@@ -177,17 +177,27 @@ geocode.forEach(city=>{
     geocode_lookup[city.state_code+"/"+city.city] = [city.longitude, city.latitude];
 });
 
-//preload blocks
-const tweets_city_20200307 = loadTweetsCity("/home/hayashis/git/apred/data/covid19/2020-03-07/tweets_city.csv");
-console.log("done loading", tweets_city_20200307.features[0]);
+const eu_geocode = fs.readFileSync("/home/hayashis/git/apred/data/european_cities_us_standard.csv", "ascii").split("\n");
+const eu_geocode_lookup = {};
+eu_geocode.forEach(line=>{
+    if(!line) return;
+    let columns = line.split(',');
+    let city = columns[0];
+    let country = columns[1];
+    let lat = parseFloat(columns[2].trim());
+    let lon = parseFloat(columns[3].trim());
+    eu_geocode_lookup[city+"/"+country] = [lon, lat];
+});
+
+const tweets_features = [];
+loadTweetsCity("/home/hayashis/git/apred/data/covid19/2020-03-07/tweets_city.csv");
+loadEUTweetsCity("/home/hayashis/git/apred/data/covid19/2020-03-07/eu_city.csv");
     
 function loadTweetsCity(path) {
     console.log("loading", path);
     let csv = fs.readFileSync(path, "ascii");
     let lines = csv.split("\n");
     let headers = lines.shift();
-
-    let features = [];
 
     //parse csv
     lines.forEach(line=>{
@@ -212,8 +222,7 @@ function loadTweetsCity(path) {
             return;
         }
 
-
-        features.push({
+        tweets_features.push({
             type: "Feature",
             geometry: {
                 type: "Point",
@@ -223,17 +232,53 @@ function loadTweetsCity(path) {
                 city,state_code,total,total_user,total_p,virus,user_virus,virus_p,virus_rel_p,user_virus_p
             }
         });
+    });
+}
 
+function loadEUTweetsCity(path) {
+    console.log("loading", path);
+    let csv = fs.readFileSync(path, "ascii");
+    let lines = csv.split("\n");
+    let headers = lines.shift();
+
+    //parse csv
+    lines.forEach(line=>{
+        if(line == "") return;
+        let cols = line.split(",");
+        //city-country,tweet count,users,virus tweets,virus tweet users,% of users talking about coronavirus
+        let city = cols[0].substring(1).trim();
+        let country_code = cols[1].substring(0, cols[1].length-1).trim();
+        let total = parseInt(cols[2]);
+        let total_user = parseInt(cols[3]);
+        let virus = parseInt(cols[4]);
+        let user_virus = parseInt(cols[5]);
+        let user_virus_p = parseFloat(cols[6]);
+
+        //lookup geocode
+        let coordinates = eu_geocode_lookup[city+"/"+country_code];
+        if(!coordinates) {
+            console.error("unknown city", city, country_code);
+            return;
+        }
+
+        tweets_features.push({
+            type: "Feature",
+            geometry: {
+                type: "Point",
+                coordinates,
+            },
+            properties: {
+                city,country_code,total,total_user,virus,user_virus,user_virus_p
+            }
+        });
+
+        /*
         if(city == "San Antonio") {
             console.log("San Antonio dump");
             console.dir(features[features.length-1]);
         }
+        */
     });
-
-    return {
-        type: "FeatureCollection",
-        features,
-    }
 }
 
 
@@ -244,12 +289,25 @@ router.get('/covid19/tweets/cities/:block', async (req, res, next)=>{
     if(!block.match(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/)) return next("bad block");
     switch(block) {
     case "2020-03-07":
-        res.json(tweets_city_20200307);
+        res.json({type: "FeatureCollection", features: tweets_features});
         break;
     default:
         next("no found");
     }
 });
+/*
+router.get('/covid19/tweets/eu-cities/:block', async (req, res, next)=>{
+    let block = req.params.block;
+    if(!block.match(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/)) return next("bad block");
+    switch(block) {
+    case "2020-03-07":
+        res.json(eu_city_20200307);
+        break;
+    default:
+        next("no found");
+    }
+});
+*/
 /*
 router.use('/project', require('./project'));
 router.use('/dataset', require('./dataset'));
