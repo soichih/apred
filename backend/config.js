@@ -8,6 +8,10 @@ exports.mongo = {
     url: 'mongodb://localhost:27017',
 }
 
+exports.google_api = {
+    key: 'AIzaSyD0spiJcQwhDLJeXDhqjLCVyZV7se5uiDU', //only works in dev1
+}
+
 exports.cutter_sources = {
     "SOC": {
         "id": "1",
