@@ -1,22 +1,28 @@
 <template>
 <div>
-    <div class="page">
-        <br>
-        <h2>Disaster Declarations</h2>
-        <CountySelecter style="float: right; top: -10px;" v-model="searchFip"/>
+    <div class="page" style="position: relative;">
+        <p style="opacity: 0.4; float: right; margin-top: 25px;">FEMA delared disasters since 2018</p>
+        <h2 style="margin-bottom: 0px">Disaster Declarations</h2>
+        <CountySelecter style="float: right; top: 50px; z-index: 1;" v-model="searchFip"/>
         <p><i class="el-icon-caret-right"/> Select a county to show detail</p>
+        <div class="legend">
+            <div v-for="(color, layer) in layers" :key="layer">
+                <span class="legend-color" :style="{backgroundColor: color}">&nbsp;</span> {{layer}}
+            </div>
+            <br>
+            <span class="legend-eda"/> EDA Award
+        </div>
     </div>
 
     <div id="map"/>
-    <div class="page">
-        <p>This map is showing currently declared FEMA disasters</p>
-    </div>
 
-    <div v-if="countyDetail" style="background-color: #eee" ref="county-detail">
+    <div v-if="countyDetail" style="background-color: #eee; position: sticky; top: 50px; z-index: 1; box-shadow: 0 2px 2px #0002;" ref="county-detail">
         <div class="page">
-            <br>
-            <h3 style="font-size: 150%;">{{countyDetail.county}} county, {{countyDetail.state}}</h3>
-            <el-row>
+            <h3 style="font-size: 150%; padding: 30px 0; margin: 0px;">
+                <i class="el-icon-top" style="float: right; cursor: pointer;" @click="gototop()"/>
+                {{countyDetail.county}} county, {{countyDetail.state}}
+            </h3>
+            <el-row v-if="selectedProperty">
                 <el-col :span="8">
                     <!--placeholder-->
                 </el-col>
@@ -29,7 +35,9 @@
                     <span class="primary">${{selectedProperty['median-income'] | formatNumber}}</span>
                 </el-col>
             </el-row>
-            <br><br>
+            <br>
+            <br>
+            <!--
             <h4>Current Disaster Declarations</h4>
             <p v-if="currentDDs.length == 0">No declared disasters! :)</p>
             <div v-for="dd in currentDDs" :key="dd._id" class="dd dd-margin-bottom" :class="{'dr-state': !dd.countyfips, 'dr-county': dd.countyfips}">
@@ -38,10 +46,10 @@
                 <span style="float: right">
                     <el-tag size="small" type="danger">{{dd.incidentType}}</el-tag>&nbsp;
                     <el-tag size="small" effect="light" type="info">Disaster # {{dd.disasterNumber}}</el-tag>&nbsp;
-                    <el-tag size="small" effect="dark" type="warning" v-if="dd.hmProgramDeclared == 1" title="hmProgramDeclared">hm</el-tag>&nbsp;
-                    <el-tag size="small" effect="dark" type="danger" v-if="dd.ihProgramDeclared == 1" title="ihProgramDeclared">ih</el-tag>&nbsp;
-                    <el-tag size="small" effect="dark" type="success" v-if="dd.iaProgramDeclared == 1" title="iaProgramDeclared">ia</el-tag>&nbsp;
-                    <el-tag size="small" effect="dark" type="" v-if="dd.paProgramDeclared == 1" title="paProgramDeclared">pa</el-tag>&nbsp;
+                    <el-tag size="small" effect="dark" type="warning" v-if="dd.hmProgramDeclared" title="hmProgramDeclared">hm</el-tag>&nbsp;
+                    <el-tag size="small" effect="dark" type="danger" v-if="dd.ihProgramDeclared" title="ihProgramDeclared">ih</el-tag>&nbsp;
+                    <el-tag size="small" effect="dark" type="success" v-if="dd.iaProgramDeclared" title="iaProgramDeclared">ia</el-tag>&nbsp;
+                    <el-tag size="small" effect="dark" type="" v-if="dd.paProgramDeclared" title="paProgramDeclared">pa</el-tag>&nbsp;
                 </span>
                 <br>
                 <span style="opacity: 0.6; font-size: 85%;">
@@ -66,86 +74,39 @@
 
             </div>
             <br>
+            -->
         </div>
     </div>
 
     <div v-if="edaEvents && edaEvents.state && edaEvents.county">
         <div class="page">
-            <br>
-            <h3>Disaster / EDA History</h3>
-            <p>This county has had the following disasters declared and EDA grants awarded in the past</p>
+            <h3>Recent Disaster / EDA Awards</h3>
+            <!--<p>This county has had the following disasters declared and EDA grants awarded in the past</p>-->
 
-            <div v-for="event in history" :key="event._id" class="history">
-                <div class="eventdetail">
-                    <span class="event-date">{{event.date.toLocaleDateString()}}</span>
-                    <div v-if="event.type == 'dr'" class="dd" :class="{'dr-state': !event.countyfips, 'dr-county': event.countyfips}">
-                        <div style="float: left; width: 40px; font-size: 200%; position: relative; top: 0px; padding-left: 3px;">
-                            <i class="el-icon-warning"/>
-                        </div>
-                        <div style="margin-left: 50px">
-                            <el-tag v-if="!event.countyfips" size="small" type="danger">Statewide</el-tag>
-                            {{event.title}}&nbsp;
-                            <span style="float: right;">
-                                <el-tag size="small" type="danger">{{event.incidentType}}</el-tag>&nbsp;
-                                <el-tag size="small" effect="light" type="info">Disaster # {{event.disasterNumber}}</el-tag>&nbsp;
-                                <el-tag size="small" effect="dark" type="warning" v-if="event.hmProgramDeclared == 1" title="hmProgramDeclared">hm</el-tag>&nbsp;
-                                <el-tag size="small" effect="dark" type="danger" v-if="event.ihProgramDeclared == 1" title="ihProgramDeclared">ih</el-tag>&nbsp;
-                                <el-tag size="small" effect="dark" type="success" v-if="event.iaProgramDeclared == 1" title="iaProgramDeclared">ia</el-tag>&nbsp;
-                                <el-tag size="small" effect="dark" type="" v-if="event.paProgramDeclared == 1" title="paProgramDeclared">pa</el-tag>&nbsp;
-                            </span>
-                            <br>
-                            <span style="opacity: 0.6; font-size: 85%;">
-                                <!--Declared: <time>{{new Date(event.declarationDate).toLocaleDateString()}}</time>&nbsp;
-                                &bull;-->
-                                Incident <time>{{new Date(event.incidentBeginDate).toLocaleDateString()}}</time>
-                                - <time>{{new Date(event.incidentEndDate).toLocaleDateString()}}</time>
-                            </span>
-                        </div>
-                    </div>
-                    <div v-else-if="event.type == 'eda2018'" class="eda2018" :class="{'eda2018-state': event.subtype == 'state', 'eda2018-county': event.subtype == 'county'}">
-
-                        <div style="float: right; text-align: right;">
-                            <p>
-                                <el-tag size="small" effect="dark" type="success">fain: {{event.fain}}</el-tag>
-                            </p>
-                            <!--
-                            <div style="width: 150px; float: right;">
-                                <b>Awared Date:</b><br>
-                                <time>{{new Date(event.grant_award_date).toLocaleDateString()}}</time>&nbsp;
-                            </div>
-                            -->
-                            <div>
-                                <br>
-                                <b>Award:</b><br>
-                                <span class="primary" style="color: #67c23a">${{event.award | formatNumber}}</span>
-                            </div>
-                        </div>
-                        <b>
-                            <i class="el-icon-money"/>&nbsp;
-                            <span v-if="event.subtype == 'state'">EDA 2018 Statewide Award</span>
-                            <span v-if="event.subtype == 'county'">EDA 2018 County Award</span>
-                        </b>
-                        <br>
-                        Regional Office: {{event.eda_regional_office}}<br>
-
-                        <br>
-                        <b>Grantee:</b> <!--{{event.grantee}},-->{{event.grantee_name}},
-                        {{event.grantee_city}}, {{event.grantee_state}}<br>
-                    
-                        <br>
-
-                        <b>Purpose:</b> {{event.grant_purpose}} 
-                        <span style="font-size: 85%">(Project Funding: ${{event.total_project_funding | formatNumber}})</span>
-                    </div>
-                    <div v-else>
-                        {{event}}
-                    </div>
+            <p v-if="recentHistory.length == 0" style="opacity: 0.8;">No disaster declared since 2018/1.</p>
+            <div v-for="(event, idx) in recentHistory" :key="event._id" class="history">
+                <Event :event="event"/>
+                <div class="connecter" v-if="idx < recentHistory.length">
+                    <!--<i class="el-icon-caret-top"/>-->
                 </div>
-                <div class="connecter"/>
             </div>
             <br>
+            <el-collapse>
+                <el-collapse-item>
+                    <template slot="title">
+                        <h3><i class="el-icon-caret-right"/> Past Disasters</h3>
+                    </template>
+                    <div v-for="event in pastHistory" :key="event._id" class="history">
+                        <Event :event="event"/>
+                        <div class="connecter">
+                            <!--<i class="el-icon-caret-top"/>-->
+                        </div>
+                    </div>
+                </el-collapse-item>
+            </el-collapse>
+
             <br>
-    
+            <br>
         </div>
     </div>
 
@@ -182,71 +143,75 @@
                 Higher event counts means more frequent events (bad)
             </p>
             <div v-for="(count, storm) in countyDetail.storm_counts" :key="storm">
-                <!--<h3 style="margin: 10px 20px;">{{storm}}</h3>-->
-                <el-collapse v-if="count > 5">
-                    <el-collapse-item name="1">  
-                        <template slot="title">
-                            <span style="opacity: 0.8; padding-left: 20px">{{storm}}</span> <i class="el-icon-caret-right"/> <b>{{count}}</b>
-                        </template>
-                        <el-table
-                        :data="stormEvents[storm]"
-                        style="width: 100%">
+                <div v-if="count > 5">
+                    <!--<h3 style="margin: 10px 20px;">{{storm}}</h3>-->
+                    <el-collapse>
+                        <el-collapse-item name="1">  
+                            <template slot="title">
+                                <span style="opacity: 0.8; padding-left: 20px">{{storm}}</span> <i class="el-icon-caret-right"/> <b>{{count}}</b>
+                            </template>
+                            <el-table
+                            :data="stormEvents[storm]"
+                            style="width: 100%">
 
-                        <el-table-column fixed width="150"
-                            prop="date"
-                            label="Date">
-                        </el-table-column>
-                        
-                        <el-table-column label="Damage ($)">
-                            <el-table-column width="80"
-                                prop="damage_property"
-                                label="Property">
+                            <el-table-column fixed width="150"
+                                prop="date"
+                                label="Date">
                             </el-table-column>
-                            <el-table-column width="80"
-                                prop="crop_property"
-                                label="Crop">
-                            </el-table-column>
-                        </el-table-column>
-
-                        <el-table-column width="80"
-                            prop="deaths"
-                            label="Death">
-                        </el-table-column>
-
-                        <el-table-column v-if="storm == 'Tornado'" label="Tornado">
-                            <el-table-column width="80"
-                                prop="tor_f_scale"
-                                label="F">
-                            </el-table-column>
-                            <el-table-column width="80"
-                                prop="tor_length"
-                                label="Length">
-                            </el-table-column>
-                            <el-table-column width="80"
-                                prop="tor_width"
-                                label="Width">
-                            </el-table-column>
-                            <el-table-column width="80"
-                                prop="tor_other_wfo"
-                                label="wfo">
+                            
+                            <el-table-column label="Damage ($)">
+                                <el-table-column width="80"
+                                    prop="damage_property"
+                                    label="Property">
+                                </el-table-column>
+                                <el-table-column width="80"
+                                    prop="crop_property"
+                                    label="Crop">
+                                </el-table-column>
                             </el-table-column>
 
-                        </el-table-column>
+                            <el-table-column width="80"
+                                prop="deaths"
+                                label="Death">
+                            </el-table-column>
 
-                        <el-table-column width="500"
-                            prop="event_narrative"
-                            label="Description">
-                        </el-table-column>
-                        </el-table>
-                    </el-collapse-item>
-                </el-collapse>
+                            <el-table-column v-if="storm == 'Tornado'" label="Tornado">
+                                <el-table-column width="80"
+                                    prop="tor_f_scale"
+                                    label="F">
+                                </el-table-column>
+                                <el-table-column width="80"
+                                    prop="tor_length"
+                                    label="Length">
+                                </el-table-column>
+                                <el-table-column width="80"
+                                    prop="tor_width"
+                                    label="Width">
+                                </el-table-column>
+                                <el-table-column width="80"
+                                    prop="tor_other_wfo"
+                                    label="wfo">
+                                </el-table-column>
 
-                <Histogram v-if="histograms[storm]" ylabel="# of Counties" xlabel="Event Counts" :value="count" :histogram="histograms[storm]"/>
+                            </el-table-column>
+
+                            <el-table-column width="500"
+                                prop="event_narrative"
+                                label="Description">
+                            </el-table-column>
+                            </el-table>
+                        </el-collapse-item>
+                    </el-collapse>
+
+                    <Histogram v-if="histograms[storm]" ylabel="# of Counties" xlabel="Event Counts" :value="count" :histogram="histograms[storm]"/>
+                </div><!--v-if count-->
             </div>
             <br>
             <!--TODO - if there are no histogram info, show that we don't have the info-->
             <br>
         </div>
+        <br>
+        <br>
     </div>
 
     <div class="page" v-if="cutterMeasures && countyDetail">
@@ -283,13 +248,11 @@
             </el-collapse-item>
 
         </el-collapse>
+        <br>
+        <br>
+        <br>
     </div>
 
-    <br>
-    <br>
-    <br>   
-    <br>    
-    <br>  
     <!--
     <div style="background-color: gray">
         <div class="page">
@@ -324,7 +287,7 @@
         <br>
     </div>
     -->
-    <footer style="background-color: #333; color: #999; padding: 50px 0px; padding-top: 50px; padding-bottom: 100px;">
+    <footer style="background-color: #333; color: #999; padding: 50px 0px; padding-top: 50px; padding-bottom: 150px;">
         <div class="page">
             <p style="line-height: 200%;">
                 APRED: The Analysis Platform for Risk, Resilience and Expenditure for Disasters (APRED) project 
@@ -343,6 +306,7 @@ import { Component, Vue, Watch } from 'vue-property-decorator'
 import CountySelecter from '@/components/CountySelecter.vue'
 import Histogram from '@/components/Histogram.vue'
 import BarGraph from '@/components/BarGraph.vue'
+import Event from '@/components/Event.vue'
 
 import mapboxgl from 'mapbox-gl';
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -351,19 +315,10 @@ import { Plotly } from 'vue-plotly';
 
 import cutterIndicators from '@/assets/cutter_indicators.json'
 
-const layers = {
-    "fire": "#f00",
-    "earthquake": "#0f0",
-    "hurricane": "#00c",
-    "typhoon": "#00c",
-    "other": "#000",
-    "severe storm": "#06f"
-};
-
 mapboxgl.accessToken = "pk.eyJ1Ijoic29pY2hpaCIsImEiOiJjazVqdnBsM2cwN242M2psdjAwZXhhaTFuIn0.o3koWlzx1Tup8CJ1B_KaEA";
 
 @Component({
-  components: { CountySelecter, BarGraph, Histogram, Plotly},
+  components: { CountySelecter, BarGraph, Histogram, Plotly, Event },
 })
 export default class County extends Vue {
 
@@ -385,7 +340,7 @@ export default class County extends Vue {
     indicators = cutterIndicators;
     cutterMeasures = null;
 
-    currentDDs = [];
+    //currentDDs = [];
     //pastDDs = [];
 
     bvi = [];
@@ -393,6 +348,19 @@ export default class County extends Vue {
     bviEmpData = null;
     bviEstLayout = null;
     bviEmpLayout = null;
+
+    layers = {
+        "fire": "#f00",
+        //"earthquake": "#0f0",
+        "hurricane": "#84a",
+        //"snow": "#fff",
+        "tornado": "#c60",
+        //"typhoon": "#00c",
+        "severe storm": "#fc0",
+        "flood": "#06f",
+
+        "other": "#f0f", //volcano, mud/landslide, snow, "coastal storm", typhoon, earthquake, snow
+    };
 
     addLayer(color) {
 
@@ -442,11 +410,29 @@ export default class County extends Vue {
     @Watch('selectedFip')
     onFipChange(to) {
         if(!to) {
-            //TODO clear data?
+            //TODO clear other data?
             return;
         }
 
         //console.log("selected", to);
+
+        const features = this.map.queryRenderedFeatures({
+            layers: ['counties']
+        });
+        
+        const feature = features.find(f=>f.properties.FIPS == to);
+        if(feature) {
+
+            //county source from mapbox currently contains both numeric and string .. and mapbox filter is type-sensitive
+            //so I need to reselect it with proper type.. we should probably build our own cleaner version of county geojson
+            if(this.selectedFip !== feature.properties.FIPS) {
+                this.selectedFip = feature.properties.FIPS;
+                return;
+            }
+            this.selectedProperty = feature.properties;
+            const filter = ['in', 'FIPS', feature.properties.FIPS];
+            this.map.setFilter('counties-highlighted', filter);
+        }
 
         let fip = to.toString(); //mapbox map's fip is sometimes number
         const statefip = fip.substring(0,2);
@@ -517,16 +503,21 @@ export default class County extends Vue {
             });
         });
         
-        this.currentDDs = [];
+        //this.currentDDs = [];
         const pDD = this.axios.get("https://dev1.soichi.us/api/apred/dd/"+statefip+"/"+countyfip).then(res=>{
             //console.dir(res.data);
             res.data.forEach(rec=>{
+                /*
                 if(rec.incidentEndDate == "") this.currentDDs.push(rec);
                 else {
                     rec.type = "dr";
                     rec.date = new Date(rec.declarationDate);
                     this.history.push(rec);
                 }
+                */
+                rec.type = "dr";
+                rec.date = new Date(rec.declarationDate);
+                this.history.push(rec);
             })
         }); 
 
@@ -543,7 +534,7 @@ export default class County extends Vue {
                 },
                 'paper_bgcolor': '#0000',
                 'plot_bgcolor': '#fff',
-                height: 400,
+                height: 550,
                 title: 'Business Establishments',
                 xaxis: {tickfont: {
                     size: 14,
@@ -654,7 +645,7 @@ export default class County extends Vue {
             //process data.
             //sort history by date.
             this.history.sort((a,b)=>{
-                return (a.date - b.date);
+                return (b.date - a.date);
             });
             //console.dir(this.history);
         })
@@ -673,12 +664,12 @@ export default class County extends Vue {
         this.map = new mapboxgl.Map({
             container: 'map', // HTML container id
             //style: 'mapbox://styles/mapbox/light-v10', // style URL
-            style: 'mapbox://styles/mapbox/streets-v11',
-            //style: 'mapbox://styles/mapbox/light-v10',
+            //style: 'mapbox://styles/mapbox/streets-v11',
+            style: 'mapbox://styles/mapbox/dark-v10',
             center: [-110, 44], // starting position as [lng, lat]
             minZoom: 2,
             pitch: 30, // pitch in degrees
-            bearing: -10, // bearing in degrees
+            //bearing: 10, // bearing in degrees
             zoom: 2,
         });
 
@@ -704,9 +695,10 @@ export default class County extends Vue {
                 }
             }, 'settlement-label'); 
 
-            for(const t in layers) {
-                const color = layers[t];
+            for(const t in this.layers) {
+                const color = this.layers[t];
 
+                //console.log("creating", t, color)
                 this.map.addLayer({
                     'id': 'county_disaster_'+t,
                     'type': 'fill',
@@ -728,7 +720,7 @@ export default class County extends Vue {
                     'paint': {
                         //'fill-outline-color': '#f80',
                         'fill-color': color,
-                        'fill-opacity': 0.4
+                        'fill-opacity': 0.3
                     },
                     'filter': ['in', 'FIPS', '']   
                 }, 'settlement-label');
@@ -757,14 +749,10 @@ export default class County extends Vue {
 
                 if(features.length == 1) {
                     this.selectedFip = features[0].properties.FIPS;
+                    /*
                     this.selectedProperty = features[0].properties;
                     const filter = ['in', 'FIPS', this.selectedFip];
                     this.map.setFilter('counties-highlighted', filter);
-
-                    /*
-                    this.$nextTick(()=>{
-                        location.hash = "#county-detail"
-                    })
                     */
                 }
             });
@@ -818,13 +806,20 @@ export default class County extends Vue {
             const fips = {};
             const counties = this.map.queryRenderedFeatures({layers: ['counties']});
 
+            //console.dir(counties);
+            //console.dir(res.data.find(r=>r.disasterNumber == "4460"));
+
             res.data.forEach(rec=>{
                 let type = rec.incidentType.toLowerCase();
                 if(type.includes('(')) type = type.substring(0, type.indexOf('('));
+                if(!this.layers[type]) {
+                    //console.error("unknown incident type", type);
+                    type = "other";
+                }
                 if(!fips[type]) fips[type] = { county: [], state: [] };
 
                 if(rec.countyfips) {
-                    //county declerations
+                    //see if have county declerations
                     let fip = rec.statefips+rec.countyfips;
                     if(!fips[type].county.includes(fip)) fips[type].county.push(fip);
                     
@@ -832,6 +827,7 @@ export default class County extends Vue {
                     fip = parseInt(fip);
                     if(!fips[type].county.includes(fip)) fips[type].county.push(fip);
                 } else {
+                    //see if have state-wide declrations
                     counties.forEach(crec=>{
                         const rfips = (crec.properties.FIPS+"").substring(0,2); //pull first 2 digit of fips
                         if(rec.statefips == rfips) {
@@ -839,23 +835,128 @@ export default class County extends Vue {
 
                             //bug in geojson source? some counties are listed as number (so I have to filter as number too)
                             fips[type].state.push(parseInt(crec.properties.FIPS));
+
+                            //if(rfips == "05") console.log(type, crec.properties.FIPS);
                         }
                     });
                 }
-            });
+            });          
 
             //console.dir(fips);
             for(const type in fips) {
-                let layerType = type;
-                if(!layers[type]) {
-                    //console.error("unknown incident type", type);
-                    layerType = "other";
-                }
-                this.map.setFilter('county_disaster_'+layerType, ['in', 'FIPS', ...fips[type].county]);
-                this.map.setFilter('state_disaster_'+layerType, ['in', 'FIPS', ...fips[type].state]);
+                this.map.setFilter('county_disaster_'+type, ['in', 'FIPS', ...fips[type].county]);
+                this.map.setFilter('state_disaster_'+type, ['in', 'FIPS', ...fips[type].state]);
                 //console.log(fips[type].state);
             }
         })
+
+        this.axios.get("https://dev1.soichi.us/api/apred/eda2018").then(res=>{
+            const edaFeatures = [];
+            //console.dir(res);
+            res.data.states.forEach(rec=>{
+                //console.log("adding", rec);
+                edaFeatures.push({
+                    type: "Feature",
+                    geometry: {
+                        type: "Point",
+                        coordinates: [ rec.lon, rec.lat ],
+                    },
+                    properties: {
+                        award: rec.award, state: true,
+                    }
+                });
+            });
+            res.data.counties.forEach(rec=>{
+                //console.log("adding", rec);
+                edaFeatures.push({
+                    type: "Feature",
+                    geometry: {
+                        type: "Point",
+                        coordinates: [ rec.lon, rec.lat ],
+                    },
+                    properties: {
+                        award: rec.award, state: false,
+                    } 
+                });
+            });
+
+            this.map.addSource('eda2018', {
+                'type': 'geojson',
+                data: {type: "FeatureCollection", features: edaFeatures},
+            });
+            //console.dir(edaFeatures);
+
+            this.map.addLayer({
+                'id': 'eda-circles',
+                'type': 'circle',
+                'source': 'eda2018',
+                'paint': {
+                    /*
+                    'circle-color': [
+                        'interpolate',
+                        ['linear'],
+                        ['get', 'award'],
+                        6,
+                        '#FCA107',
+                        8,
+                        '#7F3121'
+                    ],
+                    */
+                    'circle-color': '#67c23a',
+                    'circle-opacity': 0.75,
+                    'circle-radius': {
+                        //'base': 1.75,
+                        property: 'award', 
+                        /*
+                        stops: [
+                            [0, 3],
+                            [800000, 30],
+                        ]
+                        */
+                        /*
+                        stops:[
+                            [{zoom: 4, value: 0}, 0],
+                            [{zoom: 4, value: 800000}, 12],
+                            [{zoom: 8, value: 0}, 0],
+                            [{zoom: 8, value: 800000}, 24],
+                            [{zoom: 12, value: 0}, 0],
+                            [{zoom: 12, value: 800000}, 48]
+                        ]
+                        */
+                        stops:[
+                        
+                            [{zoom: 4, value: 0}, 2],
+                            [{zoom: 4, value: 10000000}, 20],
+                            [{zoom: 8, value: 0}, 4],
+                            [{zoom: 8, value: 10000000}, 40],
+                            [{zoom: 12, value: 0}, 8],
+                            [{zoom: 12, value: 10000000}, 60]
+            
+                        ]
+                    },              
+                }
+            });
+
+            this.map.addLayer({
+            'id': 'eda-labels',
+            'type': 'symbol',
+            'source': 'eda2018',
+            'minzoom': 8,
+            'layout': {
+                'text-field': [
+                    'concat', '$', ['to-string', ['get', 'award']]
+                ],
+                'text-font': [
+                    'Open Sans Bold',
+                    'Arial Unicode MS Bold'
+                ],
+                'text-size': 12
+                },
+                'paint': {
+                    'text-color': 'rgba(255,255,255,0.5)'
+                }
+            });
+        });
     }
 
     computeIndicator(incode) {
@@ -866,6 +967,17 @@ export default class County extends Vue {
             return sum+this.cutterMeasures[source.id];
         }, 0);
         return sum / deno;
+    }
+
+    get recentHistory() {
+        return this.history.filter(h=>(h.date >= new Date("2018-01-01")));
+    }
+    get pastHistory() {
+        return this.history.filter(h=>(h.date < new Date("2018-01-01")));
+    }
+
+    gototop() {
+        window.scrollTo(0, 0);
     }
 }
 
@@ -896,7 +1008,7 @@ h4 {
 
 #map {
     width: 100%;
-    height: 500px;
+    height: 550px;
 }
 
 .map-overlay {
@@ -921,39 +1033,10 @@ h4 {
     font-size: 175%;
     color: #409EFF;
 }
-.dd {
-    background-color: white;
-    box-shadow: 1px 1px 2px #0001;
-    padding: 10px;
-    border-radius: 4px;
-
-    &.dr-county {
-        border-left: 3px solid gray;
-        color: gray;
-    }
-    &.dr-state {
-        border-left: 3px solid #f56c6c;
-        color: #f56c6c;
-    }
-    &.dd-margin-bottom {
-        margin-bottom: 5px;
-    }
-}
-.eda2018 {
-    padding: 10px;
-    border-radius: 10px;    
-
-    &.eda2018-state {
-        background-color: #e1f3d8;
-    }
-    &.eda2018-county {
-        background-color: #e9e9eb;
-    }
-}
 
 .history {
     .event-date {
-        color: gray;
+        //color: black;
         font-size: 95%;
         padding: 5px 0;
         display: inline-block;
@@ -964,6 +1047,44 @@ h4 {
         height: 20px;
         width: 4px;
         margin-left: 30px;
+        //margin-top: 5px;
+
+        i {
+            color: #d9d9d9;
+            font-size: 175%;
+            position: relative;
+            left: -11.5px;
+            top: -12px;
+        }
+    }
+}
+
+.legend {
+position: absolute;
+display: block;
+z-index: 1;
+left: -175px;
+top: 120px;
+//width: 150px;
+color: #ddd;
+background-color: #fff3;
+padding: 10px;
+text-transform: uppercase;
+font-size: 80%;
+border-radius: 5px;
+
+    .legend-color {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+    }
+
+    .legend-eda {
+        display: inline-block;
+        width: 10px;
+        height: 10px;   
+        border-radius: 50%;
+        background-color: #67c23a;
     }
 }
 </style>

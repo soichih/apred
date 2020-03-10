@@ -7,10 +7,20 @@ const assert = require('assert');
 const xml = require("xml-parse");
 const async = require('async');
 const elasticsearch = require('@elastic/elasticsearch');
+const NodeGeocoder = require('node-geocoder');
 
 const config = require('../config');
 
 const es = new elasticsearch.Client({node: 'http://localhost:9200'});
+
+var geocoder = NodeGeocoder({
+  provider: 'google',
+ 
+  // Optional depending on the providers
+  httpAdapter: 'https', // Default
+  apiKey: config.google_api.key,
+  formatter: null         // 'gpx', 'string', ...
+});
 
 // raw data loaded from various datasources 
 let data = {
@@ -102,6 +112,7 @@ MongoClient.connect(config.mongo.url, {useUnifiedTopology: true}, function(err, 
     });
     */
 
+    /*
     async.series([
         load_fips,
         load_abbs,
@@ -112,7 +123,20 @@ MongoClient.connect(config.mongo.url, {useUnifiedTopology: true}, function(err, 
         console.log("all done");
         client.close();
     });
+    */
 
+    async.series([
+        load_fips,
+        load_abbs,
+        load_edaid,
+
+        load_eda2018,
+
+    ], err=>{
+        if(err) throw err;
+        console.log("all done");
+        client.close();
+    });
 
     /*
     const collection = db.collection('bvi');
@@ -221,6 +245,27 @@ function load_and_store_disasterdeclarations(cb) {
         if(!rec.countyfips && rec.declaredCountyArea) {
             console.log("failed to find", rec);
         }
+
+        //type case
+        rec.ihProgramDeclared = (rec.ihProgramDeclared == "1");
+        rec.iaProgramDeclared = (rec.iaProgramDeclared == "1");
+        rec.paProgramDeclared = (rec.paProgramDeclared == "1");
+        rec.hmProgramDeclared = (rec.hmProgramDeclared == "1");
+
+        rec.declarationDate = new Date(rec.declarationDate);
+        rec.incidentBeginDate = new Date(rec.incidentBeginDate);
+        if(rec.incidentEndDate) {
+            rec.incidentEndDate = new Date(rec.incidentEndDate);
+        } else {
+            delete rec.incidentEndDate;
+        }
+        if(rec.disasterCloseOutDate) {
+            rec.disasterCloseOutDate = new Date(rec.disasterCloseOutDate);
+        } else {
+            delete rec.disasterCloseOutDate;
+        }
+        rec.lastRefresh = new Date(rec.lastRefresh);
+
         recs.push(rec);
     }).on('end', err=>{
         const collection = db.collection('disaster_declarations');
@@ -644,21 +689,68 @@ function load_eda2018(cb) {
             recs.push(rec);
         }
     }).on('end', ()=>{
-        console.log("done");
-        const collection = db.collection('eda2018');
-        collection.remove({}, function(err, results) {
-            collection.insertMany(recs, function(err, result) {
-                if(err) throw err;
-                //console.log(result);
-                const collection_state = db.collection('eda2018_state');
-                collection_state.remove({}, function(err, results) {
-                    collection_state.insertMany(recs_state, function(err, result) {
-                        if(err) throw err;
-                        //console.log(result);
-                        cb();
+        console.log("done loading csv - now geocoding");
+
+        let places = recs.map(rec=>{
+            return rec.grantee_name+", "+rec.grantee_city+", "+rec.grantee_state;
+        });
+        //places = places.splice(0, 5);
+        //console.dir(places);
+
+	    geocoder.batchGeocode(places, function(err, res) {
+            if(err) throw err;
+            for(let i = 0;i < places.length; ++i) {
+                if(res[i].error) {
+                    console.error("failed to geocode", places[i]);
+                    continue;
+                }
+                console.log(places[i]);
+                //console.dir(res[i].value);
+                /*
+[ { formattedAddress: 'Coral Springs, FL, USA',
+    latitude: 26.271192,
+    longitude: -80.2706044,
+    extra:
+     { googlePlaceId: 'ChIJZeB2GTQF2YgRKyApkbWwB4k',
+       confidence: 0.5,
+       premise: null,
+       subpremise: null,
+       neighborhood: 'Coral Springs',
+       establishment: null },
+    administrativeLevels:
+     { level2long: 'Broward County',
+       level2short: 'Broward County',
+       level1long: 'Florida',
+       level1short: 'FL' },
+    city: 'Coral Springs',
+    country: 'United States',
+    countryCode: 'US',
+    provider: 'google' } ]
+
+                */
+                let info = res[i].value[0];
+                console.dir(info);
+                recs[i].lat = info.latitude;
+                recs[i].lon = info.longitude;
+                console.dir(recs[i]);
+            }
+
+            const collection = db.collection('eda2018');
+            collection.remove({}, function(err, results) {
+                collection.insertMany(recs, function(err, result) {
+                    if(err) throw err;
+                    //console.log(result);
+                    const collection_state = db.collection('eda2018_state');
+                    collection_state.remove({}, function(err, results) {
+                        collection_state.insertMany(recs_state, function(err, result) {
+                            if(err) throw err;
+                            //console.log(result);
+                            cb();
+                        });
                     });
                 });
             });
         });
+
     });
 }
