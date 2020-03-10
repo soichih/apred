@@ -24,6 +24,21 @@ router.get('/county/:fips', (req, res, next)=>{
     });
 });
 
+router.get('/eda2018', (req, res, next)=>{
+    let db = req.app.get('db');
+
+    const col = db.collection('eda2018_state');
+    col.find({}).project({award:1, lat:1, lon:1 }).toArray((err, states)=>{
+        if(err) return next(err);
+
+        const col = db.collection('eda2018');
+        col.find({}).project({award:1, lat:1, lon:1}).toArray((err, counties)=>{
+            if(err) return next(err);
+            res.json({states, counties});
+        });
+    });
+});
+
 router.get('/eda2018/:statefips', (req, res, next)=>{
     let db = req.app.get('db');
 
@@ -109,7 +124,8 @@ router.get('/currentdd', async (req, res, next)=>{
     let db = req.app.get('db');
     let dds = await db.collection('disaster_declarations').find({
         disasterType: "DR",
-        incidentEndDate: "",
+        //incidentEndDate: "",
+        declarationDate: {$gt: new Date("01/01/2018") },
     }).toArray();
     res.json(dds);
 });
@@ -138,7 +154,6 @@ router.get('/dd/:statefips/:countyfips', async (req, res, next)=>{
         ]
     }).toArray();
     res.json(dds);
-
 });
 
 router.get('/bvi/:statefips/:countyfips', async (req, res, next)=>{
