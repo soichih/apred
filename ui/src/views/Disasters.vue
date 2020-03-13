@@ -44,7 +44,7 @@
             <h3>Recent Disaster Declarations / EDA Awards</h3>
             <!--<p>This county has had the following disasters declared and EDA grants awarded in the past</p>-->
 
-            <p v-if="recentHistory.length == 0" style="opacity: 0.8;">No disaster declared since 2019</p>
+            <p v-if="recentHistory.length == 0" style="opacity: 0.8;">No disaster declared since 2017</p>
             <div v-for="(event, idx) in recentHistory" :key="event._id" class="history">
                 <Event :event="event" :colors="layers"/>
                 <div class="connecter" v-if="idx < recentHistory.length">
