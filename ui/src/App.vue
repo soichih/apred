@@ -75,6 +75,13 @@ p.small {
 width: 1000px;
 margin: auto;
 }
+@media only screen and (max-width: 1100px) {
+    .page {
+        width: 95%;
+        margin: auto;
+    }
+}
+
 /*
 .el-collapse-item__header {
     background-color: inherit;
