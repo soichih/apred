@@ -1,7 +1,7 @@
 <template>
 <div>
     <div class="page" style="position: relative;">
-        <p style="opacity: 0.4; float: right; margin-top: 25px;">FEMA delared disasters since 2019</p>
+        <p style="opacity: 0.4; float: right; margin-top: 25px;">FEMA delared disasters since 2017</p>
         <h2 style="margin-bottom: 0px">Disaster Declarations</h2>
         <CountySelecter style="float: right; top: 50px; z-index: 1;" v-model="searchFip"/>
         <p><i class="el-icon-caret-right"/> Select a county to show detail</p>
@@ -968,10 +968,8 @@ Volcano
     }
 
     is2019Eligible(event) {
-        console.dir(event);
         const begin = new Date(event.incidentBeginDate);
-        if( begin > new Date("2017-12-31") && 
-            begin < new Date("2019-01-01") ) {
+        if( begin > new Date("2017-12-31") && begin < new Date("2019-01-01") ) {
     
             // ignore some incidentType 
             switch(event.incidentType) {
@@ -986,13 +984,13 @@ Volcano
             }
         }
 
-        if( begin > new Date("2018-12-31") && 
-            begin < new Date("2020-01-01") ) {
+        if( begin > new Date("2018-12-31") && begin < new Date("2020-01-01") ) {
+            console.dir(event);
     
             switch(event.incidentType) {
             case "Severe Storm(s)":
             case "Tornado":
-            case "Floods":
+            case "Flood":
                 return true;
             }
         }
