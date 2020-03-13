@@ -768,7 +768,7 @@ export default class County extends Vue {
                 let type = rec.incidentType.toLowerCase();
                 if(type.includes('(')) type = type.substring(0, type.indexOf('('));
                 if(!this.layers[type]) {
-                    console.error("unknown incident type", type);
+                    //console.error("unknown incident type", type);
                     type = "other";
                 }
                 if(!fips[type]) fips[type] = { county: [], state: [] };
@@ -985,8 +985,7 @@ Volcano
         }
 
         if( begin > new Date("2018-12-31") && begin < new Date("2020-01-01") ) {
-            console.dir(event);
-    
+            //console.dir(event);
             switch(event.incidentType) {
             case "Severe Storm(s)":
             case "Tornado":
