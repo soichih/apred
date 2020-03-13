@@ -125,7 +125,7 @@ router.get('/currentdd', async (req, res, next)=>{
     let dds = await db.collection('disaster_declarations').find({
         disasterType: "DR",
         //incidentEndDate: "",
-        declarationDate: {$gt: new Date("01/01/2018") },
+        declarationDate: {$gt: new Date("01/01/2017") },
     }).toArray();
     res.json(dds);
 });
