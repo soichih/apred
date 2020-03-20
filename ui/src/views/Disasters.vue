@@ -737,13 +737,10 @@ export default class County extends Vue {
             });
 
             this.map.on('mouseleave', 'counties', ()=>{
-                //this.map.getCanvas().style.cursor = '';
-                
                 this.popup.remove();
                 const filter = ['in', 'FIPS'];
                 if(this.selectedFip) filter.push(this.selectedFip);
                 this.map.setFilter('counties-highlighted', filter);
-                //this.overlay.style.display = 'none';
             });
         })
 
