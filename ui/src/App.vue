@@ -1,15 +1,6 @@
 <template>
   <div id="app">
-    <!--
-    <div :style="{'margin-left': (isSideMenuCollapsed?'61px':'240px')}">
-      <el-radio-group v-model="isSideMenuCollapsed" style="margin-bottom: 20px;">
-        <el-radio-button :label="false">expand</el-radio-button>
-        <el-radio-button :label="true">collapse</el-radio-button>
-      </el-radio-group>
-    </div>
-    -->
     <TopMenu/>
-    <!--<SideMenu :active="active"/>-->
     <router-view/>
   </div>
 </template>
@@ -25,7 +16,6 @@ import { Component, Watch, Vue } from 'vue-property-decorator';
 Vue.filter("formatNumber", (value)=>{
     return numeral(value).format("0,0"); // displaying other groupings/separators is possible, look at the docs
 });
-
 
 @Component({
   components: { SideMenu, TopMenu },
