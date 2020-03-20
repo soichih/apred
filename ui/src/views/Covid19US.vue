@@ -1,15 +1,26 @@
 <template>
 <div>
-    <div id="covid19map"/>
-    <h3>From https://www.nga.org/coronavirus/</h3>
-    <div class="legend">
-        <div class="legend-color"/>
-        <span class="tick">0%</span>     
-        <span class="tick" style="float: right;">15%</span>     
-    </div>
-    <div class="info" v-if="info">
-        <p>{{info.city}} {{info.state_code}} {{info.country_code}}</p>
-        <pre>{{info}}</pre>
+    <h2 class="title">US Travel Restrictions and School Closures - From https://www.nga.org/coronavirus/</h2>
+    <div id="map"/>
+    <div id="states">
+        <ul v-if="geojson">
+            <li v-for="feature in geojson.features" :key="feature.id">
+                <h3>{{feature.properties.name}}</h3>
+                <div class="states-info">
+                    <el-tag v-if="feature.properties.emergency_declaration" type="danger" size="small">Emergency Declared</el-tag>
+                    <el-tag v-if="feature.properties.national_guard_activation" type="info" size="small">National Guard Activated</el-tag>
+                    <el-tag v-if="feature.properties.state_employee_travel_restrictions" type="primary" size="small">State Employee Travel Restrictions</el-tag>
+                    <el-tag v-if="feature.properties.statewide_limits_on_gatherings != ''" type="info" size="small"><b>State wide Gathering Limit:</b> {{feature.properties.statewide_limits_on_gatherings}}</el-tag>
+                    <el-tag v-if="feature.properties.statewide_closure_scrhool != ''" type="warning" size="small"><b>Statewide School Closure:</b> {{feature.properties.statewide_closure_scrhool}}</el-tag>
+                    <el-tag v-if="feature.properties.waiver1135 != ''" type="warning" size="small"><b>1135 Waiver</b> {{feature.properties.waiver1135}}</el-tag>
+                    <el-tag v-if="feature.properties.statewide_curfew != ''" type="warning" size="small"><b>Statewide Curfew</b> {{feature.properties.statewide_curfew}}</el-tag>
+                      <el-alert  v-if="feature.properties.statewide_closure_nonessential != ''"
+                        title="Statewide Non-Essensial Business Closure" type="error alert"
+                        :description="feature.properties.statewide_closure_nonessential" show-icon closable="false">
+                      </el-alert>
+                </div>
+            </li>
+        </ul>
     </div>
 </div>
 </template>
@@ -102,8 +113,9 @@ export default {
         ],
         block: "2020-03-07",
         map: null,
-        info: null,
         popup: null,
+
+        geojson: null,
 
         cities: {}, //cities geojson for each blocks
     }},
@@ -111,9 +123,8 @@ export default {
     mounted() {
 
         this.map = new mapboxgl.Map({
-            container: 'covid19map', // HTML container id
-            style: 'mapbox://styles/mapbox/dark-v10', // style URL
-            //style: 'mapbox://styles/mapbox/streets-v11',
+            container: 'map', // HTML container id
+            style: 'mapbox://styles/mapbox/light-v10', // style URL
             //center: [-98.35, 39.5], // starting position as [lng, lat]
             center: [-40, 34.7], // starting position as [lng, lat]
             minZoom: 2,
@@ -127,26 +138,29 @@ export default {
             offset: [0, -20],
         });
 
-        //const zoomThreshold = 4;
+        this.axios.get("https://raw.githubusercontent.com/soichih/apred/master/data/covid19states.geojson").then(res=>{
+            this.geojson = res.data;
+            console.dir(this.geojson);
 
-        this.map.on('load', ()=>{
+            this.map.on('load', ()=>{
 
-            this.updateData(); //set to initial block
+                this.updateData(); //set to initial block
 
-            this.map.on('mousemove', 'main.layer', (e)=> {
-                // Change the cursor style as a UI indicator.
-                this.map.getCanvas().style.cursor = 'pointer';
-                
-                // Display a popup with the name of the county
-                this.popup
-                    .setLngLat(e.lngLat)
-                    .setText(JSON.stringify(e.features[0].properties, null, 4))
-                    .addTo(this.map);
+                this.map.on('mousemove', 'main.layer', (e)=> {
+                    // Change the cursor style as a UI indicator.
+                    this.map.getCanvas().style.cursor = 'pointer';
+                    
+                    // Display a popup with the name of the county
+                    this.popup
+                        .setLngLat(e.lngLat)
+                        .setText(JSON.stringify(e.features[0].properties, null, 4))
+                        .addTo(this.map);
+                });
+
+                this.map.on('mouseleave', 'main.layer', ()=>{
+                    this.popup.remove();
+                 });
             });
-
-            this.map.on('mouseleave', 'main.layer', ()=>{
-                this.popup.remove();
-             });
         });
     },
 
@@ -169,7 +183,7 @@ export default {
                 //console.log("loading cities source");
                 this.map.addSource("states", {
                     type: "geojson",
-                    data: "https://raw.githubusercontent.com/soichih/apred/master/data/covid19states.geojson",
+                    data: this.geojson,
                 });
 
                 this.map.loadImage('https://www.nationalguard.mil/portals/31/Images/Image%20Gallery/Graphics/ARNG-small.png', (err, image)=>{
@@ -181,6 +195,7 @@ export default {
                         'source': 'states',
                         'filter': ['==', 'national_guard_activation', true],
                         'layout': {
+                            "icon-allow-overlap": true,
                             'icon-image': 'soldier',
                             'icon-size': 0.1,
                         }
@@ -190,7 +205,7 @@ export default {
                 this.map.addLayer({
                     'id': 'main.layer',
                     'source': 'states',
-                    'type': 'fill',
+                    //'type': 'fill',
                 });
 
                 this.map.addLayer({
@@ -258,9 +273,6 @@ export default {
                         'fill-opacity': 0.5,
                     }
                 });
-
-
-
             }
         }
     }
@@ -268,14 +280,59 @@ export default {
 </script>
 
 <style scoped>
-#covid19map {
+#map {
+    position: fixed;
+    top: 50px;
+    bottom: 0;
+    left: 450px;
+    right: 0;
+    z-index: 5;
+}
+.title {
+    display: block;
     position: fixed;
     top: 0;
-    bottom: 0;
     width: 100%;
-    z-index: 10;
+    left: 0;
+    max-height: 50px;
+    margin: 0;
+    padding: 15px;
+    background-color: white;
+    z-index: 6;
+    color: gray;
+    font-size: 15pt;
 }
-h3 {
+#states {
+    position: fixed;
+    top: 50px;
+    left: 0;
+    width: 450px;
+    bottom: 0;
+    background-color: white;
+    overflow: auto;
+}
+#states ul {
+list-style: none;
+padding-left: 0;
+}
+#states ul li {
+padding: 2px;
+}
+.states-info {
+padding-top: 10px;
+line-height: 175%;
+}
+.states-info p {
+margin: 0;
+font-size: 85%;
+}
+#states ul h3 {
+font-size: 18px;
+margin: 0;
+color: gray;
+}
+
+h2 {
     position: fixed;
     left: 20px;
     color: #fffa;
@@ -284,15 +341,6 @@ h3 {
 .block-selecter {
     padding: 20px;
     float: right;
-}
-.info {
-    display: inline-block;
-    position: fixed;
-    top: 200px;
-    font-size: 85%;
-    background-color: #fff9;
-    padding: 10px;
-    color: white;
 }
 .legend {
     position: fixed;
