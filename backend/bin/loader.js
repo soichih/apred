@@ -126,6 +126,7 @@ MongoClient.connect(config.mongo.url, {useUnifiedTopology: true}, function(err, 
     });
     */
 
+    /*
     async.series([
         load_fips,
         load_abbs,
@@ -138,6 +139,9 @@ MongoClient.connect(config.mongo.url, {useUnifiedTopology: true}, function(err, 
         console.log("all done");
         client.close();
     });
+    */
+
+    load_covid19states();
 
     /*
     const collection = db.collection('bvi');
@@ -758,3 +762,67 @@ function load_eda2018(cb) {
 
     });
 }
+
+function load_covid19states(cb) {
+    axios.get("https://raw.githubusercontent.com/mapbox/mapboxgl-jupyter/master/examples/data/us-states.geojson").then(res=>{
+        console.debug("loading covid19states csv");
+        let geojson = res.data;
+
+        let csv = fs.readFileSync(__dirname+'/data/covid19states.csv', "ascii").split("\n");
+        csv.forEach(line=>{
+            if(line == "") return;
+            let cols = [];
+            let buf = "";
+            for(let i = 0;i < line.length; ++i) {
+                if(line[i] == ",") {
+                    cols.push(buf);
+                    buf = "";
+                } else {
+                    if(line[i] == "\"") {
+                        i++;
+                        while(line[i] != "\"") {
+                            buf = buf + line[i];
+                            i++;
+                        }
+                    } else {
+                        buf = buf + line[i];
+                    }
+                }
+            }
+
+            let state = cols[0];
+
+            //search features
+            let feature = geojson.features.find(feature=>{
+                if(state.includes(feature.properties.name)) return true;
+            });
+            /*
+            [ 'State',
+              'Emergency Declaration',
+              'National Guard Activation',
+              'State Employee Travel Restrictions',
+              'Statewide Limits on Gatherings',
+              'Statewide School Closures',
+              'Statewide Closure of Nonb\u0000\u0010Essential Businesses (could indicate specifics',
+              'Statewide Curfew',
+              '1135 Waiver Status' ]
+            */
+
+            if(feature) {
+                feature.properties.emergency_declaration  = (cols[1]=="Yes");
+                feature.properties.national_guard_activation = (cols[2]=="Yes");
+                feature.properties.state_employee_travel_restrictions = (cols[3]=="Yes");
+                feature.properties.statewide_limits_on_gatherings = cols[4];
+                feature.properties.statewide_closure_scrhool = cols[5]; ///Yes or Local
+                feature.properties.statewide_closure_nonessential = cols[6];
+                feature.properties.statewide_curfew = cols[7]; //Yes or Local
+                feature.properties.waiver1135 = cols[8];
+                console.log(feature.properties);
+            }
+        });
+        fs.writeFileSync(__dirname+"/data/covid19states.geojson", JSON.stringify(geojson, null, 4));
+        console.log("done");
+    });
+}
+
+
