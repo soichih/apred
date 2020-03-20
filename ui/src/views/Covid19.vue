@@ -145,7 +145,6 @@ export default {
 
     watch: {
         block() {
-            //console.log("block updated");
             this.updateData();
             this.map.getSource('states').setData(stateData);
         }
@@ -153,28 +152,6 @@ export default {
 
     methods: {
         updateData() {
-            /*
-            console.log("loading tweet stats");
-            this.axios.get("https://dev1.soichi.us/api/apred/covid19/tweets/states/"+this.block).then(res=>{
-                console.log("applying data");
-                stateData.features.forEach(feature=>{
-                    feature.properties.density = 0;
-                });
-                
-                res.data.forEach(rec=>{
-                    //apply data to stateData
-                    //find the state
-                    const state = abbs[rec.state];
-                    const feature = stateData.features.find(feature=>feature.properties.name == state);
-                    if(feature) {
-                        feature.properties.density = rec.virus_p;
-                        console.log(state, feature.properties);
-                    }
-                });
-                this.map.getSource('states').setData(stateData);
-            });
-            */
-
             const source = this.map.getSource("tweets");
             if(source) {
                 //TODO - switch to it..
