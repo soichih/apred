@@ -41,6 +41,10 @@ new Vue({
 
             <div v-if="selected">
                 <h2>{{selected.name}}</h2>
+                <p v-if="selected.statewide_closure_nonessential != ''" class="alert">
+                    <b>Statewide Closure of Non‐Essential Businesses</b><br>
+                    {{selected.statewide_closure_nonessential}}
+                </p>
             </div>
             <p v-else>The color code on each states are determined using the following definitions for the restriction level.</p>
 
@@ -67,31 +71,31 @@ new Vue({
             </tr>
             <tr>
                 <th style="background-color: rgba(255,0,0,0.2)">1</th>
-                <td rowspan="6" style="background-color: #ddd;" :class="{active: (this.selected && this.selected.state_employee_travel_restrictions)}">Yes</td>
-                <td style="background-color: #ddd;" :class="{active: (this.selected && this.selected.statewide_closure_school == 'Local')}">Local closure</td>
+                <td rowspan="6" :class="{active: (this.selected && this.selected.state_employee_travel_restrictions)}">Yes</td>
+                <td :class="{active: (this.selected && this.selected.statewide_closure_school == 'Local')}">Local closure</td>
                 <td :class="{active: (this.selected && (this.selected.statewide_limits_on_gatherings == 'Recommended' || this.selected.statewide_limits_on_gatherings == 'Yes‐ 500 or more'))}">Recommended (/>500)</td>
-                <td rowspan="2" style="background-color: #ddd;" :class="{active: (this.selected && this.selected.statewide_closure_nonessential.includes('recommended'))}">Recommended</td>
+                <td rowspan="2" :class="{active: (this.selected && this.selected.statewide_closure_nonessential.includes('recommended'))}">Recommended</td>
             </tr>
             <tr>
                 <th style="background-color: rgba(255,0,0,0.4)">2</th>
-                <td rowspan="5" style="background-color: #999;" :class="{active: (this.selected && this.selected.statewide_closure_school == 'Yes')}">Statewide closure</td>
+                <td rowspan="5" :class="{active: (this.selected && this.selected.statewide_closure_school == 'Yes')}">Statewide closure</td>
                 <td :class="{active: (this.selected && this.selected.statewide_limits_on_gatherings == 'Yes‐ 250 or more')}">For >250 or more</td>
             </tr>
             <tr>
                 <th style="background-color: rgba(255,0,0,0.6)">3</th>
                 <td :class="{active: (this.selected && this.selected.statewide_limits_on_gatherings == 'Yes‐ 100 or more')}">For >100 or more</td>
-                <td rowspan="2" style="background-color: #bbb;" :class="{active: (this.selected && this.selected.statewide_closure_nonessential.startsWith('Limited'))}">Limited Operations Required</td>
+                <td rowspan="2" :class="{active: (this.selected && this.selected.statewide_closure_nonessential.startsWith('Limited'))}">Limited Operations Required</td>
             </tr>
             <tr>
                 <th style="background-color: rgba(255,0,0,0.7)">4</th>
                 <td :class="{active: (this.selected && this.selected.statewide_limits_on_gatherings == 'Yes‐ 50 or more')}">For >50 or more</td>
-                <td rowspan="3" style="background-color: #ddd;" :class="{active: (this.selected && this.selected.national_guard_activation)}">Active</td>
-                <td rowspan="3" style="background-color: #999;" :class="{active: (this.selected && this.selected.statewide_curfew != '')}">Local Curfew</td>
+                <td rowspan="3" :class="{active: (this.selected && this.selected.national_guard_activation)}">Active</td>
+                <td rowspan="3" :class="{active: (this.selected && this.selected.statewide_curfew != '')}">Local Curfew</td>
             </tr>
             <tr>
                 <th style="background-color: rgba(255,0,0,0.8)">5</th>
                 <td :class="{active: (this.selected && this.selected.statewide_limits_on_gatherings == 'Yes‐ 10 or more')}">For >10 or more</td>
-                <td rowspan="2" style="background-color: #999;" :class="{active: (this.selected && this.selected.statewide_closure_nonessential.startsWith('Closure required'))}">Required</td>
+                <td rowspan="2" :class="{active: (this.selected && this.selected.statewide_closure_nonessential.startsWith('Closure required'))}">Required</td>
             </tr>
             <tr>
                 <th style="background-color: rgba(255,0,0,1)">6</th>
@@ -247,7 +251,7 @@ new Vue({
 
             if(rec.statewide_curfew != "") score += 1;
 
-            return parseInt(score); //normalize between 0-6
+            return score; //should be max 6 (actually 5.5 for now..)
         },
 
         createLayers() {
