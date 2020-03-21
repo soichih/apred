@@ -1,4 +1,8 @@
-#! usr/bin/python3
+#!/usr/bin/python3
+
+#requirement
+# camelot-py 0.7.3
+# opencv-python
 
 import camelot
 import requests
