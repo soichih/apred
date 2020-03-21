@@ -28,7 +28,7 @@ for county in counties:
     posted_date = county.find('posted_date').text
     county_name = county.find('county').text
     travel_status = county.find('travel_status').text
-    print(posted_date + "\t" + county_name + "\t" + travel_status)
+    #print(posted_date + "\t" + county_name + "\t" + travel_status)
     data.append([posted_date, county_name, travel_status])
 
 with open(filebase + ".csv",'w') as f:
