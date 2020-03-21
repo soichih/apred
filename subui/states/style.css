@@ -4,6 +4,16 @@ padding: 0;
 font-family: sans-serif;
 color: #555;
 }
+
+@media only screen and (max-width: 800px) {
+    #header h1 {
+        display: none;
+    }
+    .table {
+    font-size: 75%;
+    } 
+}
+
 .page {
 width: 1000px;
 margin: auto;
@@ -60,15 +70,33 @@ height: 10px;
 }
 
 .table {
-border-spacing: 5px;
+border-spacing: 0px;
 width: 100%;
 }
 .table thead th {
 border-bottom: 1px solid gray;
 text-align: left;
+opacity: 0.7;
+font-weight: normal;
+vertical-align: top;
+}
+.table-code td {
+background-color: #eee;
+vertical-align: top;
+border: 2px solid white;
+padding: 2px;
 }
 .table-code td.active {
-background-color: #4ea5ff !important;
+background-color: #4ea5ff;
 color: white;
 }
-
+p.alert {
+border-left: 3px solid red;
+padding-left: 10px;
+box-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+border-radius: 3px;
+background-color: rgba(255,0,0,0.1);
+}
+p.alert b {
+color: red;
+}
