@@ -86,7 +86,7 @@ new Vue({
                 <th style="background-color: rgba(255,0,0,0.7)">4</th>
                 <td :class="{active: (this.selected && this.selected.statewide_limits_on_gatherings == 'Yes‐ 50 or more')}">For >50 or more</td>
                 <td rowspan="3" style="background-color: #ddd;" :class="{active: (this.selected && this.selected.national_guard_activation)}">Active</td>
-                <td rowspan="3" style="background-color: #999;" :class="{active: (this.selected && this.selected.statewide_curfew == 'Local')}">Local Curfew</td>
+                <td rowspan="3" style="background-color: #999;" :class="{active: (this.selected && this.selected.statewide_curfew != '')}">Local Curfew</td>
             </tr>
             <tr>
                 <th style="background-color: rgba(255,0,0,0.8)">5</th>
@@ -206,7 +206,7 @@ new Vue({
             });
         },
 
-        scoreLevel(rec) {
+        scoreLevel_old(rec) {
             let max = 0;
             if(rec.state_employee_travel_restrictions && max < 1) max = 1;
             if(rec.statewide_closure_school == "Yes" && max < 2) max = 2;
@@ -219,18 +219,51 @@ new Vue({
             return max;
         },
 
+        scoreLevel(rec) {
+            let score = 0;
+
+            if(rec.state_employee_travel_restrictions) score += 0.5;
+
+            switch(rec.statewide_closure_school) {
+            case "Local": score += 0.5; break;
+            case "Yes": score += 1; break;
+            }
+
+            switch(rec.statewide_limits_on_gatherings) {
+            case "Recommended": 
+            case "Yes‐ 500 or more": score += 0.2; break;
+            case "Yes‐ 250 or more": score += 0.4; break;
+            case "Yes‐ 100 or more": score += 0.6; break;
+            case "Yes‐ 50 or more": score += 0.8; break;
+            case "Yes‐ 10 or more": score += 1; break;
+            }
+
+            if(rec.national_guard_activation) score += 1;
+            
+            if(rec.statewide_limits_on_gatherings.startsWith("Closure Recommended")) score += 0.25;
+            if(rec.statewide_limits_on_gatherings.startsWith("Limited operations")) score += 0.5;
+            if(rec.statewide_limits_on_gatherings.startsWith("Closure required")) score += 0.75;
+            if(rec.statewide_limits_on_gatherings.startsWith("Required closures")) score += 1;
+
+            if(rec.statewide_curfew != "") score += 1;
+
+            return parseInt(score); //normalize between 0-6
+        },
+
         createLayers() {
             this.map.addSource("statedata", {
                 type: "geojson",
                 data: this.geojson,
             });
 
+            /*
             this.map.addLayer({
                 'id': 'allstates',
                 'source': 'statedata',
                 'type': 'fill',
                 'paint': { 'fill-color': '#000', 'fill-opacity': 0.1, }
             });
+            */
 
             /*
             this.map.addLayer({
@@ -293,7 +326,7 @@ new Vue({
 
             this.map.on('click', e=>{
                 const features = this.map.queryRenderedFeatures(e.point, {
-                    layers: ['allstates']
+                    layers: ['selected']
                 });
 
                 if(features.length == 1) {
