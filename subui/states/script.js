@@ -7,6 +7,7 @@ new Vue({
     data() {
         return {
             map: null,
+            modified: null,
             test: "hello",
             props: [],
             selected: null,
@@ -16,28 +17,14 @@ new Vue({
     template: `
     <div>
         <div class="page">
+            <p>
+                This map shows the current US travel restrictions and business / school closures. 
+                The data is from <a href="https://www.nga.org/coronavirus/">https://www.nga.org/coronavirus</a>
+                and was last updated on {{new Date(modified).toLocaleString()}}. Click on a state to view data.
+            </p>
+    
             <h2>Restriction Levels</h2>
             <div id="map"/>
-
-            <!--
-            <div class="info">
-                <div v-if="selected">
-                    <h3>{{selected.name}}</h3>
-                    <div v-if="selected.emergency_declaration">
-                        <span class="name">Emergency Decleration</span> <b>Yes</b> 
-                    </div>
-                    <div v-if="selected.national_guard_activation">
-                        <span class="name">National Guard Activation</span> <b>Yes</b> 
-                    </div>
-                    {{selected}}
-                </div>
-                <p v-else>Click a state to show info.</p>
-            </div>
-            -->
-
-            <!--
-            <span style="background-color: #0f0" class="legend-color"/> Employee Travel Restrictions
-            -->
 
             <div v-if="selected">
                 <h2>{{selected.name}} <span style="font-size: 75; opacity: 0.4;"> / {{selected.level}}</span></h2>
@@ -47,63 +34,6 @@ new Vue({
                 </p>
             </div>
             <p v-else>The color code on each states are determined using the following definitions for the restriction level.</p>
-
-            <!--
-            <table class="table table-code">
-            <thead>
-                <tr>
-                    <th>Level</th>
-                    <th>State Employee Travel Restrictions</th>
-                    <th>School Closures</th>
-                    <th>Statewide Limits on Gathering</th>
-                    <th>National Guard Activation</th>
-                    <th>Business Closure</th>
-                    <th>Curfew</th>
-                </tr>
-            </thead>
-            <tr>
-                <th style="background-color: rgba(255,0,0,0)">0</th>
-                <td :class="{active: (this.selected && !this.selected.state_employee_travel_restrictions)}">No restrictions</td>
-                <td :class="{active: (this.selected && this.selected.statewide_closure_school == '')}">No closure</td>
-                <td :class="{active: (this.selected && this.selected.statewide_limits_on_gatherings == '')}">No limit</td>
-                <td rowspan="4" style="background-color: #eee;" :class="{active: (this.selected && !this.selected.national_guard_activation)}">No Activation</td>
-                <td :class="{active: (this.selected && this.selected.statewide_closure_nonessential == '')}">No closure</td>
-                <td rowspan="4" style="background-color: #eee;" :class="{active: (this.selected && this.selected.statewide_curfew == '')}">No curfew</td>
-            </tr>
-            <tr>
-                <th style="background-color: rgba(255,0,0,0.2)">1</th>
-                <td rowspan="6" :class="{active: (this.selected && this.selected.state_employee_travel_restrictions)}">Yes</td>
-                <td :class="{active: (this.selected && this.selected.statewide_closure_school == 'Local')}">Local closure</td>
-                <td :class="{active: (this.selected && (this.selected.statewide_limits_on_gatherings == 'Recommended' || this.selected.statewide_limits_on_gatherings == 'Yes‐ 500 or more'))}">Recommended (/>500)</td>
-                <td rowspan="2" :class="{active: (this.selected && this.selected.statewide_closure_nonessential.includes('recommended'))}">Recommended</td>
-            </tr>
-            <tr>
-                <th style="background-color: rgba(255,0,0,0.4)">2</th>
-                <td rowspan="5" :class="{active: (this.selected && this.selected.statewide_closure_school == 'Yes')}">Statewide closure</td>
-                <td :class="{active: (this.selected && this.selected.statewide_limits_on_gatherings == 'Yes‐ 250 or more')}">For >250 or more</td>
-            </tr>
-            <tr>
-                <th style="background-color: rgba(255,0,0,0.6)">3</th>
-                <td :class="{active: (this.selected && this.selected.statewide_limits_on_gatherings == 'Yes‐ 100 or more')}">For >100 or more</td>
-                <td rowspan="2" :class="{active: (this.selected && this.selected.statewide_closure_nonessential.startsWith('Limited'))}">Limited Operations Required</td>
-            </tr>
-            <tr>
-                <th style="background-color: rgba(255,0,0,0.7)">4</th>
-                <td :class="{active: (this.selected && this.selected.statewide_limits_on_gatherings == 'Yes‐ 50 or more')}">For >50 or more</td>
-                <td rowspan="3" :class="{active: (this.selected && this.selected.national_guard_activation)}">Active</td>
-                <td rowspan="3" :class="{active: (this.selected && this.selected.statewide_curfew != '')}">Local Curfew</td>
-            </tr>
-            <tr>
-                <th style="background-color: rgba(255,0,0,0.8)">5</th>
-                <td :class="{active: (this.selected && this.selected.statewide_limits_on_gatherings == 'Yes‐ 10 or more')}">For >10 or more</td>
-                <td rowspan="2" :class="{active: (this.selected && this.selected.statewide_closure_nonessential.startsWith('Closure required'))}">Required</td>
-            </tr>
-            <tr>
-                <th style="background-color: rgba(255,0,0,1)">6</th>
-            </tr>
-            </table>
-            -->
-
             <table class="table table-code">
 
             <thead>
@@ -122,7 +52,7 @@ new Vue({
             <tr>
                 <th>State Employee Travel Restrictions</th>
                 <td :class="{active: (this.selected && !this.selected.state_employee_travel_restrictions)}">No Restrictions</td>
-                <td :class="{active: (this.selected && this.selected.state_employee_travel_restrictions)}" colspan="5">Yes</td>
+                <td :class="{active: (this.selected && this.selected.state_employee_travel_restrictions)}" colspan="5">Active</td>
             </tr>
 
             <tr>
@@ -159,7 +89,7 @@ new Vue({
             <tr>
                 <th>Curfew</th>
                 <td colspan="3" :class="{active: (this.selected && this.selected.statewide_curfew == '')}">No Curfew</td>
-                <td colspan="3" :class="{active: (this.selected && this.selected.statewide_curfew != '')}">Yes</td>
+                <td colspan="3" :class="{active: (this.selected && this.selected.statewide_curfew != '')}">Active</td>
             </tr>
 
             </tbody>
@@ -229,6 +159,7 @@ new Vue({
             return new Promise((resolve, reject)=>{
                 axios.get("COVID2019StateTrackingChart.csv").then(res=>{
                     //csv contains &nbsp; for space.. I need to replace it with space so we can compare names
+                    this.modified = res.headers["last-modified"];
                     let re = new RegExp(String.fromCharCode(160), "g");
                     let ascii = res.data.replace(re, " ");
 
@@ -365,18 +296,8 @@ new Vue({
             });
             */
 
-            /*
             this.map.addLayer({
-                'id': 'selected',
-                'source': 'statedata',
-                'type': 'fill',
-                'filter': ['==', 'name', ''],
-                'paint': { 'fill-color': '#fff', 'fill-opacity': 0.5, },
-            });
-            */
-
-            this.map.addLayer({
-                'id': 'selected',
+                'id': 'level',
                 'source': 'statedata',
                 'type': 'fill',
                 'paint': { 
@@ -387,25 +308,35 @@ new Vue({
                             [6, 'rgba(255,0,0,0.8)'],
                         ]
                     }, 
-                    //'fill-opacity': 1,
+                    'fill-outline-color': 'rgba(0,0,0,0)',
                 },
+            });
+
+            this.map.addLayer({
+                'id': 'selected',
+                'source': 'statedata',
+                'type': 'line',
+                'filter': ['==', 'name', ''],
+                'paint': { 'line-color': '#fff', 'line-width': 3 },
             });
 
             this.map.on('click', e=>{
                 const features = this.map.queryRenderedFeatures(e.point, {
-                    layers: ['selected']
+                    layers: ['level']
                 });
 
                 if(features.length == 1) {
                     this.selected = features[0].properties;
                     let coordinates = features[0].geometry.coordinates;
-                    //this.map.setFilter('selected', ['==', 'name', this.selected.name]);
-                    console.dir(this.selected);
+                    this.map.setFilter('selected', ['==', 'name', this.selected.name]);
 
+                    /*
+                    //zoom to selected state
                     let bounds = coordinates[0].reduce((bounds, coord)=>{
                         return bounds.extend(coord);
                     }, new mapboxgl.LngLatBounds(coordinates[0][0], coordinates[0][0]));
                     this.map.fitBounds(bounds, {padding: 20}); 
+                    */
                 }
             });
 
