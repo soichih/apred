@@ -4,7 +4,7 @@
     <div id="map"/>
     <div id="states">
         <ul v-if="geojson">
-            <li v-for="feature in geojson.features" :key="feature.id">
+            <li v-for="feature in geojson.features" :key="feature.id" @click="selectState(feature.properties.name)">
                 <h3>{{feature.properties.name}}</h3>
                 <div class="states-info">
                     <el-tag v-if="feature.properties.emergency_declaration" type="danger" size="small">Emergency Declared</el-tag>
@@ -173,6 +173,10 @@ export default {
     },
 
     methods: {
+        selectState(state) {
+            console.log(state);    
+        },
+
         updateData() {
 
             const source = this.map.getSource("tweets");
@@ -317,6 +321,10 @@ padding-left: 0;
 }
 #states ul li {
 padding: 2px;
+cursor: pointer;
+}
+#states ul li:hover {
+background-color: #ddd;
 }
 .states-info {
 padding-top: 10px;
