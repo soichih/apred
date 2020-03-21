@@ -8,11 +8,18 @@ import camelot
 import requests
 from pathlib import Path
 import pandas as pd
+from datetime import date,timedelta
+
+today = date.today();
+yesterday = today - timedelta(days=1)
 
 filebase = 'COVID2019StateTrackingChart'
 filename = Path(filebase + '.pdf')
+
 #url = "http://www.nga.org/wp-content/uploads/2020/03/COVID19StateTrackingChart.pdf"
-url = "https://www.nga.org/wp-content/uploads/2020/03/CoronavirusTrackingChart_20Mar2020.pdf"
+#url = "https://www.nga.org/wp-content/uploads/2020/03/CoronavirusTrackingChart_20Mar2020.pdf"
+url = yesterday.strftime("https://www.nga.org/wp-content/uploads/%Y/%m/CoronavirusTrackingChart_%d%b%Y.pdf")
+
 response = requests.get(url, headers={'User-Agent':'Mozilla/5.0'})
 with open(filename, "wb") as outfile:
     outfile.write(response.content)
