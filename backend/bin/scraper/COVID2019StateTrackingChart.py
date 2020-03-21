@@ -11,7 +11,8 @@ import pandas as pd
 
 filebase = 'COVID2019StateTrackingChart'
 filename = Path(filebase + '.pdf')
-url = "http://www.nga.org/wp-content/uploads/2020/03/COVID19StateTrackingChart.pdf"
+#url = "http://www.nga.org/wp-content/uploads/2020/03/COVID19StateTrackingChart.pdf"
+url = "https://www.nga.org/wp-content/uploads/2020/03/CoronavirusTrackingChart_20Mar2020.pdf"
 response = requests.get(url, headers={'User-Agent':'Mozilla/5.0'})
 with open(filename, "wb") as outfile:
     outfile.write(response.content)
