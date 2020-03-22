@@ -12,6 +12,7 @@ new Vue({
             props: [],
             selected: null,
             geojson: null,
+            county: null, //county travel restrictions
         }
     },
     template: `
@@ -32,6 +33,9 @@ new Vue({
                     <b>Statewide Closure of Non‐Essential Businesses</b><br>
                     {{selected.statewide_closure_nonessential}}
                 </p>
+
+                <p v-if="selected.name == 'Indiana'">For county specific travel advisory, please see <a href="http://www.in.gov/dhs/traveladvisory/">http://www.in.gov/dhs/traveladvisory/</a></p>
+
             </div>
             <p v-else>The color code on each states are determined using the following definitions for the restriction level.</p>
             <table class="table table-code">
@@ -122,7 +126,7 @@ new Vue({
         this.map.scrollZoom.disable();
         this.map.addControl(new mapboxgl.NavigationControl());
 
-        Promise.all([this.loadCSV(), this.loadGeo()]).then(data=>{
+        Promise.all([this.loadCSV(), this.loadGeo(), this.loadCounty()]).then(data=>{
             //merge csv into geojson
             this.geojson = data[1];
             //this.geojson.features.forEach(f=>console.dir(f.properties.name));
@@ -165,6 +169,16 @@ new Vue({
                 });
             });
         },
+
+        loadCounty(cb) {
+            return new Promise((resolve, reject)=>{
+                axios.get("travelrestriction.json").then(res=>{
+                    this.county = res.data;
+                    resolve(res.data);
+                });
+            });
+        },
+
         loadCSV(cb) {
             return new Promise((resolve, reject)=>{
                 axios.get("COVID2019StateTrackingChart.csv").then(res=>{
@@ -329,6 +343,60 @@ new Vue({
                 'filter': ['==', 'name', ''],
                 'paint': { 'line-color': '#fff', 'line-width': 3 },
             });
+
+            this.map.addSource('counties', {
+                "type": "vector",
+                "url": "mapbox://mapbox.82pkq93d"
+            });
+
+            let filter_warning = ['in', 'FIPS'];
+            let filter_watch = ['in', 'FIPS'];
+            let filter_advisory = ['in', 'FIPS'];
+            this.county.forEach(c=>{
+                if(c.state == "Warning") filter_warning.push(parseInt(c.fips));
+                if(c.state == "Watch") filter_watch.push(parseInt(c.fips));
+                if(c.state == "Advisory") filter_advisory.push(parseInt(c.fips));
+            });
+            this.map.addLayer({
+                "id": "counties-warning",
+                "type": "fill",
+                "source": "counties",
+                minzoom: 5,
+                "source-layer": "original",
+                "paint": {
+                    'fill-outline-color': '#444',
+                    'fill-color': 'red',
+                    'fill-opacity': 0.75,
+                },
+                'filter': filter_warning,
+            });
+            this.map.addLayer({
+                "id": "counties-watch",
+                "type": "fill",
+                "source": "counties",
+                minzoom: 5,
+                "source-layer": "original",
+                "paint": {
+                    'fill-outline-color': '#444',
+                    'fill-color': 'orange',
+                    'fill-opacity': 0.75,
+                },
+                'filter': filter_watch,
+            });
+            this.map.addLayer({
+                "id": "counties-advisory",
+                "type": "fill",
+                "source": "counties",
+                minzoom: 5,
+                "source-layer": "original",
+                "paint": {
+                    'fill-outline-color': '#444',
+                    'fill-color': 'yellow',
+                    'fill-opacity': 0.75,
+                },
+                'filter': filter_advisory,
+            });
+
 
             this.map.on('click', e=>{
                 const features = this.map.queryRenderedFeatures(e.point, {
