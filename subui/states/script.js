@@ -24,15 +24,32 @@ new Vue({
                 and was last updated on {{new Date(modified).toLocaleString()}}. Click on a state to view data.
             </p>
     
-            <h2>Restriction Levels</h2>
+            <!--<h2>Restriction Levels</h2>-->
             <div id="map"/>
 
             <div v-if="selected">
-                <h2>{{selected.name}} <span style="font-size: 75; opacity: 0.4;"> / {{selected.level}}</span></h2>
+                <h2>{{selected.name}}</h2>
+                <h3>
+                    <span style="font-size: 90%; opacity: 0.5;">Restriction Score</span>  
+                    <span style="font-size: 150%"><b>{{selected.level}}</b></span>
+                    <span style="opacity: 0.7">/ 5</span>
+                </h3>
+
+                <p v-if="selected.major_disaster_declaration != ''" class="alert">
+                    <b>Major Disaster Declaration</b><br>
+                    {{selected.major_disaster_declaration}}
+                </p>
+
+                <p v-if="selected.national_guard_activation != ''" class="alert">
+                    <b>National Guard Activation</b><br>
+                    Activated
+                </p>
+
                 <p v-if="selected.statewide_closure_nonessential != ''" class="alert">
                     <b>Statewide Closure of Non‐Essential Businesses</b><br>
                     {{selected.statewide_closure_nonessential}}
                 </p>
+
 
                 <p v-if="selected.name == 'Indiana'">For county specific travel advisory, please see <a href="http://www.in.gov/dhs/traveladvisory/">http://www.in.gov/dhs/traveladvisory/</a></p>
 
@@ -41,6 +58,7 @@ new Vue({
             <table class="table table-code">
 
             <thead>
+                <!--
                 <tr>
                     <th style="text-align: left;">Restriction Level</th>
                     <th style="background-color: rgba(255,0,0,0)">0</th>
@@ -49,6 +67,16 @@ new Vue({
                     <th style="background-color: rgba(255,0,0,0.6)">3</th>
                     <th style="background-color: rgba(255,0,0,0.8)">4</th>
                     <th style="background-color: rgba(255,0,0,1)">5</th>
+                </tr>
+                -->
+                <tr>
+                    <th style="text-align: left;">Restriction Level</th>
+                    <th style="background-color: #fff">0</th>
+                    <th style="background-color: #62D2A2">1</th>
+                    <th style="background-color: #F9ED69">2</th>
+                    <th style="background-color: #F08A5D">3</th>
+                    <th style="background-color: #B83B5E">4</th>
+                    <th style="background-color: #6A2C70">5</th>
                 </tr>
             </thead>
 
@@ -89,6 +117,7 @@ new Vue({
                 <td :class="{active: (this.selected && this.selected.statewide_limits_on_gatherings.startsWith('Yes‐ stay at home'))}">Stay at home</td>
             </tr>
 
+            <!--
             <tr>
                 <th>National Guard Activation</th>
                 <td colspan="3" :class="{active: (this.selected && !this.selected.national_guard_activation)}">No Activation</td>
@@ -101,7 +130,7 @@ new Vue({
                 <td colspan="2" :class="{active: (this.selected && this.selected.major_disaster_declaration == 'Request Made')}">Request Made</td>
                 <td colspan="2" :class="{active: (this.selected && this.selected.major_disaster_declaration == 'Request Approved')}">Request Approved</td>
             </tr>
-
+            -->
 
             <tr>
                 <th>Business Closure</th>
@@ -279,11 +308,6 @@ new Vue({
             case "Yes": score += 1; break;
             }
 
-            switch(rec.major_disaster_declaration) {
-            case "Request Made": score += 0.5; break;
-            case "Request Approved": score += 1; break;
-            }
-
             switch(rec.statewide_limits_on_gatherings) {
             case "Recommended": 
             case "Local": 
@@ -297,8 +321,14 @@ new Vue({
             case "Yes‐ stay at home": score += 1; break;
             }
 
-            if(rec.national_guard_activation) score += 1;
-            
+            //if(rec.national_guard_activation) score += 1;
+            /*
+            switch(rec.major_disaster_declaration) {
+            case "Request Made": score += 0.5; break;
+            case "Request Approved": score += 1; break;
+            }
+            */
+ 
             if(rec.statewide_limits_on_gatherings.startsWith("Closure Recommended")) score += 0.25;
             if(rec.statewide_limits_on_gatherings.startsWith("Limited operations")) score += 0.5;
             if(rec.statewide_limits_on_gatherings.startsWith("Closure required")) score += 0.75;
@@ -366,10 +396,24 @@ new Vue({
                     'fill-color': {
                         property: 'level',
                         stops: [
-                            [0, 'rgba(255,0,0,0)'],
-                            [6, 'rgba(255,0,0,0.8)'],
+                            [0, 'rgba(255,255,255,0.75)'],
+                            [1, 'rgba(98,210,162,0.75)'],
+                            [2, 'rgba(249,237,105,0.75)'],
+                            [3, 'rgba(240,139,93,0.75)'],
+                            [4, 'rgba(184,59,94,0.75)'],
+                            [5, 'rgba(106,44,112,0.75)'],
                         ]
                     }, 
+                    /*
+                    'fill-color': [
+                        'match', ['get', 'level'],
+                        0, '#fbb03b',
+                        1, '#223b53',
+                        2, '#e55e5e',
+                        3, '#3bb2d0',
+                        '#ccc' //other
+                    ],
+                    */
                     'fill-outline-color': 'rgba(0,0,0,0)',
                 },
             });
