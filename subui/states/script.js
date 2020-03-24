@@ -96,6 +96,14 @@ new Vue({
             </tr>
 
             <tr>
+                <th>Major Disaster Declaration</th>
+                <td colspan="2" :class="{active: (this.selected && this.selected.major_disaster_declaration == '')}">No Declaration</td>
+                <td colspan="2" :class="{active: (this.selected && this.selected.major_disaster_declaration == 'Request Made')}">Request Made</td>
+                <td colspan="2" :class="{active: (this.selected && this.selected.major_disaster_declaration == 'Request Approved')}">Request Approved</td>
+            </tr>
+
+
+            <tr>
                 <th>Business Closure</th>
                 <td :class="{active: (this.selected && this.selected.statewide_closure_nonessential == '')}">No Closure</td>
                 <td colspan="2" :class="{active: (this.selected && this.selected.statewide_closure_nonessential.includes('recommended'))}">Recommended</td>
@@ -241,7 +249,7 @@ new Vue({
                         let rec = {
                             state: cols[0],
                             emergency_declaration: (cols[1]=="Yes"),
-                            major_disaster_declaration: (cols[2]=="Yes"),
+                            major_disaster_declaration: cols[2], //Request Approved / Request Made 
                             national_guard_activation: (cols[3]=="Yes"),
                             state_employee_travel_restrictions: (cols[4]=="Yes"),
                             statewide_limits_on_gatherings: cols[5],
@@ -269,6 +277,11 @@ new Vue({
             switch(rec.statewide_closure_school) {
             case "Local": score += 0.5; break;
             case "Yes": score += 1; break;
+            }
+
+            switch(rec.major_disaster_declaration) {
+            case "Request Made": score += 0.5; break;
+            case "Request Approved": score += 1; break;
             }
 
             switch(rec.statewide_limits_on_gatherings) {
