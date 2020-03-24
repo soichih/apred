@@ -23,6 +23,9 @@ margin: auto;
         width: 95%;
         margin: auto;
     }
+    .restriction_score {
+        font-size: 75%;
+    }
 }
 
 #map {
@@ -83,7 +86,7 @@ opacity: 0.7;
 font-weight: bold;
 vertical-align: top;
 color: black;
-padding: 5px;
+padding: 5px 0;
 }
 .table tbody th {
 text-align: left;
@@ -93,12 +96,21 @@ background-color: #eee;
 vertical-align: top;
 border: 2px solid white;
 padding: 2px;
+color: #999;
 }
 .table-code td.active {
 /*background-color: #4ea5ff;*/
 background-color: #0F81C7;
 color: white;
 }
+table.legend {
+border-collapse: collapse;
+width: 100%;
+}
+table.legend thead th {
+padding: 5px 0;
+}
+
 p.alert {
 border-left: 3px solid red;
 padding-left: 10px;
