@@ -66,12 +66,14 @@ new Vue({
                 <td :class="{active: (this.selected && this.selected.statewide_closure_school == 'Yes')}" colspan="5">Statewide Closure</td>
             </tr>
 
+            <!--
             <tr>
                 <th>Childcare Closures</th>
                 <td :class="{active: (this.selected && this.selected.statewide_closure_school == '')}">No Closure</td>
                 <td :class="{active: (this.selected && this.selected.statewide_closure_school == 'Local')}">Local Closure</td>
                 <td :class="{active: (this.selected && this.selected.statewide_closure_school == 'Yes')}" colspan="5">Statewide Closure</td>
             </tr>
+            -->
 
             <tr>
                 <th>Statewide Limits on Gathering</th>
