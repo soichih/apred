@@ -95,7 +95,8 @@ border: 2px solid white;
 padding: 2px;
 }
 .table-code td.active {
-background-color: #4ea5ff;
+/*background-color: #4ea5ff;*/
+background-color: #0F81C7;
 color: white;
 }
 p.alert {
