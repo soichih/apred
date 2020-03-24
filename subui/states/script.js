@@ -341,6 +341,16 @@ new Vue({
         },
 
         createLayers() {
+            var layers = this.map.getStyle().layers;
+            // Find the index of the first symbol layer in the map style
+            var firstSymbolId;
+            for (var i = 0; i < layers.length; i++) {
+                if (layers[i].type === 'symbol') {
+                    firstSymbolId = layers[i].id;
+                    break;
+                }
+            }
+
             this.map.addSource("statedata", {
                 type: "geojson",
                 data: this.geojson,
@@ -396,12 +406,12 @@ new Vue({
                     'fill-color': {
                         property: 'level',
                         stops: [
-                            [0, 'rgba(255,255,255,0.75)'],
-                            [1, 'rgba(98,210,162,0.75)'],
-                            [2, 'rgba(249,237,105,0.75)'],
-                            [3, 'rgba(240,139,93,0.75)'],
-                            [4, 'rgba(184,59,94,0.75)'],
-                            [5, 'rgba(106,44,112,0.75)'],
+                            [0, 'rgb(255,255,255)'],
+                            [1, 'rgb(98,210,162)'],
+                            [2, 'rgb(249,237,105)'],
+                            [3, 'rgb(240,139,93)'],
+                            [4, 'rgb(184,59,94)'],
+                            [5, 'rgb(106,44,112)'],
                         ]
                     }, 
                     /*
@@ -416,7 +426,7 @@ new Vue({
                     */
                     'fill-outline-color': 'rgba(0,0,0,0)',
                 },
-            });
+            }, firstSymbolId);
 
             this.map.addLayer({
                 'id': 'selected',
@@ -451,7 +461,7 @@ new Vue({
                     'fill-opacity': 0.75,
                 },
                 'filter': filter_warning,
-            });
+            }, firstSymbolId);
             this.map.addLayer({
                 "id": "counties-watch",
                 "type": "fill",
@@ -464,7 +474,7 @@ new Vue({
                     'fill-opacity': 0.75,
                 },
                 'filter': filter_watch,
-            });
+            }, firstSymbolId);
             this.map.addLayer({
                 "id": "counties-advisory",
                 "type": "fill",
@@ -477,8 +487,7 @@ new Vue({
                     'fill-opacity': 0.75,
                 },
                 'filter': filter_advisory,
-            });
-
+            }, firstSymbolId);
 
             this.map.on('click', e=>{
                 const features = this.map.queryRenderedFeatures(e.point, {
