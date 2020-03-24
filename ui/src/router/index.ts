@@ -3,7 +3,6 @@ import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
 import Disasters from '../views/Disasters.vue'
 import Covid19 from '../views/Covid19.vue'
-import Covid19US from '../views/Covid19US.vue'
 
 Vue.use(VueRouter)
 
@@ -30,14 +29,6 @@ const routes = [
         component: Covid19,
         meta: {
             menu: "covid19"
-        }
-    },
-    {
-        path: '/covid19us',
-        name: 'COVID19US',
-        component: Covid19US,
-        meta: {
-            menu: "covid19us"
         }
     },
     /*
