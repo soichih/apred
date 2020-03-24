@@ -25,13 +25,35 @@ new Vue({
             </p>
     
             <!--<h2>Restriction Levels</h2>-->
+            <table class="legend">
+            <thead>
+                <tr style="font-size: 85%; text-align: center;">
+                    <td></td>
+                    <td>Least Restrictive</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>Most Restrictive</td>
+                </tr>
+                <tr>
+                    <th width="10%" style="text-align: left;" class="restriction_score">Restriction&nbsp;Score</th>
+                    <th width="10%" style="background-color: #fff">0</th>
+                    <th width="10%" style="background-color: #62D2A2">1</th>
+                    <th width="10%" style="background-color: #F9ED69">2</th>
+                    <th width="10%" style="background-color: #F08A5D">3</th>
+                    <th width="10%" style="background-color: #B83B5E; color: white;">4</th>
+                    <th width="10%" style="background-color: #6A2C70; color: white;">5</th>
+                </tr>
+            </thead>
+            </table>
             <div id="map"/>
 
             <div v-if="selected">
                 <h2>{{selected.name}}</h2>
                 <h3>
                     <span style="font-size: 90%; opacity: 0.5;">Restriction Score</span>  
-                    <span style="font-size: 150%"><b>{{selected.level}}</b></span>
+                    <span style="font-size: 150%"><b>{{selected.level.toFixed(1)}}</b></span>
                     <span style="opacity: 0.7">/ 5</span>
                 </h3>
 
@@ -55,96 +77,93 @@ new Vue({
 
             </div>
             <p v-else>The color code on each states are determined using the following definitions for the restriction level.</p>
-            <table class="table table-code">
 
+            <table class="table table-code" v-if="selected">
             <thead>
-                <!--
                 <tr>
-                    <th style="text-align: left;">Restriction Level</th>
-                    <th style="background-color: rgba(255,0,0,0)">0</th>
-                    <th style="background-color: rgba(255,0,0,0.2)">1</th>
-                    <th style="background-color: rgba(255,0,0,0.4)">2</th>
-                    <th style="background-color: rgba(255,0,0,0.6)">3</th>
-                    <th style="background-color: rgba(255,0,0,0.8)">4</th>
-                    <th style="background-color: rgba(255,0,0,1)">5</th>
-                </tr>
-                -->
-                <tr>
-                    <th style="text-align: left;">Restriction Level</th>
+                    <th style="text-align: left;">Restrictions</th>
+                    <!--
                     <th style="background-color: #fff">0</th>
                     <th style="background-color: #62D2A2">1</th>
                     <th style="background-color: #F9ED69">2</th>
                     <th style="background-color: #F08A5D">3</th>
                     <th style="background-color: #B83B5E">4</th>
                     <th style="background-color: #6A2C70">5</th>
-                </tr>
+                    -->
+                    <th style="opacity: 0.8;">Less Restrictive</th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th style="opacity: 0.8;">More Restrictive</th>
+                 </tr>
             </thead>
 
             <tbody>
             <tr>
                 <th>State Employee Travel Restrictions</th>
-                <td :class="{active: (this.selected && !this.selected.state_employee_travel_restrictions)}">No Restrictions</td>
-                <td :class="{active: (this.selected && this.selected.state_employee_travel_restrictions)}" colspan="5">Active</td>
+                <td :class="{active: (!selected.state_employee_travel_restrictions)}">No Restrictions</td>
+                <td :class="{active: (selected.state_employee_travel_restrictions)}" colspan="5">Active</td>
             </tr>
 
             <tr>
                 <th>School Closures</th>
-                <td :class="{active: (this.selected && this.selected.statewide_closure_school == '')}">No Closure</td>
-                <td :class="{active: (this.selected && this.selected.statewide_closure_school == 'Local')}">Local Closure</td>
-                <td :class="{active: (this.selected && this.selected.statewide_closure_school == 'Yes')}" colspan="5">Statewide Closure</td>
+                <td :class="{active: (selected && selected.statewide_closure_school == '')}">No Closure</td>
+                <td :class="{active: (selected && selected.statewide_closure_school == 'Local')}">Local Closure</td>
+                <td :class="{active: (selected && selected.statewide_closure_school == 'Yes')}" colspan="5">Statewide Closure</td>
             </tr>
 
             <!--
             <tr>
                 <th>Childcare Closures</th>
-                <td :class="{active: (this.selected && this.selected.statewide_closure_school == '')}">No Closure</td>
-                <td :class="{active: (this.selected && this.selected.statewide_closure_school == 'Local')}">Local Closure</td>
-                <td :class="{active: (this.selected && this.selected.statewide_closure_school == 'Yes')}" colspan="5">Statewide Closure</td>
+                <td :class="{active: (selected.statewide_closure_school == '')}">No Closure</td>
+                <td :class="{active: (selected.statewide_closure_school == 'Local')}">Local Closure</td>
+                <td :class="{active: (selected.statewide_closure_school == 'Yes')}" colspan="5">Statewide Closure</td>
             </tr>
             -->
 
             <tr>
                 <th>Statewide Limits on Gathering</th>
-                <td :class="{active: (this.selected && this.selected.statewide_limits_on_gatherings == '')}">No Limit</td>
-                <td :class="{active: (this.selected && (
-                    this.selected.statewide_limits_on_gatherings.startsWith('Recommended') || 
-                    this.selected.statewide_limits_on_gatherings.startsWith('Local') || 
-                    this.selected.statewide_limits_on_gatherings.startsWith('Yes‐ 50 or more') || 
-                    this.selected.statewide_limits_on_gatherings.startsWith('Yes‐ unspecified')))}">Recommended</td>
-                <td :class="{active: (this.selected && this.selected.statewide_limits_on_gatherings.startsWith('Yes‐ 25 or more'))}">For 25 or more</td>
-                <td :class="{active: (this.selected && this.selected.statewide_limits_on_gatherings.startsWith('Yes‐ 10 or more'))}">For 10 or more</td>
-                <td :class="{active: (this.selected && this.selected.statewide_limits_on_gatherings.startsWith('Yes‐ 5 or more'))}">For 5 or more</td>
-                <td :class="{active: (this.selected && this.selected.statewide_limits_on_gatherings.startsWith('Yes‐ stay at home'))}">Stay at home</td>
+                <td :class="{active: (selected.statewide_limits_on_gatherings == '')}">No Limit</td>
+                <td :class="{active: (
+                    selected.statewide_limits_on_gatherings.startsWith('Recommended') || 
+                    selected.statewide_limits_on_gatherings.startsWith('Local') || 
+                    selected.statewide_limits_on_gatherings.startsWith('Yes- 50 or more') || 
+                    selected.statewide_limits_on_gatherings.startsWith('Yes- unspecified'))}">Recommended</td>
+                <td :class="{active: (selected.statewide_limits_on_gatherings.startsWith('Yes- 25 or more'))}">For 25 or more</td>
+                <td :class="{active: (selected.statewide_limits_on_gatherings.startsWith('Yes- 10 or more'))}">For 10 or more</td>
+                <td :class="{active: (selected.statewide_limits_on_gatherings.startsWith('Yes- 5 or more'))}">For 5 or more</td>
+                <td :class="{active: (selected.statewide_limits_on_gatherings.startsWith('Yes- stay at home'))}">Stay at home</td>
             </tr>
 
             <!--
             <tr>
                 <th>National Guard Activation</th>
-                <td colspan="3" :class="{active: (this.selected && !this.selected.national_guard_activation)}">No Activation</td>
-                <td colspan="3" :class="{active: (this.selected && this.selected.national_guard_activation)}">Active</td>
+                <td colspan="3" :class="{active: (!selected.national_guard_activation)}">No Activation</td>
+                <td colspan="3" :class="{active: (selected.national_guard_activation)}">Active</td>
             </tr>
 
             <tr>
                 <th>Major Disaster Declaration</th>
-                <td colspan="2" :class="{active: (this.selected && this.selected.major_disaster_declaration == '')}">No Declaration</td>
-                <td colspan="2" :class="{active: (this.selected && this.selected.major_disaster_declaration == 'Request Made')}">Request Made</td>
-                <td colspan="2" :class="{active: (this.selected && this.selected.major_disaster_declaration == 'Request Approved')}">Request Approved</td>
+                <td colspan="2" :class="{active: (selected.major_disaster_declaration == '')}">No Declaration</td>
+                <td colspan="2" :class="{active: (selected.major_disaster_declaration == 'Request Made')}">Request Made</td>
+                <td colspan="2" :class="{active: (selected.major_disaster_declaration == 'Request Approved')}">Request Approved</td>
             </tr>
             -->
 
             <tr>
                 <th>Business Closure</th>
-                <td :class="{active: (this.selected && this.selected.statewide_closure_nonessential == '')}">No Closure</td>
-                <td colspan="2" :class="{active: (this.selected && this.selected.statewide_closure_nonessential.includes('recommended'))}">Recommended</td>
-                <td colspan="2" :class="{active: (this.selected && this.selected.statewide_closure_nonessential.startsWith('Limited'))}">Limited Operations</td>
-                <td :class="{active: (this.selected && this.selected.statewide_closure_nonessential.startsWith('Closure required'))}">Required</td>
+                <td :class="{active: (selected.statewide_closure_nonessential == '')}">No Closure</td>
+                <td colspan="2" :class="{active: (selected && selected.statewide_closure_nonessential.includes('recommended'))}">Recommended</td>
+                <td colspan="2" :class="{active: (selected && selected.statewide_closure_nonessential.startsWith('Limited'))}">Limited Operations</td>
+                <td :class="{active: (selected.statewide_closure_nonessential.startsWith('Closure required'))}">Required</td>
             </tr>
 
             <tr>
                 <th>Curfew</th>
-                <td colspan="2" :class="{active: (this.selected && this.selected.statewide_curfew == '')}">No Curfew</td>
-                <td colspan="2" :class="{active: (this.selected && this.selected.statewide_curfew == 'Local')}">Local Curfew</td>
-                <td colspan="2" :class="{active: (this.selected && this.selected.statewide_curfew == 'Yes')}">Active</td>
+                <td colspan="2" :class="{active: (selected.statewide_curfew == '')}">No Curfew</td>
+                <td colspan="2" :class="{active: (selected.statewide_curfew == 'Local')}">Local Curfew</td>
+                <td colspan="2" :class="{active: (selected.statewide_curfew == 'Yes')}">Active</td>
             </tr>
 
             </tbody>
@@ -238,6 +257,9 @@ new Vue({
                     let re = new RegExp(String.fromCharCode(160), "g");
                     let ascii = res.data.replace(re, " ");
 
+                    re = new RegExp(String.fromCharCode(8208), "g");
+                    ascii = ascii.replace(re, "-");
+
                     let csv = ascii.split("\n");
                     let recs = [];
                     csv.forEach(line=>{
@@ -298,7 +320,7 @@ new Vue({
             });
         },
 
-        scoreLevel(rec) {
+        scoreLevel_v2(rec) {
             let score = 0;
 
             if(rec.state_employee_travel_restrictions) score += 0.5;
@@ -340,9 +362,49 @@ new Vue({
             return score; //should be max 6 (actually 5.5 for now..)
         },
 
+        scoreLevel(rec) {
+            let score = 0;
+
+            /*
+            if(rec.state == "California (CA)") {
+                console.dir(rec);
+                console.log(rec.statewide_limits_on_gatherings);
+                console.log(rec.statewide_limits_on_gatherings.startsWith("Yes"));
+                console.log("Yes-".charCodeAt(3));
+                console.log(rec.statewide_limits_on_gatherings.charCodeAt(3));
+            }
+            */
+            if(rec.state_employee_travel_restrictions) score += 0.1;
+
+            switch(rec.statewide_closure_school) {
+            case "Local": score += 0.1; break;
+            case "Yes": score += 0.2; break;
+            }
+
+            if( rec.statewide_limits_on_gatherings.startsWith("Recommended") ||
+                rec.statewide_limits_on_gatherings.startsWith("Local") ||
+                rec.statewide_limits_on_gatherings.startsWith("Yes- 50 or more") ||
+                rec.statewide_limits_on_gatherings.startsWith("Yes- unspecified")) score += 0.2;
+            if (rec.statewide_limits_on_gatherings.startsWith("Yes- 25 or more")) score += 0.4;
+            if (rec.statewide_limits_on_gatherings.startsWith("Yes- 10 or more")) score += 0.6;
+            if (rec.statewide_limits_on_gatherings.startsWith("Yes- 5 or more")) score += 0.8;
+            if (rec.statewide_limits_on_gatherings.startsWith("Yes- stay at home")) score += 1;
+
+            if(rec.statewide_closure_nonessential.includes("recommended")) score += 0.33;
+            if(rec.statewide_closure_nonessential.startsWith("Limited")) score += 0.66;
+            if(rec.statewide_closure_nonessential.startsWith("Closure required")) score += 1;
+
+            if(rec.statewide_curfew == "Local") score += 0.1;
+            if(rec.statewide_curfew != "Yes") score += 0.2;
+
+            return score*(5/2);
+        },
+
+
         createLayers() {
-            var layers = this.map.getStyle().layers;
+            //https://docs.mapbox.com/mapbox-gl-js/example/geojson-layer-in-stack/
             // Find the index of the first symbol layer in the map style
+            var layers = this.map.getStyle().layers;
             var firstSymbolId;
             for (var i = 0; i < layers.length; i++) {
                 if (layers[i].type === 'symbol') {
