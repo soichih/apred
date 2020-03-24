@@ -67,13 +67,24 @@ new Vue({
             </tr>
 
             <tr>
+                <th>Childcare Closures</th>
+                <td :class="{active: (this.selected && this.selected.statewide_closure_school == '')}">No Closure</td>
+                <td :class="{active: (this.selected && this.selected.statewide_closure_school == 'Local')}">Local Closure</td>
+                <td :class="{active: (this.selected && this.selected.statewide_closure_school == 'Yes')}" colspan="5">Statewide Closure</td>
+            </tr>
+
+            <tr>
                 <th>Statewide Limits on Gathering</th>
                 <td :class="{active: (this.selected && this.selected.statewide_limits_on_gatherings == '')}">No Limit</td>
-                <td :class="{active: (this.selected && (this.selected.statewide_limits_on_gatherings == 'Recommended' || this.selected.statewide_limits_on_gatherings == 'Yes‐ 500 or more'))}">Recommended</td>
-                <td :class="{active: (this.selected && this.selected.statewide_limits_on_gatherings == 'Yes‐ 250 or more')}">For 250 or more</td>
-                <td :class="{active: (this.selected && this.selected.statewide_limits_on_gatherings == 'Yes‐ 100 or more')}">For 100 or more</td>
-                <td :class="{active: (this.selected && this.selected.statewide_limits_on_gatherings == 'Yes‐ 50 or more')}">For 50 or more</td>
-                <td :class="{active: (this.selected && this.selected.statewide_limits_on_gatherings == 'Yes‐ 10 or more')}">For 10 or more</td>
+                <td :class="{active: (this.selected && (
+                    this.selected.statewide_limits_on_gatherings.startsWith('Recommended') || 
+                    this.selected.statewide_limits_on_gatherings.startsWith('Local') || 
+                    this.selected.statewide_limits_on_gatherings.startsWith('Yes‐ 50 or more') || 
+                    this.selected.statewide_limits_on_gatherings.startsWith('Yes‐ unspecified')))}">Recommended</td>
+                <td :class="{active: (this.selected && this.selected.statewide_limits_on_gatherings.startsWith('Yes‐ 25 or more'))}">For 25 or more</td>
+                <td :class="{active: (this.selected && this.selected.statewide_limits_on_gatherings.startsWith('Yes‐ 10 or more'))}">For 10 or more</td>
+                <td :class="{active: (this.selected && this.selected.statewide_limits_on_gatherings.startsWith('Yes‐ 5 or more'))}">For 5 or more</td>
+                <td :class="{active: (this.selected && this.selected.statewide_limits_on_gatherings.startsWith('Yes‐ stay at home'))}">Stay at home</td>
             </tr>
 
             <tr>
@@ -92,8 +103,9 @@ new Vue({
 
             <tr>
                 <th>Curfew</th>
-                <td colspan="3" :class="{active: (this.selected && this.selected.statewide_curfew == '')}">No Curfew</td>
-                <td colspan="3" :class="{active: (this.selected && this.selected.statewide_curfew != '')}">Active</td>
+                <td colspan="2" :class="{active: (this.selected && this.selected.statewide_curfew == '')}">No Curfew</td>
+                <td colspan="2" :class="{active: (this.selected && this.selected.statewide_curfew == 'Local')}">Local Curfew</td>
+                <td colspan="2" :class="{active: (this.selected && this.selected.statewide_curfew == 'Yes')}">Active</td>
             </tr>
 
             </tbody>
@@ -209,16 +221,35 @@ new Vue({
                                 }
                             }
                         }
+                        /*
+                        0 State,
+                        1 Emergency Declaration,
+                        2 Major Disaster Dec,
+                        3 National Guard Activation,
+                        4 State Employee Travel Restrictions,
+                        5 Statewide Limits on Gatherings,
+                        6 Statewide School Closures,
+                        7 State Child Care Closures,
+                        8 Statewide Closure of Non‐Essential Businesses,
+                        9 Statewide Curfew,
+                        10 1135 Waiver Status,
+                        11 Extension of Individual Income Tax Deadlines,
+                        12 Primary Election
+                        */
                         let rec = {
                             state: cols[0],
                             emergency_declaration: (cols[1]=="Yes"),
-                            national_guard_activation: (cols[2]=="Yes"),
-                            state_employee_travel_restrictions: (cols[3]=="Yes"),
-                            statewide_limits_on_gatherings: cols[4],
-                            statewide_closure_school: cols[5], ///Yes or Local
-                            statewide_closure_nonessential: cols[6], 
-                            statewide_curfew: cols[7], //Yes or Local
-                            waiver1135: cols[8], //Approved
+                            major_disaster_declaration: (cols[2]=="Yes"),
+                            national_guard_activation: (cols[3]=="Yes"),
+                            state_employee_travel_restrictions: (cols[4]=="Yes"),
+                            statewide_limits_on_gatherings: cols[5],
+                            statewide_closure_school: cols[6], ///Yes or Local
+                            statewide_closure_childcare: cols[7], ///Yes or Local
+                            statewide_closure_nonessential: cols[8], 
+                            statewide_curfew: cols[9], //Yes or Local
+                            waiver1135: cols[10], //Approved
+                            extension_incometax: cols[11], 
+                            primary_election: cols[12], 
                         };
                         rec.level = this.scoreLevel(rec);
                         recs.push(rec);
@@ -226,19 +257,6 @@ new Vue({
                     resolve(recs);
                 }).catch(reject);
             });
-        },
-
-        scoreLevel_old(rec) {
-            let max = 0;
-            if(rec.state_employee_travel_restrictions && max < 1) max = 1;
-            if(rec.statewide_closure_school == "Yes" && max < 2) max = 2;
-            if(rec.statewide_limits_on_gatherings == "Yes‐ 100 or more" && max < 3) max = 3;
-            if(rec.statewide_limits_on_gatherings == "Yes‐ 50 or more" && max < 4) max = 4;
-            if(rec.statewide_limits_on_gatherings == "Yes‐ 25 or more" && max < 5) max = 5;
-            if(rec.statewide_limits_on_gatherings == "Yes‐ 10 or more" && max < 6) max = 6;
-            if(rec.statewide_limits_on_gatherings == "Recommended" && max < 1) max = 1;
-            if(rec.national_guard_activation && max < 4) max = 4;
-            return max;
         },
 
         scoreLevel(rec) {
@@ -253,11 +271,15 @@ new Vue({
 
             switch(rec.statewide_limits_on_gatherings) {
             case "Recommended": 
-            case "Yes‐ 500 or more": score += 0.2; break;
-            case "Yes‐ 250 or more": score += 0.4; break;
-            case "Yes‐ 100 or more": score += 0.6; break;
-            case "Yes‐ 50 or more": score += 0.8; break;
-            case "Yes‐ 10 or more": score += 1; break;
+            case "Local": 
+            case "Yes‐ 50 or more": 
+            case "Yes‐ unspecified": 
+                    score += 0.2; 
+                    break;
+            case "Yes‐ 25 or more": score += 0.4; break;
+            case "Yes‐ 10 or more": score += 0.6; break;
+            case "Yes‐ 5 or more": score += 0.8; break;
+            case "Yes‐ stay at home": score += 1; break;
             }
 
             if(rec.national_guard_activation) score += 1;
@@ -267,7 +289,8 @@ new Vue({
             if(rec.statewide_limits_on_gatherings.startsWith("Closure required")) score += 0.75;
             if(rec.statewide_limits_on_gatherings.startsWith("Required closures")) score += 1;
 
-            if(rec.statewide_curfew != "") score += 1;
+            if(rec.statewide_curfew == "Local") score += 0.5;
+            if(rec.statewide_curfew != "Yes") score += 1;
 
             return score; //should be max 6 (actually 5.5 for now..)
         },
