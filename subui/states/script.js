@@ -152,9 +152,9 @@ new Vue({
             <tr>
                 <th>Business Closure</th>
                 <td :class="{active: (selected.statewide_closure_nonessential == '')}">No Closure</td>
-                <td colspan="2" :class="{active: (selected && selected.statewide_closure_nonessential.includes('recommended'))}">Recommended</td>
-                <td colspan="2" :class="{active: (selected && selected.statewide_closure_nonessential.startsWith('Limited'))}">Limited Operations</td>
-                <td :class="{active: (selected.statewide_closure_nonessential.startsWith('Closure required'))}">Required</td>
+                <td colspan="2" :class="{active: selected.statewide_closure_nonessential.includes('recommended')}">Recommended</td>
+                <td colspan="2" :class="{active: selected.statewide_closure_nonessential.includes('Limited')}">Limited Operations</td>
+                <td :class="{active: selected.statewide_closure_nonessential.startsWith('Closure required')}">Required</td>
             </tr>
 
             <tr>
@@ -407,7 +407,7 @@ new Vue({
             if (rec.statewide_limits_on_gatherings.startsWith("Yes- stay at home")) score += 1;
 
             if(rec.statewide_closure_nonessential.includes("recommended")) score += 0.2;
-            if(rec.statewide_closure_nonessential.startsWith("Limited")) score += 0.4;
+            if(rec.statewide_closure_nonessential.includes("Limited")) score += 0.4;
             if(rec.statewide_closure_nonessential.startsWith("Closure required")) score += 0.6;
 
             if(rec.statewide_curfew == "Local") score += 0.1;
