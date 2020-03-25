@@ -58,13 +58,11 @@ new Vue({
                 </h3>
 
                 <p v-if="selected.major_disaster_declaration != ''" class="alert">
-                    <b>Major Disaster Declaration</b><br>
-                    {{selected.major_disaster_declaration}}
+                    <b>Major Disaster Declared</b>
                 </p>
 
                 <p v-if="selected.national_guard_activation != ''" class="alert">
-                    <b>National Guard Activation</b><br>
-                    Activated
+                    <b>National Guard Activated</b>
                 </p>
 
                 <p v-if="selected.statewide_closure_nonessential != ''" class="alert">
@@ -108,9 +106,9 @@ new Vue({
 
             <tr>
                 <th>School Closures</th>
-                <td :class="{active: (selected && selected.statewide_closure_school == '')}">No Closure</td>
-                <td :class="{active: (selected && selected.statewide_closure_school == 'Local')}">Local Closure</td>
-                <td :class="{active: (selected && selected.statewide_closure_school == 'Yes')}" colspan="5">Statewide Closure</td>
+                <td :class="{active: (selected.statewide_closure_school == '')}">No Closure</td>
+                <td :class="{active: (selected.statewide_closure_school == 'Local')}">Local Closure</td>
+                <td :class="{active: (selected.statewide_closure_school == 'Yes')}" colspan="5">Statewide Closure</td>
             </tr>
 
             <!--
@@ -390,9 +388,9 @@ new Vue({
             if (rec.statewide_limits_on_gatherings.startsWith("Yes- 5 or more")) score += 0.8;
             if (rec.statewide_limits_on_gatherings.startsWith("Yes- stay at home")) score += 1;
 
-            if(rec.statewide_closure_nonessential.includes("recommended")) score += 0.33;
-            if(rec.statewide_closure_nonessential.startsWith("Limited")) score += 0.66;
-            if(rec.statewide_closure_nonessential.startsWith("Closure required")) score += 1;
+            if(rec.statewide_closure_nonessential.includes("recommended")) score += 0.2;
+            if(rec.statewide_closure_nonessential.startsWith("Limited")) score += 0.4;
+            if(rec.statewide_closure_nonessential.startsWith("Closure required")) score += 0.6;
 
             if(rec.statewide_curfew == "Local") score += 0.1;
             if(rec.statewide_curfew != "Yes") score += 0.2;
