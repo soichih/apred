@@ -381,39 +381,31 @@ new Vue({
         scoreLevel(rec) {
             let score = 0;
 
-            /*
-            if(rec.state == "California (CA)") {
-                console.dir(rec);
-                console.log(rec.statewide_limits_on_gatherings);
-                console.log(rec.statewide_limits_on_gatherings.startsWith("Yes"));
-                console.log("Yes-".charCodeAt(3));
-                console.log(rec.statewide_limits_on_gatherings.charCodeAt(3));
-            }
-            */
             if(rec.state_employee_travel_restrictions) score += 0.1;
 
             switch(rec.statewide_closure_school) {
-            case "Local": score += 0.1; break;
             case "Yes": score += 0.2; break;
+            case "Local": score += 0.1; break;
             }
 
-            if( rec.statewide_limits_on_gatherings.startsWith("Recommended") ||
+            if(rec.statewide_limits_on_gatherings.startsWith("Yes- stay at home")) score += 1;
+            else if(rec.statewide_limits_on_gatherings.startsWith("Yes- 5 or more")) score += 0.8;
+            else if(rec.statewide_limits_on_gatherings.startsWith("Yes- 10 or more")) score += 0.6;
+            else if(rec.statewide_limits_on_gatherings.startsWith("Yes- 25 or more")) score += 0.4;
+            else if(rec.statewide_limits_on_gatherings.startsWith("Recommended") ||
                 rec.statewide_limits_on_gatherings.startsWith("Local") ||
                 rec.statewide_limits_on_gatherings.startsWith("Yes- 50 or more") ||
                 rec.statewide_limits_on_gatherings.startsWith("Yes- unspecified")) score += 0.2;
-            if (rec.statewide_limits_on_gatherings.startsWith("Yes- 25 or more")) score += 0.4;
-            if (rec.statewide_limits_on_gatherings.startsWith("Yes- 10 or more")) score += 0.6;
-            if (rec.statewide_limits_on_gatherings.startsWith("Yes- 5 or more")) score += 0.8;
-            if (rec.statewide_limits_on_gatherings.startsWith("Yes- stay at home")) score += 1;
 
-            if(rec.statewide_closure_nonessential.includes("recommended")) score += 0.2;
-            if(rec.statewide_closure_nonessential.includes("Limited")) score += 0.4;
-            if(rec.statewide_closure_nonessential.startsWith("Closure required")) score += 0.6;
+            if(rec.statewide_closure_nonessential.includes("required")) score += 0.6;
+            else if(rec.statewide_closure_nonessential.includes("Limited")) score += 0.4;
+            else if(rec.statewide_closure_nonessential.includes("recommended")) score += 0.2;
 
-            if(rec.statewide_curfew == "Local") score += 0.1;
-            if(rec.statewide_curfew != "Yes") score += 0.2;
+            if(rec.statewide_curfew == "Yes") score += 0.2;
+            else if(rec.statewide_curfew == "Local") score += 0.1;
 
-            return score*(5/2);
+            let max = 0.1 + 0.2 + 1 + 0.6 + 0.2;
+            return score/max * 5;
         },
 
 
