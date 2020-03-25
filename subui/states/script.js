@@ -225,12 +225,14 @@ new Vue({
             this.map.on('load', ()=>{
                 this.createLayers();
             });
-        });
+        }).catch(err=>{
+            console.error(err);
+        });;
 
     },
 
     methods: {
-        loadGeo(cb) {
+        loadGeo() {
             return new Promise((resolve, reject)=>{
                 axios.get("covid19states.geojson").then(res=>{
                     resolve(res.data);
@@ -238,7 +240,7 @@ new Vue({
             });
         },
 
-        loadCounty(cb) {
+        loadCounty() {
             return new Promise((resolve, reject)=>{
                 axios.get("travelrestriction.json").then(res=>{
                     this.county = res.data;
@@ -247,7 +249,7 @@ new Vue({
             });
         },
 
-        loadCSV(cb) {
+        loadCSV() {
             return new Promise((resolve, reject)=>{
                 axios.get("COVID2019StateTrackingChart.csv").then(res=>{
                     //csv contains &nbsp; for space.. I need to replace it with space so we can compare names
@@ -260,8 +262,13 @@ new Vue({
 
                     let csv = ascii.split("\n");
                     let recs = [];
-                    csv.forEach(line=>{
-                        if(line == "") return;
+                    let headers = csv.shift();
+                    
+                    //console.dir(headers);
+                    for(let l = 0;l < csv.length; ++l) {
+                        let line = csv[l];
+                        if(line == "") continue;
+
                         let cols = [];
                         let buf = "";
                         for(let i = 0;i < line.length; ++i) {
@@ -274,12 +281,19 @@ new Vue({
                                     while(line[i] != "\"") {
                                         buf = buf + line[i];
                                         i++;
+                                        if(i == line.length) {
+                                            //reach the end of line without ending double quote.. try reading the next line
+                                            l++;
+                                            i = 0;
+                                            line = csv[l];
+                                        }
                                     }
                                 } else {
                                     buf = buf + line[i];
                                 }
                             }
                         }
+                        cols.push(buf); //add the last column
                         /*
                         0 State,
                         1 Emergency Declaration,
@@ -303,18 +317,22 @@ new Vue({
                             state_employee_travel_restrictions: (cols[4]=="Yes"),
                             statewide_limits_on_gatherings: cols[5],
                             statewide_closure_school: cols[6], ///Yes or Local
-                            statewide_closure_childcare: cols[7], ///Yes or Local
-                            statewide_closure_nonessential: cols[8], 
-                            statewide_curfew: cols[9], //Yes or Local
-                            waiver1135: cols[10], //Approved
-                            extension_incometax: cols[11], 
-                            primary_election: cols[12], 
+                            //statewide_closure_childcare: cols[7], ///Yes or Local
+                            statewide_closure_nonessential: cols[7], 
+                            statewide_curfew: cols[8], //Yes or Local
+                            waiver1135: cols[9], //Approved
+                            extension_incometax: cols[10], 
+                            primary_election: cols[11], 
                         };
                         rec.level = this.scoreLevel(rec);
                         recs.push(rec);
-                    });
+                        //console.dir(cols);
+                    }
+                        console.log("p-end");
                     resolve(recs);
-                }).catch(reject);
+                }).catch(err=>{
+                    reject(err);
+                });
             });
         },
 
