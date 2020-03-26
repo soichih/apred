@@ -15,7 +15,7 @@ import re
 # Find the current PDF url from webiste
 nga_url = "https://www.nga.org/coronavirus/"
 response = requests.get(nga_url, headers={'User-Agent':'Mozilla/5.0'})
-rgx = re.compile(r'https:\/\/www.nga.org\S*orona\S*rack\S*.xlsx')
+rgx = re.compile(r'https:\/\/www.nga.org\S*CoronavirusStateActionsChart\S*.xlsx')
 rgx_matches = rgx.findall(response.text)
 
 if len(rgx_matches) != 1:
