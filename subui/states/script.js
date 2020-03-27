@@ -74,7 +74,7 @@ new Vue({
                 <p v-if="selected.name == 'Indiana'">For county specific travel advisory, please see <a href="http://www.in.gov/dhs/traveladvisory/">http://www.in.gov/dhs/traveladvisory/</a></p>
 
             </div>
-            <p v-else>The color code on each states are determined using the following definitions for the restriction level.</p>
+            <p v-else>The restriction score is computed by analyzing various criterias such as school closure, non-essential business / travel restrictions, curfew, etc.</p>
 
             <table class="table table-code" v-if="selected">
             <thead>
