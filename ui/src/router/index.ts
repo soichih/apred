@@ -2,6 +2,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
 import Disasters from '../views/Disasters.vue'
+import DisastersCounty from '../views/DisastersCounty.vue'
 import Covid19 from '../views/Covid19.vue'
 
 Vue.use(VueRouter)
@@ -21,6 +22,14 @@ const routes = [
         component: Disasters,
         meta: {
             menu: "disasters"
+        }
+    },
+    {
+        path: '/disasters/:fips',
+        name: 'Disaster Declerations (County)',
+        component: DisastersCounty,
+        meta: {
+            menu: "disasters_county"
         }
     },
     {
