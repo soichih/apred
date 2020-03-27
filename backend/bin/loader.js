@@ -141,7 +141,7 @@ MongoClient.connect(config.mongo.url, {useUnifiedTopology: true}, function(err, 
     });
     */
 
-    load_covid19states();
+    //load_covid19states();
 
     /*
     const collection = db.collection('bvi');

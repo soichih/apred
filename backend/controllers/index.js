@@ -296,6 +296,7 @@ function loadEUTweetsCity(path) {
     });
 }
 
+router.use('/statsamerica', require('./statsamerica'));
 
 //we need to convert a large geojson to vector layer using a tool like..
 //https://github.com/mapbox/geojson-vt
