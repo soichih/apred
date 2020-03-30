@@ -87,7 +87,7 @@ MongoClient.connect(config.mongo.url, {useUnifiedTopology: true}, function(err, 
     async.series([
         
         load_fips,
-        load_abbs,
+        //load_abbs,
         load_edaid,
 
         store_fips, //load_fips / load_abbs
@@ -95,7 +95,6 @@ MongoClient.connect(config.mongo.url, {useUnifiedTopology: true}, function(err, 
         //load_storm_data,
         //load_storm_data_es,
         count_storm_data,
-
         
         load_cutter_sources,
         load_cutter_combined,
@@ -113,10 +112,22 @@ MongoClient.connect(config.mongo.url, {useUnifiedTopology: true}, function(err, 
     });
     */
 
-    /*
+    //create cutter source catalog with us/state average/sdev
+    async.series([
+        
+        load_fips,
+        load_cutter_sources,
+        load_cutter_combined,
+    ], err=>{
+        if(err) throw err;
+        fs.writeFileSync(__dirname+"../../ui/src/assets/cutter_indicators.json", JSON.stringify(data.cutter.indicators, null, 4));
+        client.close();
+    });
+
+
+    /* -- modified but not tested
     async.series([
         load_fips,
-        load_abbs,
         load_and_store_disasterdeclarations,
 
     ], err=>{
@@ -129,11 +140,9 @@ MongoClient.connect(config.mongo.url, {useUnifiedTopology: true}, function(err, 
     /*
     async.series([
         load_fips,
-        load_abbs,
+        //load_abbs,
         load_edaid,
-
         load_eda2018,
-
     ], err=>{
         if(err) throw err;
         console.log("all done");
@@ -142,6 +151,8 @@ MongoClient.connect(config.mongo.url, {useUnifiedTopology: true}, function(err, 
     */
 
     //load_covid19states();
+
+    //load_and_store_demo();
 
     /*
     const collection = db.collection('bvi');
@@ -194,8 +205,27 @@ MongoClient.connect(config.mongo.url, {useUnifiedTopology: true}, function(err, 
 
 });
 
+function load_and_store_demo() {
+    let demo = require('../../data/statsamerica.demo.json');
+    const county = db.collection('county');
+    async.eachOfSeries(demo, (item, _fip, next)=>{
+        let fips = _fip.substring(0,2)+"."+_fip.substring(2);
+        console.log(fips, item);
+        county.updateOne({fips}, {$set: {
+            demo: item,
+        }}).then(res=>{
+            console.dir(res.result);
+            next();
+        }).catch(next);
+    }, err=>{
+        if(err) throw err;
+        console.log("done");
+    });
+}
+
 function load_fips(cb) {
     console.debug("loading fips");
+    /*
     let recs = fs.readFileSync(__dirname+"/data/fips.tsv", "ascii").split("\n");
     recs.forEach(rec=>{
         if(rec == "") return;
@@ -209,6 +239,12 @@ function load_fips(cb) {
         let fips = statefips+'.'+countyfips;
         if(!data.counties[fips]) data.counties[fips] = {storm_counts: {}, cutter_measures: []};
     })
+    */
+    data.fips = require(__dirname+"/../../data/fips.json");
+    data.fips.forEach(rec=>{
+        let fips = rec.statefips+'.'+rec.countyfips;
+        if(!data.counties[fips]) data.counties[fips] = {storm_counts: {}, cutter_measures: []};
+    });
     cb();
 }
 
@@ -319,7 +355,7 @@ function load_edaid(cb) {
     }).on('end', cb);
 }
 
-
+/* consumed to fips
 function load_abbs(cb) {
     console.debug("loading abbs");
     let txt = fs.readFileSync(__dirname+'/data/state_abbs.txt', 'ascii');
@@ -339,6 +375,7 @@ function load_abbs(cb) {
 
     cb();
 }
+*/
 
 function store_fips(cb) {
     const collection = db.collection('fips');
@@ -495,10 +532,10 @@ function store_county(cb) {
       let fips_rec = data.fips.find(rec=>(rec.statefips+"."+rec.countyfips == fips));
       if(!fips_rec) throw "no such fip:"+fips;
       recs.push(Object.assign(data.counties[fips], {
-      fips,
-      state: fips_rec.state,
-      stabb: fips_rec.stabb,
-      county: fips_rec.county,
+          fips,
+          state: fips_rec.state,
+          stabb: fips_rec.stabb,
+          county: fips_rec.county,
       }));
     }
 
@@ -584,11 +621,9 @@ function load_noaa(cb) {
 }
 */
 
-//const cutter_base = ++"INFODER Data Aquarium/Projects/Cutter Implementation";
-
 function load_cutter_sources(cb) {
     console.debug("loading cutter sources");
-    fs.createReadStream(__dirname+'/data/INFODER Data Aquarium/Projects/Cutter Implementation/Production Files/source_export.csv').pipe(csvParser({
+    fs.createReadStream('/mnt/scratch/hayashis/apred/INFODER Data Aquarium/Projects/Cutter Implementation/Production Files/source_export.csv').pipe(csvParser({
         mapHeaders({header, index}) {
             return header.toLowerCase();
         },
@@ -598,14 +633,24 @@ function load_cutter_sources(cb) {
         indicator.sources.push({id: rec.id, name: rec.name});
     }).on('end', ()=>{
         console.log(JSON.stringify(data.cutter.indicators, null, 4));
-        fs.writeFileSync("cutter_indicators.json", JSON.stringify(data.cutter.indicators, null, 4));
         cb();
     });
 }
 
 function load_cutter_combined(cb) {
+    //create dictionary of all sources 
+    let sources = {};
+    for(let indicator in data.cutter.indicators) {
+        data.cutter.indicators[indicator].sources.forEach(source=>{
+            sources[source.id] = source;
+            source.total = 0;
+            source.count = 0;
+            source.states = {};
+        });
+    }
+
     console.debug("loading cutter combined");
-    fs.createReadStream(__dirname+'/data/INFODER Data Aquarium/Projects/Cutter Implementation/Production Files/measure_export.csv').pipe(csvParser({
+    fs.createReadStream('/mnt/scratch/hayashis/apred/INFODER Data Aquarium/Projects/Cutter Implementation/Production Files/measure_export.csv').pipe(csvParser({
         mapHeaders({header, index}) {
             return header.toLowerCase();
         },
@@ -615,32 +660,42 @@ function load_cutter_combined(cb) {
         let state_fips = input_fip.substring(0,2);
         let county_fips = input_fip.substring(2,5);
         let fips = state_fips+'.'+county_fips;
-        //data.cutter.combined.push({fips, measure: rec.measure, source: rec.source});
-        
-        //if(!data.counties[fips]) data.counties[fips] = {};
-        //if(!data.counties[fips].cutter_measures) data.counties[fips].cutter_measures = [];
-
-        //find source to set the measure
-        /*
-        for(let indicator in data.counties[fips].cutter.indicators) {
-            data.counties[fips].cutter.indicators[indicator].sources.forEach(source=>{
-                if(source.id == rec.source) {
-                    source.value = parseFloat(rec.value);
-                }
-            });
-        }
-        */
         if(!data.counties[fips]) {
             console.log("failed to find:"+fips);
             console.dir(rec);
             return;
         }
         data.counties[fips].cutter_measures.push({source: rec.source, value: parseFloat(rec.value), date: rec.date});
+
+        //aggregate average 
+        let source = sources[rec.source];
+        source.total += parseFloat(rec.value);
+        source.count++;
+        if(!source.states[state_fips]) source.states[state_fips] = { total: 0, count: 0 };
+        source.states[state_fips].total += parseFloat(rec.value);
+        source.states[state_fips].count++;
+
     }).on('end', ()=>{
-        //console.log(JSON.stringify(data.counties["48.419"], null, 4));
+
+        //convert total/count to average
+        for(let indicator in data.cutter.indicators) {
+            data.cutter.indicators[indicator].sources.forEach(source=>{
+                source.average = +(source.total / source.count).toFixed(3);
+                delete source.total;
+                delete source.count;
+
+                for(let statefip in source.states) {
+                    let total = source.states[statefip].total;
+                    let count = source.states[statefip].count;
+                    source.states[statefip] = +(total / count).toFixed(3);
+                }
+            });
+        }
+
         cb();
     });
 }
+
 
 /*
 const insertDocuments = function(db, callback) {
