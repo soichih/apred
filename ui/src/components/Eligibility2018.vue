@@ -1,11 +1,16 @@
 <template>
 <div class="eligibility">
     <el-collapse>
-      <el-collapse-item title="Elibible for 2018 Disaster Supplemental Funding">
+      <el-collapse-item>
+        <template slot="title">
+            <div class="title">
+                <i class="el-icon-caret-right"/> Maybe eligible for 2018 disaster supplemental funding
+            </div>
+        </template>
         <p>
             Applicants who are affected by this disaster may be eligible for <a href="https://www.grants.gov/web/grants/view-opportunity.html?oppId=302953">2018 EDA Disaster Supplemental</a> funding ($587 million). This investment assistance will help communities and regions devise and implement long-term economic recovery strategies through a variety of non-construction and construction projects, as appropriate, to address economic challenges.
         </p>
-        <p>
+        <p style="background-color: #eee; padding: 10px;">
             <b>Eligible Applicants</b> 
             <ul>
                 <li>Nonprofits</li>
@@ -54,5 +59,11 @@ export default class Eligibility2018 extends Vue {
 <style scoped lang="scss">
 .eligibility {
 padding: 10px;
+}
+.title:hover {
+color: #409EFF;
+}
+.el-collapse {
+border: none;
 }
 </style>
