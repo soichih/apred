@@ -12,31 +12,48 @@
             <h3 style="font-size: 150%; padding: 30px 0; margin: 0px;">
                 Loading..
             </h3>
+            <div style="height: 900px"/><!--show something while waiting?-->
         </div>
     </div>
 
     <div v-else>
         <div v-if="countyDetail" style="background-color: #eee; position: sticky; top: 50px; z-index: 1; box-shadow: 0 2px 2px #0002;" ref="county-detail">
             <div class="page">
-                <h3 style="font-size: 150%; padding: 30px 0; margin: 0px;">
-                    <el-button type="info" circle icon="el-icon-back" style="float: left; position: relative; top: -8px; margin-right: 20px;" @click="goback()"/>
-                    {{countyDetail.county}} county, {{countyDetail.state}}
-                </h3>
-                <el-row v-if="selectedProperty">
-                    <el-col :span="8">
-                        <!--placeholder-->
+                <el-row style="clear: both; padding-top: 10px;">
+                    <el-col :span="11">
+                        <h3 style="font-size: 150%; font-weight: normal; padding-bottom: 10px; margin: 0; vertical-align: top;">
+                            <el-button type="info" circle icon="el-icon-back" style="float: left; position: relative; top: -8px; margin-right: 20px;" @click="goback()"/>
+                            <b>{{countyDetail.county}}</b> county, {{countyDetail.state}}
+                        </h3>
                     </el-col>
                     <el-col :span="8">
                         <span class="sub-heading">Population</span><br>
-                        <span class="primary"> {{selectedProperty['population'] | formatNumber}}</span>
+                        <span class="primary" v-if="countyDetail.demo"> {{totalPopulation(countyDetail.demo) | formatNumber}}</span>
+                        <div v-else style="padding: 10px 0; opacity: 0.5;">No information</div>
+                        <br>
+
+                        <!--TODO - replace it with plotly!!!!-->
+                        <vue-bar-graph v-if="countyDetail.demo"
+                            :points="populationPoints(countyDetail.demo)"
+                            :width="300"
+                            :height="100"
+                            :show-x-axis="true" 
+                            :show-values="true"
+                            bar-color="#999"
+                            text-color="#666"
+                            text-alt-color="white"
+                        />
                     </el-col>
-                    <el-col :span="8">
+                    <el-col :span="5">
+                        <span class="sub-heading">Disaster Resilience</span><br>
+                        <Plotly :data="[drSpyderData]" :layout="drSpyderLayout"/>
+
+                        <!--
                         <span class="sub-heading">Median Income</span><br>
                         <span class="primary">${{selectedProperty['median-income'] | formatNumber}}</span>
+                        -->
                     </el-col>
                 </el-row>
-                <br>
-                <br>
             </div>
         </div>
 
@@ -57,7 +74,7 @@
                 <el-collapse>
                     <el-collapse-item>
                         <template slot="title">
-                            <h3><i class="el-icon-caret-right"/> Past Disasters</h3>
+                            <h3><i class="el-icon-caret-right"/> Past Disasters ({{pastHistory.length}})</h3>
                         </template>
                         <div v-for="event in pastHistory" :key="event._id" class="history">
                             <Event :event="event" :colors="layers"/>
@@ -180,13 +197,18 @@
         <div class="page" v-if="cutterMeasures && countyDetail">
            
             <h3>Disaster Resilience</h3>
-            <p style="margin: 20px;">TODO Describe what resilience means, and how it's computed.
+            <p style="margin: 20px;">
+                TODO Describe what resilience means, and how it's computed.
+
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
                 Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. 
                 Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
-                Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+                The score you see is the average of all sub-indecies for this indicators.
+            </p>
         
-            <p style="font-size: 85%; opacity: 0.8; margin-left: 300px; margin-right: 50px; padding: 0 10px;">
+            <p style="font-size: 85%; opacity: 0.8; margin-left: 325px; margin-right: 50px; padding: 0 10px;">
                 <span>Low Resilience</span>
                 <span style="float: right">High Resilience</span>
             </p>
@@ -194,22 +216,38 @@
             <el-collapse>
                 <el-collapse-item v-for="incode in Object.keys(indicators)" :key="incode" :title="indicators[incode].name" style="padding: 10px;">
                     <template slot="title">
-                        <span style="float: left; min-width: 300px; position: relative; top: -5px; font-size: 125%;">{{indicators[incode].name}}</span>
-                        <BarGraph style="margin-right: 30px;" :value="computeIndicator(incode)" :min="0" :max="1" :height="20"/>
+                        <span style="float: left; min-width: 325px; position: relative; top: -5px; font-size: 125%;">
+                            <i class="el-icon-caret-right"/>
+                            {{indicators[incode].name}} <el-tag type="info" size="small">{{incode}}</el-tag>
+                        </span>
+                        <BarGraph style="margin-right: 30px; width: 100%;" :value="indicatorScores[incode]" :us_avg="computeAverage(indicators[incode])" :min="0" :max="1" :height="20"/>
                     </template>
                     <p class="help">TODO Describe what {{indicators[incode].name}} means and purpose of this indicator. 
                         Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
                     Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. 
                     </p>
 
-                    <el-collapse accordion>
+                    <el-collapse>
                         <el-collapse-item v-for="source in indicators[incode].sources" :key="source.id">
                             <template slot="title">
+                                <i class="el-icon-caret-right" style="opacity: 0.5;"/>
                                 <span style="float: left; min-width: 325px">{{source.name}}</span>
-                                <BarGraph style="margin-right: 30px;" :value="cutterMeasures[source.id]" :min="0" :max="1" />
+                                <BarGraph style="margin-right: 30px; width: 100%;" :value="cutterMeasures[source.id]" :min="0" :max="1" />
                             </template>
-                            <p>TODO - Describe what this measure means. What it means to be 0, what it means to be 1, and how it's computed, 
-                                the impact of this value, and what investiment would improve it?</p>
+
+                            <p>
+                                TODO - Describe what this measure means. What it means to be 0, what it means to be 1, and how it's computed, 
+                                the impact of this value, and what investiment would improve it?
+                            </p>
+
+                            <div style="padding: 10px; padding-right: 40px; background-color: #eee;">
+                                <span style="float: left; width: 275px; text-align: right; padding-right: 30px;">State Average</span>
+                                <BarGraph style="margin-left: 315px;" :value="source.states[statefips]" :min="0" :max="1" color="#8e8e8e"/>
+                                <br>
+                                <span style="float: left; width: 275px; text-align: right; padding-right: 30px;">US Average</span>
+                                <BarGraph style="margin-left: 315px;" :value="source.average" :min="0" :max="1" color="#8e8e8e"/>
+                            </div>
+
                         </el-collapse-item>
                     </el-collapse>
                    
@@ -246,12 +284,22 @@ import Event from '@/components/Event.vue'
 import Eligibility2018 from '@/components/Eligibility2018.vue'
 import Eligibility2019 from '@/components/Eligibility2019.vue'
 
-import { Plotly } from 'vue-plotly';
+import { Plotly } from 'vue-plotly'
+import VueBarGraph from 'vue-bar-graph'
 
 import cutterIndicators from '@/assets/cutter_indicators.json'
 
 @Component({
-    components: { CountySelecter, BarGraph, Histogram, Plotly, Event, Eligibility2018, Eligibility2019 },
+    components: { 
+        CountySelecter, 
+        BarGraph, 
+        Histogram, 
+        Plotly, 
+        Event, 
+        Eligibility2018, 
+        Eligibility2019,
+        VueBarGraph,
+    },
 })
 export default class County extends Vue {
 
@@ -259,7 +307,7 @@ export default class County extends Vue {
     popup = null;
 
     //overlay;
-    selectedProperty = null;
+    //selectedProperty = null;
 
     //county data
     countyDetail = null; 
@@ -291,10 +339,44 @@ export default class County extends Vue {
         "other": "#f0f", //volcano, mud/landslide, snow, "coastal storm", typhoon, earthquake, snow
     };
 
+    statefips = null;
+
+    drSpyderData = {
+      type: 'scatterpolar',
+      r: [],
+      theta: [],
+      fill: 'toself'
+    }
+
+    drSpyderLayout = {
+      polar: {
+        radialaxis: {
+          visible: false,
+          range: [0, 1]
+        },
+        bgcolor: '#fff9'
+      },
+        //showlegend: false,
+        'paper_bgcolor': '#0000',
+        //'plot_bgcolor': '#ffffff99',
+        width: 160,
+        height: 125,
+        margin: {
+            l: 10,
+            r: 10,
+            b: 20,
+            t: 20,
+        },
+    }
+
+    indicatorScores = {};
+
     mounted() {
         const fips = this.$route.params.fips.toString();
         const statefips = fips.substring(0,2);
         const countyfips = fips.substring(2);
+
+        this.statefips = statefips;
 
         const pStormHistogram = this.axios.get("https://dev1.soichi.us/api/apred/storm/histogram").then(res=>{
             res.data.forEach(rec =>{
@@ -313,10 +395,32 @@ export default class County extends Vue {
                 this.cutterMeasures[m.source] = m.value;
             });
 
+            this.drSpyderData.r = [];
+            this.drSpyderData.theta = [];
+            Object.keys(this.indicators).forEach(incode=>{
+                let deno = 0;
+                const sum = this.indicators[incode].sources.reduce((sum,source)=>{
+                    if(!this.cutterMeasures[source.id]) return sum;
+                    deno++;
+                    return sum+this.cutterMeasures[source.id];
+                }, 0);
+                const value = sum / deno;
+                this.indicatorScores[incode] = value;
+                this.drSpyderData.r.push(value);
+                this.drSpyderData.theta.push(incode);
+            });
+
+            //I need to add the first incode to *close* the loop
+            this.drSpyderData.r.push(this.drSpyderData.r[0]);
+            this.drSpyderData.theta.push(this.drSpyderData.theta[0]);
+
+
+            /*
             this.$nextTick(()=>{
                 const top = this.$refs['county-detail'].offsetTop-50;
                 window.scrollTo(0, top);
             });
+            */
         });
 
         const pStatestorm = this.axios.get("https://dev1.soichi.us/api/apred/storm/query/"+statefips+"."+countyfips).then(res=>{
@@ -360,17 +464,8 @@ export default class County extends Vue {
             });
         });
         
-        //this.currentDDs = [];
         const pDD = this.axios.get("https://dev1.soichi.us/api/apred/dd/"+statefips+"/"+countyfips).then(res=>{
             res.data.forEach(rec=>{
-                /*
-                if(rec.incidentEndDate == "") this.currentDDs.push(rec);
-                else {
-                    rec.type = "dr";
-                    rec.date = new Date(rec.declarationDate);
-                    this.history.push(rec);
-                }
-                */
                 rec.type = "dr";
                 rec.date = new Date(rec.declarationDate);
                 this.history.push(rec);
@@ -508,14 +603,24 @@ export default class County extends Vue {
         })
     }
 
-    computeIndicator(incode) {
-        let deno = 0;
-        const sum = this.indicators[incode].sources.reduce((sum,source)=>{
-            if(!this.cutterMeasures[source.id]) return sum;
-            deno++;
-            return sum+this.cutterMeasures[source.id];
-        }, 0);
-        return sum / deno;
+    computeAverage(source) {
+        //if(!source.sources) return 0;
+        const total = source.sources.reduce((a,v)=>a+v.average, 0);
+        return total / source.sources.length;
+    }
+    totalPopulation(demo) { 
+        return demo.reduce((a,v)=>v.value+a, 0);
+    }
+
+    populationPoints(demo) { 
+        return [
+            {label: '0-4', value: demo[0].value},
+            {label: '5-17', value: demo[1].value},
+            {label: '18-24', value: demo[2].value},
+            {label: '25-44', value: demo[3].value},
+            {label: '45-64', value: demo[4].value},
+            {label: '>65', value: demo[5].value},
+        ];
     }
 
     get recentHistory() {
@@ -552,7 +657,6 @@ export default class County extends Vue {
     is2019Eligible(event) {
         const begin = new Date(event.incidentBeginDate);
         if( begin > new Date("2017-12-31") && begin < new Date("2019-01-01") ) {
-    
             // ignore some incidentType 
             switch(event.incidentType) {
             case "Chemical":
@@ -564,6 +668,7 @@ export default class County extends Vue {
                 //all other are eligible
                 return true;
             }
+
         }
 
         if( begin > new Date("2018-12-31") && begin < new Date("2020-01-01") ) {
@@ -574,6 +679,11 @@ export default class County extends Vue {
             case "Flood":
                 return true;
             }
+
+            // it also qualifies if incidentTitle includes those names
+            if( event.title.toLowerCase().includes("tornado") ||
+                event.title.toLowerCase().includes("flood") ||
+                event.title.toLowerCase().includes("severe storms")) return true;
         }
 
         return false;
@@ -595,7 +705,7 @@ h2 {
 }
 
 h3 {
-    padding: 20px 0 0px 0;
+    padding: 20px 0 0 0;
     color: #0006;
     text-transform: uppercase;
 }
@@ -668,5 +778,11 @@ h4 {
         display: inline-block; 
         margin-right: 10px;
     }
+}
+</style>
+
+<style lang="scss"> 
+.el-collapse-item__header {
+border: none;
 }
 </style>

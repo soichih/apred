@@ -495,10 +495,10 @@ h4 {
 
     .legend-eda {
         display: inline-block;
-        width: 10px;
-        height: 10px;   
+        width: 8px;
+        height: 8px;   
         border-radius: 50%;
-        background-color: #67c23a;
+        border: 2px solid #67c23a;
     }
 
     .legend-item {
