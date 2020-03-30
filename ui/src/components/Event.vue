@@ -1,6 +1,6 @@
 <template>
 <div class="eventdetail">
-    <span class="event-date">{{event.date.toLocaleDateString()}}</span>
+    <div class="event-date">{{event.date.toLocaleDateString()}}</div>
     <div v-if="event.type == 'dr'" class="dd" :class="eventClass" :style="eventStyle">
         <div style="float: left; width: 40px; font-size: 200%; position: relative; top: 0px; padding-left: 3px;">
             <i class="el-icon-warning"/>
@@ -16,10 +16,10 @@
             <el-tag size="small" effect="dark" type="" v-if="event.paProgramDeclared" title="paProgramDeclared">pa</el-tag>&nbsp;
         </span>
         <div style="margin-left: 50px; margin-right: 200px;">
-            <!--<el-tag v-if="!event.countyfips" size="small" type="info">Statewide</el-tag>-->
-            <b v-if="!event.countyfips">Statewide</b>
-            {{event.title}}&nbsp;
+            <b v-if="!event.countyfips">STATEWIDE <i class="el-icon-arrow-right"/> </b> &nbsp;
+            <b>{{event.incidentType}}</b> &nbsp;
             <br>
+            <span style="font-size: 85%;">{{event.title}}</span> &nbsp;
             <span style="opacity: 0.6; font-size: 85%;">
                 <!--Declared: <time>{{new Date(event.declarationDate).toLocaleDateString()}}</time>&nbsp; &bull;-->
                 Incident <time>{{new Date(event.incidentBeginDate).toLocaleDateString()}}</time>
@@ -154,5 +154,10 @@ export default class BarGraph extends Vue {
     font-weight: bold;
     font-size: 175%;
     color: #409EFF;
+}
+.event-date {
+padding: 5px 0;
+opacity: 0.8;
+font-size: 85%;
 }
 </style>
