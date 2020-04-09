@@ -1,5 +1,6 @@
 <template>
 <div>
+    <TopMenu/>
     <!--
     <div class="page" style="position: relative;">
         <p style="opacity: 0.4; float: right; margin-top: 25px;">FEMA delared disasters since 2017</p>
@@ -22,11 +23,14 @@
                 <el-row style="clear: both; padding-top: 10px;">
                     <el-col :span="11">
                         <h3 style="font-size: 150%; font-weight: normal; padding-bottom: 10px; margin: 0; vertical-align: top;">
-                            <el-button type="info" circle icon="el-icon-back" style="float: left; position: relative; top: -8px; margin-right: 20px;" @click="goback()"/>
-                            <b>{{countyDetail.county}}</b> county, {{countyDetail.state}}
+                            <el-button type="info" circle icon="el-icon-back" style="float: left; position: relative; top: -4px; margin-right: 20px;" @click="goback()"/>
+                            <div style="margin-left: 60px; padding-bottom: 20px;">
+                                <div class="important"><b>{{countyDetail.county}}</b> county,</div>
+                                {{countyDetail.state}}
+                            </div>
                         </h3>
                     </el-col>
-                    <el-col :span="8">
+                    <el-col :span="8" class="border-left">
                         <span class="sub-heading">Population</span><br>
                         <span class="primary" v-if="countyDetail.demo"> {{totalPopulation(countyDetail.demo) | formatNumber}}</span>
                         <div v-else style="padding: 10px 0; opacity: 0.5;">No information</div>
@@ -35,7 +39,7 @@
                         <!--TODO - replace it with plotly!!!!-->
                         <vue-bar-graph v-if="countyDetail.demo"
                             :points="populationPoints(countyDetail.demo)"
-                            :width="300"
+                            :width="200"
                             :height="100"
                             :show-x-axis="true" 
                             :show-values="true"
@@ -44,7 +48,7 @@
                             text-alt-color="white"
                         />
                     </el-col>
-                    <el-col :span="5">
+                    <el-col :span="5" class="border-left">
                         <span class="sub-heading">Disaster Resilience</span><br>
                         <Plotly :data="[drSpyderData]" :layout="drSpyderLayout"/>
 
@@ -60,31 +64,27 @@
         <div v-if="edaEvents && edaEvents.state && edaEvents.county">
             <div class="page">
                 <h3>Recent Disaster Declarations / EDA Awards</h3>
-                <!--<p>This county has had the following disasters declared and EDA grants awarded in the past</p>-->
+                <p>EDIT ME. The following disasters has been declared and EDA grants awarded in the past.</p>
 
                 <p v-if="recentHistory.length == 0" style="opacity: 0.8;">No disaster declared since 2017</p>
                 <div v-for="(event, idx) in recentHistory" :key="event._id" class="history">
-                    <Event :event="event" :colors="layers"/>
-                    <div class="connecter" v-if="idx < recentHistory.length">
-                        <Eligibility2018 v-if="is2018Eligible(event)"/>
-                        <Eligibility2019 v-if="is2019Eligible(event)"/>
-                    </div>
-                </div>
-                <br>
-                <el-collapse>
-                    <el-collapse-item>
-                        <template slot="title">
-                            <h3><i class="el-icon-caret-right"/> Past Disasters ({{pastHistory.length}})</h3>
-                        </template>
-                        <div v-for="event in pastHistory" :key="event._id" class="history">
-                            <Event :event="event" :colors="layers"/>
-                            <div class="connecter">
-                                <!--<i class="el-icon-caret-top"/>-->
-                            </div>
+                    <Event :event="event" :colors="layers">
+                        <div class="connecter" v-if="idx < recentHistory.length">
+                            <Eligibility2018 v-if="is2018Eligible(event)"/>
+                            <Eligibility2019 v-if="is2019Eligible(event)"/>
                         </div>
-                    </el-collapse-item>
-                </el-collapse>
+                    </Event>
+                </div>
 
+                <div v-if="!showPastHistory" style="border-top: 2px solid #f3f3f3;">
+                    <br>
+                    <el-button round @click="showPastHistory = !showPastHistory">
+                        <i class="el-icon-caret-right"/> Show Past Disasters ({{pastHistory.length}})
+                    </el-button>
+                </div>
+                <div v-if="showPastHistory">
+                    <Event :event="event" :colors="layers" v-for="event in pastHistory" :key="event._id" class="history"/>
+                </div>
                 <br>
                 <br>
             </div>
@@ -99,19 +99,93 @@
                     that are believed to be <i>vulnerable</i> to various natural disasters.
                 </p>
                 <p>
-                    To calculate the BVI, we isolated businesses by NAICS[1] code from the U.S. Census’ most recent County Business Patterns based on their vulnerability to a disaster.
+                    To calculate the BVI, we isolated businesses by NAICS[1] code from the U.S. Census’ most recent County Business Patterns (part of Census: https://www.census.gov/econ/overview/mu0800.html)
+                    based on their vulnerability to natural disaster (farmers, transportation companies, etc..)
                     Businesses that were identified to be especially vulnerable to a disaster are those which are dependent on supply chains,
                     have a high reliance on public utilities like water and electricity, or have a large infrastructure footprint and low infrastructure mobility.
                 </p>
 
-                <Plotly :data="bviEstData" :layout="bviEstLayout" :display-mode-bar="false"></Plotly>
-                <br>
-                <Plotly :data="bviEmpData" :layout="bviEmpLayout" :display-mode-bar="false"></Plotly>
-                <br>
+                <el-row>
+                    <el-col :span="12">
+                        <Plotly :data="bviEstData" :layout="bviEstLayout" :display-mode-bar="false"></Plotly>
+                    </el-col>
+                    <el-col :span="12">
+                        <Plotly :data="bviEmpData" :layout="bviEmpLayout" :display-mode-bar="false"></Plotly>
+                    </el-col>
+                </el-row>
             </div>
         </div>
 
-        <div v-if="stormEvents && countyDetail">
+        <div class="page" v-if="cutterMeasures && countyDetail">
+           
+            <h3>Disaster Resilience</h3>
+            <p style="margin: 20px;">
+                TODO Describe what resilience means, and how it's computed.
+
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
+                Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. 
+                Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
+                Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+                The score you see is the average of all sub-indecies for this indicators.
+            </p>
+        
+            <p style="font-size: 85%; opacity: 0.8; margin-left: 350px; padding: 0 10px;">
+                <span>Low Resilience</span>
+                <span style="float: right">High Resilience</span>
+            </p>
+
+            <div v-for="incode in Object.keys(indicators)" :key="incode" :title="indicators[incode].name" style="padding: 10px;">
+                <div class="indicator-head">
+                    <span style="float: left; width: 325px; font-size: 110%; color: black;">
+                        <!--<i class="el-icon-caret-right"/>-->
+                        {{indicators[incode].name}} <el-tag type="info" size="small">{{incode}}</el-tag>
+                    </span>
+                    <div style="position: relative; margin-left: 350px;">
+                        <span style="position: absolute; left: -80px; font-size: 85%;">This County</span>
+                        <BarGraph :value="indicatorScores[incode]" :min="0" :max="1" :height="15"/>
+                        <span style="position: absolute; left: -80px; font-size: 85%;">US Average</span>
+                        <BarGraph style="opacity: 0.5;" :value="computeAverage(indicators[incode])" :min="0" :max="1" :height="15"/>
+                    </div>
+                    <br> 
+                    <p v-if="incode == 'SOC'">Social resilience deals with attributes of the individual members of communities.</p>
+                    <p v-if="incode == 'ECON'">Economic resilience deals with the financial and economic factors that contribute to the resilience of 
+communities. </p>
+                    <p v-if="incode == 'INST'">TODO - describe this index</p>
+                    <p v-if="incode == 'IHFR'">Infrastructure resilience deals with physical structures (housing, shelter, medical capacity, etc.) that exist
+within communities.</p>
+                    <p v-if="incode == 'COMM'">Community Capital deals with the relationships between the individual and the community as a whole. </p>
+                    <p v-if="incode == 'FLOR'">TODO - describe this index</p>
+
+                    <el-button @click="shownIndicators.push(incode)" v-if="!shownIndicators.includes(incode)" plain type="info" size="small" style="width: 100%"><i class="el-icon-caret-right"/> Show Sub-Categories</el-button>
+                </div>
+                <div class="indicator-detail" v-if="shownIndicators.includes(incode)">
+                    <el-collapse>
+                        <el-collapse-item v-for="source in indicators[incode].sources" :key="source.id">
+                            <template slot="title">
+                                <i class="el-icon-caret-right" style="opacity: 0.5;"/>
+                                <span style="float: left; min-width: 340px">{{source.name}}</span>
+                                <BarGraph style="margin-right: 30px; width: 100%;" :value="cutterMeasures[source.id]" :min="0" :max="1" />
+                            </template>
+
+                            <p>
+                                TODO - Describe what this measure means. What it means to be 0, what it means to be 1, and how it's computed, 
+                                the impact of this value, and what investiment would improve it?
+                            </p>
+
+                            <div style="padding: 10px; padding-right: 40px; background-color: #eee;">
+                                <span style="float: left; width: 275px; text-align: right; padding-right: 30px;">State Average</span>
+                                <BarGraph style="margin-left: 315px;" :value="source.states[statefips]" :min="0" :max="1" color="#8e8e8e"/>
+                                <br>
+                                <span style="float: left; width: 275px; text-align: right; padding-right: 30px;">US Average</span>
+                                <BarGraph style="margin-left: 315px;" :value="source.average" :min="0" :max="1" color="#8e8e8e"/>
+                            </div>
+                        </el-collapse-item>
+                    </el-collapse>
+                </div>
+            </div><!--indicator-->
+
+            <div v-if="stormEvents && countyDetail">
             <div class="page">
                 <br>
                 <h3>Natural Events Frequencies</h3>
@@ -193,68 +267,7 @@
             <br>
             <br>
         </div>
-
-        <div class="page" v-if="cutterMeasures && countyDetail">
-           
-            <h3>Disaster Resilience</h3>
-            <p style="margin: 20px;">
-                TODO Describe what resilience means, and how it's computed.
-
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
-                Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. 
-                Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
-                Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-                The score you see is the average of all sub-indecies for this indicators.
-            </p>
-        
-            <p style="font-size: 85%; opacity: 0.8; margin-left: 325px; margin-right: 50px; padding: 0 10px;">
-                <span>Low Resilience</span>
-                <span style="float: right">High Resilience</span>
-            </p>
-
-            <el-collapse>
-                <el-collapse-item v-for="incode in Object.keys(indicators)" :key="incode" :title="indicators[incode].name" style="padding: 10px;">
-                    <template slot="title">
-                        <span style="float: left; min-width: 325px; position: relative; top: -5px; font-size: 125%;">
-                            <i class="el-icon-caret-right"/>
-                            {{indicators[incode].name}} <el-tag type="info" size="small">{{incode}}</el-tag>
-                        </span>
-                        <BarGraph style="margin-right: 30px; width: 100%;" :value="indicatorScores[incode]" :us_avg="computeAverage(indicators[incode])" :min="0" :max="1" :height="20"/>
-                    </template>
-                    <p class="help">TODO Describe what {{indicators[incode].name}} means and purpose of this indicator. 
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
-                    Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. 
-                    </p>
-
-                    <el-collapse>
-                        <el-collapse-item v-for="source in indicators[incode].sources" :key="source.id">
-                            <template slot="title">
-                                <i class="el-icon-caret-right" style="opacity: 0.5;"/>
-                                <span style="float: left; min-width: 325px">{{source.name}}</span>
-                                <BarGraph style="margin-right: 30px; width: 100%;" :value="cutterMeasures[source.id]" :min="0" :max="1" />
-                            </template>
-
-                            <p>
-                                TODO - Describe what this measure means. What it means to be 0, what it means to be 1, and how it's computed, 
-                                the impact of this value, and what investiment would improve it?
-                            </p>
-
-                            <div style="padding: 10px; padding-right: 40px; background-color: #eee;">
-                                <span style="float: left; width: 275px; text-align: right; padding-right: 30px;">State Average</span>
-                                <BarGraph style="margin-left: 315px;" :value="source.states[statefips]" :min="0" :max="1" color="#8e8e8e"/>
-                                <br>
-                                <span style="float: left; width: 275px; text-align: right; padding-right: 30px;">US Average</span>
-                                <BarGraph style="margin-left: 315px;" :value="source.average" :min="0" :max="1" color="#8e8e8e"/>
-                            </div>
-
-                        </el-collapse-item>
-                    </el-collapse>
-                   
-                </el-collapse-item>
-
-            </el-collapse>
-            <br>
+        <br>
             <br>
             <br>
         </div>
@@ -276,6 +289,8 @@
 <script>
 
 import { Component, Vue } from 'vue-property-decorator'
+
+import TopMenu from '@/components/TopMenu.vue'
 import CountySelecter from '@/components/CountySelecter.vue'
 import Histogram from '@/components/Histogram.vue'
 import BarGraph from '@/components/BarGraph.vue'
@@ -291,6 +306,7 @@ import cutterIndicators from '@/assets/cutter_indicators.json'
 
 @Component({
     components: { 
+        TopMenu,
         CountySelecter, 
         BarGraph, 
         Histogram, 
@@ -325,6 +341,9 @@ export default class County extends Vue {
     bviEmpData = null;
     bviEstLayout = null;
     bviEmpLayout = null;
+
+    showPastHistory = false;
+    shownIndicators = [];
 
     layers = {
         "fire": "#f00",
@@ -477,10 +496,10 @@ export default class County extends Vue {
             this.bvi = res.data;
             this.bviEstLayout = {
                 margin: {
-                    l: 80,
-                    //r: 20,
+                    l: 30,
+                    r: 30,
+                    t: 30,
                     //b: 30,
-                    //t: 20,
                     //pad: 10,
                 },
                 'paper_bgcolor': '#0000',
@@ -506,19 +525,19 @@ export default class County extends Vue {
                     //x: 0,
                     //y: 1.0,
                     bgcolor: 'rgba(255, 255, 255, 0)',
-                    bordercolor: 'rgba(255, 255, 255, 0)'
+                    bordercolor: 'rgba(255, 255, 255, 0)',
+                    orientation: 'h',
                 },
-                barmode: 'group',
-                //bargap: 0.15,
-                bargroupgap: 0.1
+                //barmode: 'group',
+                //bargroupgap: 0.1
             }
 
             this.bviEmpLayout = {
                 margin: {
-                    l: 80,
-                    //r: 20,
+                    l: 30,
+                    r: 30,
+                    t: 30,
                     //b: 30,
-                    //t: 20,
                     //pad: 10,
                 },
                 'paper_bgcolor': '#0000',
@@ -544,11 +563,13 @@ export default class County extends Vue {
                     //x: 0,
                     //y: 1.0,
                     bgcolor: 'rgba(255, 255, 255, 0)',
-                    bordercolor: 'rgba(255, 255, 255, 0)'
+                    bordercolor: 'rgba(255, 255, 255, 0)',
+                    orientation: 'h',
                 },
-                barmode: 'group',
-                //bargap: 0.15,
-                bargroupgap: 0.1
+                //type: 'scatter',
+                //mode: 'lines+markers',
+                //barmode: 'group',
+                //bargroupgap: 0.1
             }
 
             const x = [];
@@ -569,13 +590,29 @@ export default class County extends Vue {
                 marker: {color: 'rgb(100, 100, 100)'},
                 type: 'bar'
             }
+            /*
+            const traceBtLine = {
+                x,y: bviBt,
+                name: 'Total',
+                marker: {color: 'rgb(200, 200, 200)'},
+                type: 'line'
+            }
+            */
             const traceBtV = {
                 x, y: bviBtV,
                 name: 'Vulnerable',
                 marker: {color: '#f56c6c'},
                 type: 'bar'
             }
-            this.bviEstData = [traceBt, traceBtV];
+            /*
+            const traceBtVLine = {
+                x, y: bviBtV,
+                name: 'Vulnerable',
+                marker: {color: '#f56c6c90'},
+                type: 'line'
+            }
+            */
+            this.bviEstData = [traceBt, traceBtV ];
 
             const traceEt = {
                 x,y: bviEt,
@@ -593,13 +630,18 @@ export default class County extends Vue {
         });        
 
         this.loading = true;
-        Promise.all([pStormHistogram, pCountydata, pStatestorm, pStateEda, pCountyEda, pDD]).then(()=>{
-            //process data.
-            //sort history by date.
+
+        Promise.all([pDD, pCountydata, pStateEda, pCountyEda]).then(()=>{
             this.loading = false;
+            //sort history by date.
             this.history.sort((a,b)=>{
                 return (b.date - a.date);
             });
+        });
+
+        //secondary stuff..
+        Promise.all([pStormHistogram, pStatestorm]).then(()=>{
+            //process data.
         })
     }
 
@@ -723,31 +765,15 @@ h4 {
 .primary {
     font-weight: bold;
     font-size: 175%;
+}
+
+.indicator-detail {
+}
+
+.important, 
+.primary {
     color: #409EFF;
 }
-
-.history {
-    .event-date {
-        //color: black;
-        font-size: 95%;
-        padding: 5px 0;
-        display: inline-block;
-    }
-    .connecter {
-        border-left: 4px solid #d9d9d9;
-        min-height: 20px;
-        margin-left: 30px;
-
-        i {
-            color: #d9d9d9;
-            font-size: 175%;
-            position: relative;
-            left: -11.5px;
-            top: -12px;
-        }
-    }
-}
-
 .legend {
     position: absolute;
     display: block;
@@ -777,6 +803,17 @@ h4 {
     .legend-item {
         display: inline-block; 
         margin-right: 10px;
+    }
+}
+.border-left {
+    border-left: 1px solid #ccc;
+    height: 150px;
+    padding-left: 20px;
+    margin-bottom: 8px;
+}
+@media only screen and (max-width: 700px) {
+    .border-left {
+        display: none;
     }
 }
 </style>

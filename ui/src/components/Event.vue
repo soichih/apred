@@ -1,74 +1,85 @@
 <template>
-<div class="eventdetail">
-    <div class="event-date">{{event.date.toLocaleDateString()}}</div>
-    <div v-if="event.type == 'dr'" class="dd" :class="eventClass" :style="eventStyle">
-        <div style="float: left; width: 40px; font-size: 200%; position: relative; top: 0px; padding-left: 3px;">
-            <i class="el-icon-warning"/>
+<div>
+    <div class="event-header">
+        <div class="event-icon">
+            <div v-if="event.type == 'dr'" class="dd" :class="eventClass" :style="eventStyle">
+                <i class="el-icon-warning"/>
+            </div>
+            <div v-else-if="event.type == 'eda2018'" class="eda2018" :class="{'eda2018-state': event.subtype == 'state', 'eda2018-county': event.subtype == 'county'}">
+                <i class="el-icon-money" style="background-color: green; border-radius: 50%; color: white;"/>
+            </div>
         </div>
-        <span style="float: right;">
-            <!--
-            <el-tag size="small" type="danger">{{event.incidentType}}</el-tag>&nbsp;
-            -->
-            <el-tag size="small" effect="light" type="info">Disaster # {{event.disasterNumber}}</el-tag>&nbsp;
-            <el-tag size="small" effect="dark" type="warning" v-if="event.hmProgramDeclared" title="hmProgramDeclared">hm</el-tag>&nbsp;
-            <el-tag size="small" effect="dark" type="danger" v-if="event.ihProgramDeclared" title="ihProgramDeclared">ih</el-tag>&nbsp;
-            <el-tag size="small" effect="dark" type="success" v-if="event.iaProgramDeclared" title="iaProgramDeclared">ia</el-tag>&nbsp;
-            <el-tag size="small" effect="dark" type="" v-if="event.paProgramDeclared" title="paProgramDeclared">pa</el-tag>&nbsp;
-        </span>
-        <div style="margin-left: 50px; margin-right: 200px;">
+
+        <h3 v-if="event.type == 'dr'" class="dd" :class="eventClass" :style="eventStyle">
+            <span style="float: right;">
+                <el-tag size="small" effect="light" type="info">Disaster # {{event.disasterNumber}}</el-tag>&nbsp;
+
+            </span>
             <b v-if="!event.countyfips">STATEWIDE <i class="el-icon-arrow-right"/> </b> &nbsp;
             <b>{{event.incidentType}}</b> &nbsp;
             <br>
-            <span style="font-size: 85%;">{{event.title}}</span> &nbsp;
-            <span style="opacity: 0.6; font-size: 85%;">
-                <!--Declared: <time>{{new Date(event.declarationDate).toLocaleDateString()}}</time>&nbsp; &bull;-->
-                Incident <time>{{new Date(event.incidentBeginDate).toLocaleDateString()}}</time>
-                - <time>{{new Date(event.incidentEndDate).toLocaleDateString()}}</time>
-            </span>
-        </div>
+        </h3>
+
+        <h3 v-else-if="event.type == 'eda2018'" class="eda2018" :class="{'eda2018-state': event.subtype == 'state', 'eda2018-county': event.subtype == 'county'}">
+            <el-tag size="small" effect="dark" type="success" style="float: right;">fain: {{event.fain}}</el-tag>
+            <b v-if="event.subtype == 'state'">Statewide</b>
+            EDA 2018 Award
+            <span style="opacity: 0.5;"> | </span>
+            ${{event.award | formatNumber}}
+        </h3>
     </div>
-    <div v-else-if="event.type == 'eda2018'" class="eda2018" :class="{'eda2018-state': event.subtype == 'state', 'eda2018-county': event.subtype == 'county'}">
 
-        <div style="float: left; width: 40px; font-size: 200%; position: relative; top: 0px; padding-left: 3px;">
-            <i class="el-icon-money"/>
-        </div>
-        <div style="margin-left: 50px">
-            <div style="float: right; text-align: right;">
-                <p>
-                    <el-tag size="small" effect="dark" type="success">fain: {{event.fain}}</el-tag>
-                </p>
-                <!--
-                <div style="width: 150px; float: right;">
-                    <b>Awared Date:</b><br>
-                    <time>{{new Date(event.grant_award_date).toLocaleDateString()}}</time>&nbsp;
-                </div>
-                -->
-                <div>
-                    Award:<br>
-                    <span class="primary" style="color: #67c23a">${{event.award | formatNumber}}</span>
-                </div>
-            </div>
+    <div class="event-body">
+        <div class="event-date" :title="eventDateTitle">{{event.date.toLocaleDateString()}}</div>
+        <div v-if="event.type == 'dr'">
             <div>
-                <b v-if="event.subtype == 'state'">Statewide</b>
-                EDA 2018 Award
+                <span style="font-size: 85%;">{{event.title}}</span> &nbsp;
+                <span style="opacity: 0.6; font-size: 85%;">
+                    <!--Declared: <time>{{new Date(event.declarationDate).toLocaleDateString()}}</time>&nbsp; &bull;-->
+                    Incident <time>{{new Date(event.incidentBeginDate).toLocaleDateString()}}</time>
+                    - <time>{{new Date(event.incidentEndDate).toLocaleDateString()}}</time>
+                </span>
+            
+                <p style="line-height: 200%;">
+                    <!-- https://www.fema.gov/openfema-dataset-disaster-declarations-summaries-v1 -->
+                    <el-tag size="small" effect="plain" type="info" v-if="event.hmProgramDeclared" title="hmProgramDeclared">
+                        <a href="https://www.fema.gov/media-library/assets/documents/107704">Hazard Mitigation Program</a>
+                    </el-tag>&nbsp;
+                    <el-tag size="small" effect="plain" type="info" v-if="event.ihProgramDeclared" title="ihProgramDeclared">
+                        <a href="https://www.fema.gov/media-library/assets/documents/24945">Individuals and Households Program</a>
+                    </el-tag>&nbsp;
+                    <el-tag size="small" effect="plain" type="info" v-if="event.iaProgramDeclared" title="iaProgramDeclared">
+                        <a href="https://www.fema.gov/media-library/assets/documents/133744">Individual Assistance Program</a>
+                    </el-tag>&nbsp;
+                    <el-tag size="small" effect="plain" type="info" v-if="event.paProgramDeclared" title="paProgramDeclared">
+                        <a href="https://www.fema.gov/media-library/assets/documents/90743">Public Assistance Program</a>
+                    </el-tag>&nbsp;
+                </p>
             </div>
-            <br>
-            <span style="font-size: 90%">Regional Office: {{event.eda_regional_office}}</span>
-            <br>
+        </div>
 
-            <br>
+        <div v-else-if="event.type == 'eda2018'">
+
             <b>To:</b> <!--{{event.grantee}},-->{{event.grantee_name}},
             {{event.grantee_city}}, {{event.grantee_state}}<br>
         
             <br>
 
             <b>For:</b> {{event.grant_purpose}} 
-            <span style="font-size: 85%">(Project Funding: ${{event.total_project_funding | formatNumber}})</span>
+            <span>&gt; Project Funding: ${{event.total_project_funding | formatNumber}}</span>
+
+            <br>
+            <br>
+            <b>Regional Office:</b> {{event.eda_regional_office}}
         </div>
+        <div v-else>
+            {{event}}
+        </div>
+
+        <slot/>
+        <br>
     </div>
-    <div v-else>
-        {{event}}
-    </div>
+
 </div>
 </template>
 
@@ -89,6 +100,11 @@ export default class BarGraph extends Vue {
         return c;
     }
 
+    get eventDateTitle() {
+        if(this.event.type == "eda2018") return "Grant Award Date";
+        else return "Disaster Declaration Date";
+    }
+
     get eventStyle() {
         let color = this.colors['other'];
 
@@ -100,11 +116,11 @@ export default class BarGraph extends Vue {
         if(this.colors[type]) color = this.colors[type];
 
         const s = {
-            borderLeft: 'solid 3px '+color, 
+            //borderLeft: 'solid 3px '+color, 
             color: color,
         }
 
-        if(!this.event.countyfips) s.backgroundColor = color+'2'; //statewide
+        //if(!this.event.countyfips) s.backgroundColor = color+'2'; //statewide
 
         return s;
     }
@@ -112,52 +128,35 @@ export default class BarGraph extends Vue {
 </script>
 
 <style scoped lang="scss">
-/*
-.eventdetail {
-    font-size: 16px;
-}
-*/
-.dd {
-    background-color: white;
-    box-shadow: 1px 1px 2px #0001;
-    padding: 10px;
-    border-radius: 4px;
-
-    //default
-    border-left: 3px solid gray;
-    color: gray;
-
-    &.dr-state {
-        color: #f56c6c;
-    }
-    &.dd-margin-bottom {
-        margin-bottom: 5px;
-    }
-}
-.eda2018 {
-    padding: 10px;
-    border-radius: 4px;    
-    box-shadow: 1px 1px 2px #0001;
-
-    &.eda2018-state {
-        border-left: 3px solid #67c23a;
-        background-color: #e1f3d8;
-        color: #67c23a;
-    }
-    &.eda2018-county {
-        border-left: 3px solid #67c23a;
-        background-color: white;
-        color: #67c23a;
-    }
+h3 {
+margin: 0;
+padding-top: 8px;
 }
 .primary {
     font-weight: bold;
-    font-size: 175%;
+    font-size: 170%;
     color: #409EFF;
 }
 .event-date {
-padding: 5px 0;
-opacity: 0.8;
-font-size: 85%;
+    padding-top: 8px;
+    margin-bottom: 20px;
 }
+.event-header {
+    .event-icon {
+        float: left;
+        display: inline-block;
+        width: 50px;
+        font-size: 225%;
+    }
+}
+.event-body {
+    padding-bottom: 10px;
+    border-left: 3px solid #eee;
+    margin-left: 17px;
+    padding-left: 30px;
+}
+.eda2018 {
+color: green;
+}
+
 </style>
