@@ -1,11 +1,12 @@
 <template>
 <div>
+    <ctilbanner/>
     <div id="covid19map"/>
     <h3>Number of twitter users who tweeted (size) and percentage of users who tweeted about virus (color) in the last 35 days.</h3>
     <div class="legend">
         <div class="legend-color"/>
         <span class="tick">0%</span>     
-        <span class="tick" style="float: right;">15%</span>     
+        <span class="tick" style="float: right;">7%</span>     
     </div>
     <el-select v-model="block" class="block-selecter">
         <el-option v-for="block in blocks" :key="block" :label="block" :value="block"/>
@@ -19,7 +20,7 @@
 
 <script>
 // @ is an alias to /src
-//import HelloWorld from '@/components/HelloWorld.vue'
+import ctilbanner from '@/components/CTILBanner.vue';
 import mapboxgl from 'mapbox-gl';
 import "mapbox-gl/dist/mapbox-gl.css";
 
@@ -98,7 +99,7 @@ abbsLines.forEach(line=>{
 
 export default {
     name: 'Covid19',
-    components: {},
+    components: { ctilbanner },
 
     data() { return {
         //tweetsStates: null,
@@ -201,8 +202,8 @@ export default {
                             property: 'user_virus_p', 
                             stops: [
                                 [0, '#48f'],
-                                [7.0, '#fc4'],
-                                [14.0, '#f44'],
+                                [3.5, '#fc4'],
+                                [7, '#f44'],
                             ]
                         },
                         "circle-opacity": 0.9,
@@ -220,17 +221,19 @@ export default {
 <style scoped>
 #covid19map {
     position: fixed;
-    top: 50px;
+    top: 80px;
     bottom: 0;
     width: 100%;
 }
 h3 {
     position: fixed;
-    left: 20px;
+    top: 80px;
+    left: 30px;
     color: #fffa;
     font-size: 11pt;
 }
 .block-selecter {
+    top: 20px;
     padding: 20px;
     float: right;
 }
@@ -245,7 +248,7 @@ h3 {
 }
 .legend {
     position: fixed;
-    top: 100px;
+    top: 120px;
     left: 20px;
     width: 200px;
     background-color: #fff3;

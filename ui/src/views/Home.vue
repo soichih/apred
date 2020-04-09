@@ -7,7 +7,7 @@
     <router-link to="/covid19">COVID19</router-link>
     <br>
     <br>
-    <router-link to="/covid19us">COVID19 US</router-link>
+    <a href="https://dev1.soichi.us/bvi/">BVI</a>
   </div>
 </template>
 

@@ -1,13 +1,11 @@
 <template>
   <div id="app">
-    <TopMenu/>
     <router-view/>
   </div>
 </template>
 
 <script>
-import SideMenu from '@/components/SideMenu.vue'
-import TopMenu from '@/components/TopMenu.vue'
+//import SideMenu from '@/components/SideMenu.vue'
 
 import numeral from "numeral";
 
@@ -18,7 +16,7 @@ Vue.filter("formatNumber", (value)=>{
 });
 
 @Component({
-  components: { SideMenu, TopMenu },
+  components: { /*SideMenu, TopMenu*/ },
 })
 export default class App extends Vue {
   //isSideMenuCollapsed = false;
@@ -53,6 +51,7 @@ scroll-behavior: smooth;
 }
 a {
   text-decoration: none;
+  color: #409EFF;
 }
 #app {
 margin-top: 50px;
