@@ -1,13 +1,16 @@
 <template>
 <div>
+    <TopMenu/>
     <div class="page" style="position: relative;">
         <p style="opacity: 0.4; float: right; margin-top: 25px;">FEMA delared disasters since 2017</p>
         <h2 style="margin-bottom: 0px">Disaster Declarations</h2>
-        <CountySelecter style="float: right; top: 50px; z-index: 1;" v-model="searchFip"/>
         <p><i class="el-icon-caret-right"/> Select a county to show detail</p>
+
+        <CountySelecter style="float: left; top: 15px; z-index: 1; width: 230px;" v-model="searchFip"/>
         <div class="legend">
-            <div v-for="(color, layer) in layers" :key="layer" class="legend-item" :class="{hidden: hiddenLayers.includes(layer)}" @click="toggleLayer(layer)">
-                <span class="legend-color" :style="{backgroundColor: color}">&nbsp;</span> {{layer}}
+            <div v-for="(color, layer) in layers" :key="layer" class="legend-item" :class="{hidden: hiddenLayers.includes(layer)}" @click.stop="toggleLayer(layer)">
+                <input type="checkbox" :checked="!hiddenLayers.includes(layer)" style="float: right;"/>
+                <span class="legend-color" :style="{backgroundColor: color}">&nbsp;</span>&nbsp;{{layer}}
             </div>
             <span class="legend-eda"/> EDA Award ($)
         </div>
@@ -31,6 +34,7 @@
 
 import { Component, Vue, Watch } from 'vue-property-decorator'
 import CountySelecter from '@/components/CountySelecter.vue'
+import TopMenu from '@/components/TopMenu.vue'
 
 import mapboxgl from 'mapbox-gl';
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -40,7 +44,7 @@ import cutterIndicators from '@/assets/cutter_indicators.json'
 mapboxgl.accessToken = "pk.eyJ1Ijoic29pY2hpaCIsImEiOiJjazVqdnBsM2cwN242M2psdjAwZXhhaTFuIn0.o3koWlzx1Tup8CJ1B_KaEA";
 
 @Component({
-    components: { CountySelecter },
+    components: { CountySelecter, TopMenu },
 })
 export default class County extends Vue {
 
@@ -479,8 +483,7 @@ h4 {
     position: absolute;
     display: block;
     z-index: 1;
-    top: 120px;
-    //width: 150px;
+    top: 180px;
     background-color: #fff9;
     padding: 10px;
     text-transform: uppercase;
@@ -502,11 +505,12 @@ h4 {
     }
 
     .legend-item {
-        display: inline-block; 
+        width: 200px;
+        height: 20px;
         margin-right: 10px;
         cursor: pointer;
         &.hidden {
-            opacity: 0.2;
+            color: #999;
         }
     }
     

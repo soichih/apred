@@ -1,12 +1,10 @@
 <template>
-<div class="eligibility">
-    <el-collapse>
-      <el-collapse-item>
-        <template slot="title">
-            <div class="title">
-                <i class="el-icon-caret-right"/> Maybe eligible for 2019 disaster supplemental funding
-            </div>
-        </template>
+<div>
+    <br>
+    <el-button type="success" plain @click="showDetail = true" v-if="!showDetail" style="width: 100%">
+        <i class="el-icon-caret-right"/> This incident maybe eligible for 2019 disaster supplemental funding
+    </el-button>
+    <div v-if="showDetail">
         <p>
             Applicants who are affected by this disaster may be eligible for <a href="https://www.grants.gov/web/grants/view-opportunity.html?oppId=319126">2019 EDA Disaster Supplemental</a> funding ($587 million). This investment assistance will help communities and regions devise and implement long-term economic recovery strategies through a variety of non-construction and construction projects, as appropriate, to address economic challenges.
         </p>
@@ -25,16 +23,15 @@
             </ul>
         </p>
         <p>
-            <el-button @click="apply" type="primary">Apply</el-button>
+            <el-button @click="apply" type="success" style="width: 100%;"><i class="el-icon-caret-right"/> Apply</el-button>
         </p>
         <br>
-      </el-collapse-item>
-    </el-collapse>
+    </div><!--showDetail-->
 </div>
 </template>
 
 <script>
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Vue } from 'vue-property-decorator';
 
 @Component
 export default class Eligibility2019 extends Vue {
@@ -44,6 +41,9 @@ export default class Eligibility2019 extends Vue {
     @Prop({default: 10, type: Number}) height;
     @Prop({type: Number}) value;
 */
+
+    showDetail = false;
+
     apply() {
         document.location = "https://www.grants.gov/web/grants/view-opportunity.html?oppId=319126";
     }
@@ -57,9 +57,6 @@ export default class Eligibility2019 extends Vue {
 </script>
 
 <style scoped lang="scss">
-.eligibility {
-padding: 10px;
-}
 .title:hover {
 color: #409EFF;
 }
