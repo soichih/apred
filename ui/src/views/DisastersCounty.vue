@@ -148,15 +148,7 @@
                         <BarGraph style="opacity: 0.5;" :value="computeAverage(indicators[incode])" :min="0" :max="1" :height="15"/>
                     </div>
                     <br> 
-                    <p v-if="incode == 'SOC'">Social resilience deals with attributes of the individual members of communities.</p>
-                    <p v-if="incode == 'ECON'">Economic resilience deals with the financial and economic factors that contribute to the resilience of 
-communities. </p>
-                    <p v-if="incode == 'INST'">TODO - describe this index</p>
-                    <p v-if="incode == 'IHFR'">Infrastructure resilience deals with physical structures (housing, shelter, medical capacity, etc.) that exist
-within communities.</p>
-                    <p v-if="incode == 'COMM'">Community Capital deals with the relationships between the individual and the community as a whole. </p>
-                    <p v-if="incode == 'FLOR'">TODO - describe this index</p>
-
+                    <IndicatorInfo :id="incode"/>
                     <el-button @click="shownIndicators.push(incode)" v-if="!shownIndicators.includes(incode)" plain type="info" size="small" style="width: 100%"><i class="el-icon-caret-right"/> Show Sub-Categories</el-button>
                 </div>
                 <div class="indicator-detail" v-if="shownIndicators.includes(incode)">
@@ -168,10 +160,7 @@ within communities.</p>
                                 <BarGraph style="margin-right: 30px; width: 100%;" :value="cutterMeasures[source.id]" :min="0" :max="1" />
                             </template>
 
-                            <p>
-                                TODO - Describe what this measure means. What it means to be 0, what it means to be 1, and how it's computed, 
-                                the impact of this value, and what investiment would improve it?
-                            </p>
+                            <MeasureInfo :id="source.id"/>
 
                             <div style="padding: 10px; padding-right: 40px; background-color: #eee;">
                                 <span style="float: left; width: 275px; text-align: right; padding-right: 30px;">State Average</span>
@@ -295,6 +284,8 @@ import CountySelecter from '@/components/CountySelecter.vue'
 import Histogram from '@/components/Histogram.vue'
 import BarGraph from '@/components/BarGraph.vue'
 import Event from '@/components/Event.vue'
+import IndicatorInfo from '@/components/IndicatorInfo.vue'
+import MeasureInfo from '@/components/MeasureInfo.vue'
 
 import Eligibility2018 from '@/components/Eligibility2018.vue'
 import Eligibility2019 from '@/components/Eligibility2019.vue'
@@ -315,6 +306,8 @@ import cutterIndicators from '@/assets/cutter_indicators.json'
         Eligibility2018, 
         Eligibility2019,
         VueBarGraph,
+        IndicatorInfo,
+        MeasureInfo,
     },
 })
 export default class County extends Vue {
