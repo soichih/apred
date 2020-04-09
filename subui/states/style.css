@@ -121,3 +121,46 @@ background-color: rgba(255,0,0,0.1);
 p.alert b {
 color: red;
 }
+
+table.info {
+    border-collapse: collapse;
+    width: 100%;
+    border: 1px solid #ddd;
+}
+table.info th {
+    border: 1px solid #eee;
+    padding: 20px;
+    background-color: #f9f9f9;
+    font-weight: normal;
+    text-align: left;
+}
+table.info td {
+    border: 1px solid #eee;
+    padding: 10px 20px;
+    vertical-align: top;
+    line-height: 200%;
+}
+table.info p.option {
+    display: inline-block;
+    opacity: 0.6;
+    margin: 0;
+    margin-right: 10px;
+}
+table.info p.option.active {
+    opacity: 1;
+}
+table.info p.option .circle {
+border-radius: 50%;
+display: inline-block;
+width: 10px;
+height: 10px;
+border: 2px solid #999;
+padding: 2px;
+background-clip: content-box;
+position: relative;
+top: 3px;
+}
+
+table.info p.option.active .circle {
+background-color: #62d2a2;
+}

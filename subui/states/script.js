@@ -23,7 +23,8 @@ new Vue({
                 The data is from <a href="https://www.nga.org/coronavirus/">https://www.nga.org/coronavirus</a>
                 and was last updated on {{new Date(modified).toLocaleString()}}. Click on a state to view data.
             </p>
-    
+
+   
             <!--<h2>Restriction Levels</h2>-->
             <table class="legend">
             <thead>
@@ -57,6 +58,8 @@ new Vue({
                     <span style="opacity: 0.7">/ 5</span>
                 </h3>
 
+                <p v-if="selected.name == 'Indiana'">For county specific travel advisory, please see <a href="http://www.in.gov/dhs/traveladvisory/">http://www.in.gov/dhs/traveladvisory/</a></p>
+
                 <p v-if="selected.major_disaster_declaration != ''" class="alert">
                     <b>Major Disaster Declared</b>
                 </p>
@@ -65,108 +68,83 @@ new Vue({
                     <b>National Guard Activated</b>
                 </p>
 
+                <!--
                 <p v-if="selected.statewide_closure_nonessential != ''" class="alert">
                     <b>Statewide Closure of Non‐Essential Businesses</b><br>
                     {{selected.statewide_closure_nonessential}}
                 </p>
+                -->
 
-
-                <p v-if="selected.name == 'Indiana'">For county specific travel advisory, please see <a href="http://www.in.gov/dhs/traveladvisory/">http://www.in.gov/dhs/traveladvisory/</a></p>
 
             </div>
             <p v-else>The restriction score is computed by analyzing various criterias such as school closure, non-essential business / travel restrictions, curfew, etc.</p>
 
-            <table class="table table-code" v-if="selected">
-            <thead>
+            <table class="info" v-if="selected">
                 <tr>
-                    <th style="text-align: left;">Restrictions</th>
-                    <!--
-                    <th style="background-color: #fff">0</th>
-                    <th style="background-color: #62D2A2">1</th>
-                    <th style="background-color: #F9ED69">2</th>
-                    <th style="background-color: #F08A5D">3</th>
-                    <th style="background-color: #B83B5E">4</th>
-                    <th style="background-color: #6A2C70">5</th>
-                    -->
-                    <th style="opacity: 0.8;">Less Restrictive</th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    <th style="opacity: 0.8;">More Restrictive</th>
-                 </tr>
-            </thead>
-
-            <tbody>
-            <tr>
-                <th>State Employee Travel Restrictions</th>
-                <td :class="{active: (!selected.state_employee_travel_restrictions)}">No Restrictions</td>
-                <td :class="{active: (selected.state_employee_travel_restrictions)}" colspan="5">Active</td>
-            </tr>
-
-            <tr>
-                <th>School Closures</th>
-                <td :class="{active: (selected.statewide_closure_school == '')}">No Closure</td>
-                <td :class="{active: (selected.statewide_closure_school == 'Local')}">Local Closure</td>
-                <td :class="{active: (selected.statewide_closure_school == 'Yes')}" colspan="5">Statewide Closure</td>
-            </tr>
-
-            <!--
-            <tr>
-                <th>Childcare Closures</th>
-                <td :class="{active: (selected.statewide_closure_school == '')}">No Closure</td>
-                <td :class="{active: (selected.statewide_closure_school == 'Local')}">Local Closure</td>
-                <td :class="{active: (selected.statewide_closure_school == 'Yes')}" colspan="5">Statewide Closure</td>
-            </tr>
-            -->
-
-            <tr>
-                <th>Statewide Limits on Gathering</th>
-                <td :class="{active: (selected.statewide_limits_on_gatherings == '')}">No Limit</td>
-                <td :class="{active: (
-                    selected.statewide_limits_on_gatherings.startsWith('Recommended') || 
-                    selected.statewide_limits_on_gatherings.startsWith('Local') || 
-                    selected.statewide_limits_on_gatherings.startsWith('Yes- 50 or more') || 
-                    selected.statewide_limits_on_gatherings.startsWith('Yes- unspecified'))}">Recommended</td>
-                <td :class="{active: (selected.statewide_limits_on_gatherings.startsWith('Yes- 25 or more'))}">For 25 or more</td>
-                <td :class="{active: (selected.statewide_limits_on_gatherings.startsWith('Yes- 10 or more'))}">For 10 or more</td>
-                <td :class="{active: (selected.statewide_limits_on_gatherings.startsWith('Yes- 5 or more'))}">For 5 or more</td>
-                <td :class="{active: (selected.statewide_limits_on_gatherings.startsWith('Yes- stay at home'))}">Stay at home</td>
-            </tr>
-
-            <!--
-            <tr>
-                <th>National Guard Activation</th>
-                <td colspan="3" :class="{active: (!selected.national_guard_activation)}">No Activation</td>
-                <td colspan="3" :class="{active: (selected.national_guard_activation)}">Active</td>
-            </tr>
-
-            <tr>
-                <th>Major Disaster Declaration</th>
-                <td colspan="2" :class="{active: (selected.major_disaster_declaration == '')}">No Declaration</td>
-                <td colspan="2" :class="{active: (selected.major_disaster_declaration == 'Request Made')}">Request Made</td>
-                <td colspan="2" :class="{active: (selected.major_disaster_declaration == 'Request Approved')}">Request Approved</td>
-            </tr>
-            -->
-
-            <tr>
-                <th>Business Closure</th>
-                <td :class="{active: (selected.statewide_closure_nonessential == '')}">No Closure</td>
-                <td colspan="2" :class="{active: selected.statewide_closure_nonessential.includes('recommended')}">Recommended</td>
-                <td colspan="2" :class="{active: selected.statewide_closure_nonessential.includes('Limited')}">Limited Operations</td>
-                <td :class="{active: selected.statewide_closure_nonessential.startsWith('Closure required')}">Required</td>
-            </tr>
-
-            <tr>
-                <th>Curfew</th>
-                <td colspan="2" :class="{active: (selected.statewide_curfew == '')}">No Curfew</td>
-                <td colspan="2" :class="{active: (selected.statewide_curfew == 'Local')}">Local Curfew</td>
-                <td colspan="2" :class="{active: (selected.statewide_curfew == 'Yes')}">Active</td>
-            </tr>
-
-            </tbody>
+                    <th>Restrictions</th>
+                    <th style="color: gray;">
+                        <!--
+                        Less Restrictive <span style="float: right">More Restrictive</span>
+                        -->
+                        Scores
+                    </th>
+                </tr>
+                <tr>
+                    <th>State Employee Travel Restrictions</th>
+                    <td>
+                        <!--state employee travel restrictions-->
+                        <p class="option" :class="{active: (!selected.state_employee_travel_restrictions)}"><span class="circle"/> No Restrictions (+0)</p>
+                        <p class="option" :class="{active: (selected.state_employee_travel_restrictions)}"><span class="circle"/> Active (+0.5)</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th>School Closures</th>
+                    <td>
+                        <!--school closures-->
+                        <p class="option" :class="{active: (selected.statewide_closure_school == '')}"><span class="circle"/> No Closure (+0)</p>
+                        <p class="option" :class="{active: (selected.statewide_closure_school == 'Local')}"><span class="circle"/> Local Closure (+0.25)</p>
+                        <p class="option" :class="{active: (selected.statewide_closure_school == 'Yes')}"><span class="circle"/> Statewide Closure (+0.5)</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Curfew</th>
+                    <td>
+                        <!--curfew-->
+                        <p class="option" :class="{active: (selected.statewide_curfew == '')}"><span class="circle"/> No Curfew (+0)</p>
+                        <p class="option" :class="{active: (selected.statewide_curfew == 'Local')}"><span class="circle"/> Local Curfew (+0.5)</p>
+                        <p class="option" :class="{active: (selected.statewide_curfew == 'Yes')}"><span class="circle"/> Statewide Curfew (+1)</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Business Closure</th>
+                    <td>
+                        {{selected.statewide_closure_nonessential}} (+{{scoreStatewideClosure(selected.statewide_closure_nonessential)}})
+                    </td>
+                </tr>
+                <tr>
+                    <th>Statewide Limits on Gathering</th>
+                    <td>
+                        <p class="option" :class="{active: (selected.statewide_limits_on_gatherings == '')}"><span class="circle"/> No Limit (+0)</p>
+                        <p class="option" :class="{active: (
+                    selected.statewide_limits_on_gatherings.startsWith('Recommended') ||
+                    selected.statewide_limits_on_gatherings.startsWith('Local') ||
+                    selected.statewide_limits_on_gatherings.startsWith('Yes- unspecified'))}">
+                            <span class="circle"/> Recommended (+0.4)</p>
+                        <p class="option" :class="{active: (selected.statewide_limits_on_gatherings.startsWith('Yes- 10 or more'))}"><span class="circle"/> For 10 or more (+0.6)</p>
+                        <p class="option" :class="{active: (selected.statewide_limits_on_gatherings.startsWith('Yes- 5 or more'))}"><span class="circle"/> For 5 or more (+0.8)</p>
+                        <p class="option" :class="{active: (selected.statewide_limits_on_gatherings.startsWith('Yes- stay at home'))}"><span class="circle"/> Stay at home (+1)</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Domestic Travel Limitations</th>
+                    <td>
+                        <p class="option" :class="{active: (selected.domestic_travel_limit == '')}"><span class="circle"/> No Limit (+0)</p>
+                        <p class="option" :class="{active: (selected.domestic_travel_limit.includes('Recommendation'))}"><span class="circle"/> Recommended (+0.5)</p>
+                        <p class="option" :class="{active: (selected.domestic_travel_limit.includes('Executive'))}"><span class="circle"/> Executive Order (+1)</p>
+                    </td>
+                </tr>
             </table>
-            
+ 
             <br>
             <br>
             <br>
@@ -295,19 +273,24 @@ new Vue({
                         }
                         cols.push(buf); //add the last column
                         /*
-                        0 State,
-                        1 Emergency Declaration,
-                        2 Major Disaster Dec,
-                        3 National Guard Activation,
-                        4 State Employee Travel Restrictions,
-                        5 Statewide Limits on Gatherings,
-                        6 Statewide School Closures,
-                        7 State Child Care Closures,
-                        8 Statewide Closure of Non‐Essential Businesses,
-                        9 Statewide Curfew,
-                        10 1135 Waiver Status,
-                        11 Extension of Individual Income Tax Deadlines,
-                        12 Primary Election
+                        0 State/Territory,
+                        1 Emergency Declaration,
+                        2 Major Disaster Declaration,
+                        3 National Guard State Activation,
+                        4 State Employee Travel Restrictions,
+                        5 Statewide Limits on Gatherings and Stay at Home Orders,
+                        6 Statewide School Closures,
+
+                        7 Statewide Closure of Non-Essential Businesses ,
+                        8 Statewide Closure of Some or All Non-Essential Businesses ,
+                        9 Essential Business Designations Issued,
+                        10 Statewide Curfew,
+                        11 1135 Waiver Status,
+                        12 Extension of Individual Income Tax Deadlines,
+                        13 Primary Election,
+                        14 Domestic Travel Limitations,
+                        15 Statewide Mask Policy,
+                        16 Ventilator Sharing
                         */
                         let rec = {
                             state: cols[0],
@@ -317,12 +300,16 @@ new Vue({
                             state_employee_travel_restrictions: (cols[4]=="Yes"),
                             statewide_limits_on_gatherings: cols[5],
                             statewide_closure_school: cols[6], ///Yes or Local
-                            //statewide_closure_childcare: cols[7], ///Yes or Local
                             statewide_closure_nonessential: cols[7], 
-                            statewide_curfew: cols[8], //Yes or Local
-                            waiver1135: cols[9], //Approved
-                            extension_incometax: cols[10], 
-                            primary_election: cols[11], 
+                            statewide_closure_some_nonessential: cols[8], 
+                            essential_designations: cols[9], 
+                            statewide_curfew: cols[10], //Yes or Local
+                            waiver1135: cols[11], //Approved
+                            extension_incometax: cols[12], 
+                            primary_election: cols[13], 
+                            domestic_travel_limit: cols[14], 
+                            statewide_mask: cols[15], 
+                            ventilator_sharing: cols[16], 
                         };
                         rec.level = this.scoreLevel(rec);
                         recs.push(rec);
@@ -336,78 +323,48 @@ new Vue({
             });
         },
 
-        scoreLevel_v2(rec) {
-            let score = 0;
-
-            if(rec.state_employee_travel_restrictions) score += 0.5;
-
-            switch(rec.statewide_closure_school) {
-            case "Local": score += 0.5; break;
-            case "Yes": score += 1; break;
-            }
-
-            switch(rec.statewide_limits_on_gatherings) {
-            case "Recommended": 
-            case "Local": 
-            case "Yes‐ 50 or more": 
-            case "Yes‐ unspecified": 
-                    score += 0.2; 
-                    break;
-            case "Yes‐ 25 or more": score += 0.4; break;
-            case "Yes‐ 10 or more": score += 0.6; break;
-            case "Yes‐ 5 or more": score += 0.8; break;
-            case "Yes‐ stay at home": score += 1; break;
-            }
-
-            //if(rec.national_guard_activation) score += 1;
-            /*
-            switch(rec.major_disaster_declaration) {
-            case "Request Made": score += 0.5; break;
-            case "Request Approved": score += 1; break;
-            }
-            */
- 
-            if(rec.statewide_limits_on_gatherings.startsWith("Closure Recommended")) score += 0.25;
-            if(rec.statewide_limits_on_gatherings.startsWith("Limited operations")) score += 0.5;
-            if(rec.statewide_limits_on_gatherings.startsWith("Closure required")) score += 0.75;
-            if(rec.statewide_limits_on_gatherings.startsWith("Required closures")) score += 1;
-
-            if(rec.statewide_curfew == "Local") score += 0.5;
-            if(rec.statewide_curfew != "Yes") score += 1;
-
-            return score; //should be max 6 (actually 5.5 for now..)
-        },
 
         scoreLevel(rec) {
             let score = 0;
 
-            if(rec.state_employee_travel_restrictions) score += 0.1;
+            //max 0.5
+            if(rec.state_employee_travel_restrictions) score += 0.5;
 
-            switch(rec.statewide_closure_school) {
-            case "Yes": score += 0.2; break;
-            case "Local": score += 0.1; break;
-            }
+            //max 0.5;
+            if(rec.statewide_closure_school == "Yes") score += 0.5;
+            else if(rec.statewide_closure_school == "Local") score += 0.25;
 
+            //max 1
+            if(rec.statewide_curfew == "Yes") score += 1;
+            else if(rec.statewide_curfew == "Local") score += 0.5;
+
+            //max 1
             if(rec.statewide_limits_on_gatherings.startsWith("Yes- stay at home")) score += 1;
             else if(rec.statewide_limits_on_gatherings.startsWith("Yes- 5 or more")) score += 0.8;
             else if(rec.statewide_limits_on_gatherings.startsWith("Yes- 10 or more")) score += 0.6;
-            else if(rec.statewide_limits_on_gatherings.startsWith("Yes- 25 or more")) score += 0.4;
             else if(rec.statewide_limits_on_gatherings.startsWith("Recommended") ||
                 rec.statewide_limits_on_gatherings.startsWith("Local") ||
                 rec.statewide_limits_on_gatherings.startsWith("Yes- 50 or more") ||
-                rec.statewide_limits_on_gatherings.startsWith("Yes- unspecified")) score += 0.2;
+                rec.statewide_limits_on_gatherings.startsWith("Yes- unspecified")) score += 0.4;
 
-            if(rec.statewide_closure_nonessential.includes("required")) score += 0.6;
-            else if(rec.statewide_closure_nonessential.includes("Limited")) score += 0.4;
-            else if(rec.statewide_closure_nonessential.includes("recommended")) score += 0.2;
+            //max 1
+            score += this.scoreStatewideClosure(rec.statewide_closure_nonessential);
 
-            if(rec.statewide_curfew == "Yes") score += 0.2;
-            else if(rec.statewide_curfew == "Local") score += 0.1;
+            //max 1
+            if(rec.domestic_travel_limit.includes('Executive')) score += 1;
+            else if(rec.domestic_travel_limit.includes('Recommendation')) score += 0.5;
 
-            let max = 0.1 + 0.2 + 1 + 0.6 + 0.2;
-            return score/max * 5;
+            //let max = 0.1 + 0.2 + 1 + 0.6 + 0.2 + 1;
+            return score;
         },
 
+        scoreStatewideClosure(value) {
+            if(value.includes("prohibited")) return 1;
+            else if(value.includes("required")) return 0.8;
+            else if(value.includes("Limited")) return 0.6;
+            else if(value.includes("recommended")) return 0.4;
+            return 0;
+        },
 
         createLayers() {
             //https://docs.mapbox.com/mapbox-gl-js/example/geojson-layer-in-stack/
