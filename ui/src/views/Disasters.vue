@@ -33,27 +33,34 @@
 <script>
 
 import { Component, Vue, Watch } from 'vue-property-decorator'
+import { State, Getter, Action, Mutation, namespace } from 'vuex-class'
 import CountySelecter from '@/components/CountySelecter.vue'
 import TopMenu from '@/components/TopMenu.vue'
 
 import mapboxgl from 'mapbox-gl';
 import "mapbox-gl/dist/mapbox-gl.css";
+import axios from 'axios'
 
 import cutterIndicators from '@/assets/cutter_indicators.json'
 
 mapboxgl.accessToken = "pk.eyJ1Ijoic29pY2hpaCIsImEiOiJjazVqdnBsM2cwN242M2psdjAwZXhhaTFuIn0.o3koWlzx1Tup8CJ1B_KaEA";
+const pCurrentDD = axios.get("https://dev1.soichi.us/api/apred/currentdd");
+const pEDA2018 = axios.get("https://dev1.soichi.us/api/apred/eda2018");
+const map = null;
 
 @Component({
     components: { CountySelecter, TopMenu },
 })
-export default class County extends Vue {
+export default class Disaster extends Vue {
 
-    map = null;
     popup = null;
     //overlay;
     selectedFip = null;
     searchFip = null;
     selectedProperty = null;
+
+    //@State('count') count;
+    //@Mutation('increment') addCount;
 
     //county data
     countyDetail = null; 
@@ -138,6 +145,12 @@ export default class County extends Vue {
     }
 
     mounted() {
+        //this.addCount();
+        //console.log("mounted... loading", this.count);
+        this.loadMap();
+    }
+
+    loadMap() {
         this.map = new mapboxgl.Map({
             container: 'map', // HTML container id
             style: 'mapbox://styles/mapbox/light-v10', // style URL
@@ -161,11 +174,6 @@ export default class County extends Vue {
             offset: [0, -20],
         });
 
-        this.map.on('idle',()=>{
-            if(!this.currentdd) {
-                this.loadCurrentdd();
-            }
-        });
 
         this.map.on('load', ()=>{
             this.map.addSource('counties', {
@@ -218,7 +226,6 @@ export default class County extends Vue {
                         visibility: this.hiddenLayers.includes(t)?'none':'visible',
                     }
                 });
-
             }
 
             this.map.addLayer({
@@ -269,10 +276,12 @@ export default class County extends Vue {
                 if(this.selectedFip) filter.push(this.selectedFip);
                 this.map.setFilter('counties-highlighted', filter);
             });
+            this.map.once('idle',()=>{
+                console.log("idleing..");
+                this.loadCurrentdd();
+            });
         })
     }
-
-    currentdd = false;
 
     toggleLayer(layer) {
         const pos = this.hiddenLayers.indexOf(layer);
@@ -285,11 +294,7 @@ export default class County extends Vue {
     }
 
     loadCurrentdd() {
-        this.currentdd = true;
-
-        this.axios.get("https://dev1.soichi.us/api/apred/currentdd").then(res=>{
-
-//key by incidenType, and storing {county: [], state: []}
+        pCurrentDD.then(res=>{
             const fips = {};
             const counties = this.map.queryRenderedFeatures({layers: ['counties']});
             res.data.forEach(rec=>{
@@ -330,7 +335,7 @@ export default class County extends Vue {
             }
         })
 
-        this.axios.get("https://dev1.soichi.us/api/apred/eda2018").then(res=>{
+        pEDA2018.then(res=>{
             const edaFeatures = [];
             res.data.states.forEach(rec=>{
                 edaFeatures.push({
