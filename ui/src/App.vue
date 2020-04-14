@@ -9,31 +9,54 @@
 
 import numeral from "numeral";
 
-import { Component, Watch, Vue } from 'vue-property-decorator';
+import { Component, Watch, Vue, State } from 'vue-property-decorator';
 
 Vue.filter("formatNumber", (value)=>{
     return numeral(value).format("0,0"); // displaying other groupings/separators is possible, look at the docs
 });
 
-@Component({
-  components: { /*SideMenu, TopMenu*/ },
+import Vuex from 'vuex'
+Vue.use(Vuex)
+const store = new Vuex.Store({
+    state: {
+        count: 0,
+    },
+    mutations: {
+        increment (state) {
+            state.count++
+        },
+    }
 })
-export default class App extends Vue {
-  //isSideMenuCollapsed = false;
-  active = '';
 
-  mounted() {
-    //console.log("app mounted", this.$route.meta);
-    this.active = this.$route.meta.menu;
-  }
-  
-  @Watch('$route')
-  onChangeRoute(to, from) {
-    //console.log("route changed");
-    //console.dir(this.$route.meta);
-    if(this.$route.meta.menu) this.active = this.$route.meta.menu;
-  }
-  
+/*
+export default class App extends Vue {
+    //isSideMenuCollapsed = false;
+    active = '';
+
+    mounted() {
+    }
+
+    @Watch('$route')
+    onChangeRoute(to, from) {
+    }
+
+}
+*/
+export default {
+    name: 'App',
+    store,
+    //components: { Counter },
+    mounted() {
+        this.active = this.$route.meta.menu;
+        //store.commit('increment');
+        //console.log("App mounted", store.state.count);
+    },
+    watch: {
+        '$route'() {
+            console.log("route changed");
+            if(this.$route.meta.menu) this.active = this.$route.meta.menu;
+        }
+    },
 }
 
 </script>
@@ -71,10 +94,4 @@ margin: auto;
     }
 }
 
-/*
-.el-collapse-item__header {
-    background-color: inherit;
-    border-bottom: 1px solid #0001;
-}
-*/
 </style>
