@@ -118,7 +118,7 @@ new Vue({
                 <tr>
                     <th>Business Closure</th>
                     <td>
-                        {{selected.statewide_closure_nonessential}} (+{{scoreStatewideClosure(selected.statewide_closure_nonessential)}})
+                        <i>{{selected.statewide_closure_nonessential}}</i> (+{{scoreStatewideClosure(selected.statewide_closure_nonessential)}})
                     </td>
                 </tr>
                 <tr>
@@ -388,9 +388,10 @@ new Vue({
         },
 
         scoreStatewideClosure(value) {
+            value = value.toLowerCase();
             if(value.includes("prohibited")) return 1;
             else if(value.includes("required")) return 0.8;
-            else if(value.includes("Limited")) return 0.6;
+            else if(value.includes("limited")) return 0.6;
             else if(value.includes("recommended")) return 0.4;
             return 0;
         },
