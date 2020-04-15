@@ -11,8 +11,6 @@ axios({
     url: "https://www.fema.gov/api/open/v1/DisasterDeclarationsSummaries.csv",
     responseType: 'stream'
 }).then(res=>{
-    //res.data.pipe(fs.createWriteStream('/tmp/DisasterDeclarationsSummaries.csv'));
-    //fs.createReadStream(__dirname+'/data/DisasterDeclarationsSummaries.csv').pipe(csvParser({})).on('data', rec=>{
     let recs = [];
     let fipsmiss = 0;
     res.data.pipe(csvParser({})).on('data', rec=>{
