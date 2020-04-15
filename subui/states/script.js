@@ -132,7 +132,7 @@ new Vue({
                             <span class="circle"/> Recommended (+0.4)</p>
                         <p class="option" :class="{active: (selected.statewide_limits_on_gatherings.startsWith('Yes- 10 or more'))}"><span class="circle"/> For 10 or more (+0.6)</p>
                         <p class="option" :class="{active: (selected.statewide_limits_on_gatherings.startsWith('Yes- 5 or more'))}"><span class="circle"/> For 5 or more (+0.8)</p>
-                        <p class="option" :class="{active: (selected.statewide_limits_on_gatherings.startsWith('Yes- stay at home'))}"><span class="circle"/> Stay at home (+1)</p>
+                        <p class="option" :class="{active: (selected.statewide_limits_on_gatherings.startsWith('Yes- stay at'))}"><span class="circle"/> Stay at home (+1)</p>
                     </td>
                 </tr>
                 <tr>
@@ -365,7 +365,7 @@ new Vue({
             else if(rec.statewide_curfew == "Local") score += 0.25;
 
             //max 1
-            if(rec.statewide_limits_on_gatherings.startsWith("Yes- stay at home")) score += 1;
+            if(rec.statewide_limits_on_gatherings.startsWith("Yes- stay")) score += 1;
             else if(rec.statewide_limits_on_gatherings.startsWith("Yes- 5 or more")) score += 0.8;
             else if(rec.statewide_limits_on_gatherings.startsWith("Yes- 10 or more")) score += 0.6;
             else if(rec.statewide_limits_on_gatherings.startsWith("Recommended") ||
