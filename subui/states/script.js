@@ -54,7 +54,7 @@ new Vue({
                 <h2>{{selected.name}}</h2>
                 <h3>
                     <span style="font-size: 90%; opacity: 0.5;">Restriction Score</span>  
-                    <span style="font-size: 150%"><b>{{selected.level.toFixed(1)}}</b></span>
+                    <span style="font-size: 150%"><b>{{selected.level.toFixed(2)}}</b></span>
                     <span style="opacity: 0.7">/ 5</span>
                 </h3>
 
@@ -111,8 +111,8 @@ new Vue({
                     <td>
                         <!--curfew-->
                         <p class="option" :class="{active: (selected.statewide_curfew == '')}"><span class="circle"/> No Curfew (+0)</p>
-                        <p class="option" :class="{active: (selected.statewide_curfew == 'Local')}"><span class="circle"/> Local Curfew (+0.5)</p>
-                        <p class="option" :class="{active: (selected.statewide_curfew == 'Yes')}"><span class="circle"/> Statewide Curfew (+1)</p>
+                        <p class="option" :class="{active: (selected.statewide_curfew == 'Local')}"><span class="circle"/> Local Curfew (+0.25)</p>
+                        <p class="option" :class="{active: (selected.statewide_curfew == 'Yes')}"><span class="circle"/> Statewide Curfew (+0.5)</p>
                     </td>
                 </tr>
                 <tr>
@@ -141,6 +141,14 @@ new Vue({
                         <p class="option" :class="{active: (selected.domestic_travel_limit == '')}"><span class="circle"/> No Limit (+0)</p>
                         <p class="option" :class="{active: (selected.domestic_travel_limit.includes('Recommendation'))}"><span class="circle"/> Recommended (+0.5)</p>
                         <p class="option" :class="{active: (selected.domestic_travel_limit.includes('Executive'))}"><span class="circle"/> Executive Order (+1)</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Mask in Public</th>
+                    <td>
+                        <p class="option" :class="{active: (selected.statewide_mask == '')}"><span class="circle"/> No (+0)</p>
+                        <p class="option" :class="{active: (selected.statewide_mask.startsWith('Rec') || selected.statewide_mask.startsWith('Yes'))}"><span class="circle"/> Recommended (+0.25)</p>
+                        <p class="option" :class="{active: (selected.statewide_mask.startsWith('Mandatory'))}"><span class="circle"/> Mandatory (+0.5)</p>
                     </td>
                 </tr>
             </table>
@@ -292,6 +300,25 @@ new Vue({
                         15 Statewide Mask Policy,
                         16 Ventilator Sharing
                         */
+                        /*
+                        0 State,
+                        1 Emergency Declaration,
+                        2 Major Disaster Declaration,
+                        3 National Guard State Activation,
+                        4 State Employee Travel Restrictions,
+                        5 Statewide Limits on Gatherings and Stay at Home Orders,
+                        6 Statewide School Closures,
+                        7 Statewide Closure of Non-Essential Business Spaces,
+
+                        8 Essential Business Designations List*,
+                        9 Statewide Curfew,
+                        10 1135 Waiver Status,
+                        11 Extension of Individual Income Tax Deadlines,
+                        12 Primary Election,
+                        13 Domestic Travel Limitations,
+                        14 Using Cloth Face Coverings in Public,
+                        15 Ventilator Sharing
+                        */
                         let rec = {
                             state: cols[0],
                             emergency_declaration: (cols[1]=="Yes"),
@@ -301,21 +328,20 @@ new Vue({
                             statewide_limits_on_gatherings: cols[5],
                             statewide_closure_school: cols[6], ///Yes or Local
                             statewide_closure_nonessential: cols[7], 
-                            statewide_closure_some_nonessential: cols[8], 
-                            essential_designations: cols[9], 
-                            statewide_curfew: cols[10], //Yes or Local
-                            waiver1135: cols[11], //Approved
-                            extension_incometax: cols[12], 
-                            primary_election: cols[13], 
-                            domestic_travel_limit: cols[14], 
-                            statewide_mask: cols[15], 
-                            ventilator_sharing: cols[16], 
+                            essential_designations: cols[8], 
+                            statewide_curfew: cols[9], //Yes or Local
+                            waiver1135: cols[10], //Approved
+                            extension_incometax: cols[11], 
+                            primary_election: cols[12], 
+                            domestic_travel_limit: cols[13], 
+                            statewide_mask: cols[14], 
+                            ventilator_sharing: cols[15], 
                         };
                         rec.level = this.scoreLevel(rec);
                         recs.push(rec);
                         //console.dir(cols);
                     }
-                        console.log("p-end");
+                    console.dir(recs[0]);
                     resolve(recs);
                 }).catch(err=>{
                     reject(err);
@@ -334,9 +360,9 @@ new Vue({
             if(rec.statewide_closure_school == "Yes") score += 0.5;
             else if(rec.statewide_closure_school == "Local") score += 0.25;
 
-            //max 1
-            if(rec.statewide_curfew == "Yes") score += 1;
-            else if(rec.statewide_curfew == "Local") score += 0.5;
+            //max 0.5
+            if(rec.statewide_curfew == "Yes") score += 0.5;
+            else if(rec.statewide_curfew == "Local") score += 0.25;
 
             //max 1
             if(rec.statewide_limits_on_gatherings.startsWith("Yes- stay at home")) score += 1;
@@ -354,7 +380,10 @@ new Vue({
             if(rec.domestic_travel_limit.includes('Executive')) score += 1;
             else if(rec.domestic_travel_limit.includes('Recommendation')) score += 0.5;
 
-            //let max = 0.1 + 0.2 + 1 + 0.6 + 0.2 + 1;
+            //max 0.5
+            if(rec.statewide_mask.startsWith('Rec') || rec.statewide_mask.startsWith('Yes')) score += 0.25;
+            if(rec.statewide_mask.startsWith('Mandatory')) score += 0.5;
+
             return score;
         },
 
