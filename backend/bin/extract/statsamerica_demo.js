@@ -6,7 +6,7 @@ const config = require('../../config');
 const mssql = require('mssql');
 
 //I can only connect from IU VPN connected IPs - not dev1
-mssql.connect(config.stats_america.db_demo).then(pool=>{
+mssql.connect(config.stats_america.db_stats4).then(pool=>{
     console.log("connected");
     load_gemographics(pool);
 });
