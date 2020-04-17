@@ -26,3 +26,5 @@ data/COVID2019StateTrackingChart.csv
 
 backend/bin/scraper/COVID2019StateTrackingChart.pdf
 backend/bin/scraper/COVID2019StateTrackingChart.csv
+
+raw

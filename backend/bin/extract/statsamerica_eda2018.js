@@ -6,7 +6,7 @@ const config = require('../../config');
 const mssql = require('mssql');
 
 //I can only connect from IU VPN connected IPs - not dev1
-mssql.connect(config.stats_america.db_eda).then(async pool=>{
+mssql.connect(config.stats_america.db_red_dr).then(async pool=>{
     console.log("connected");
     const supp = await pool.request().query(`
         SELECT * FROM eda_disaster_supp;
