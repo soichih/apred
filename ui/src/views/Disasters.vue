@@ -41,8 +41,6 @@ import mapboxgl from 'mapbox-gl';
 import "mapbox-gl/dist/mapbox-gl.css";
 import axios from 'axios'
 
-import cutterIndicators from '@/assets/cutter_indicators.json'
-
 mapboxgl.accessToken = "pk.eyJ1Ijoic29pY2hpaCIsImEiOiJjazVqdnBsM2cwN242M2psdjAwZXhhaTFuIn0.o3koWlzx1Tup8CJ1B_KaEA";
 const pCurrentDD = axios.get("https://dev1.soichi.us/api/apred/currentdd");
 const pEDA2018 = axios.get("https://dev1.soichi.us/api/apred/eda2018");
@@ -54,44 +52,18 @@ const map = null;
 export default class Disaster extends Vue {
 
     popup = null;
+
     //overlay;
     selectedFip = null;
     searchFip = null;
     selectedProperty = null;
 
-    //@State('count') count;
-    //@Mutation('increment') addCount;
-
-    //county data
-    countyDetail = null; 
-    stormEvents = null;
-
-    edaEvents = null;
-    history = [];
-    histograms = {};
-
-    indicators = cutterIndicators;
-    cutterMeasures = null;
-
-    //currentDDs = [];
-    //pastDDs = [];
-
-    bvi = [];
-    bviEstData = null;
-    bviEmpData = null;
-    bviEstLayout = null;
-    bviEmpLayout = null;
-
     layers = {
         "fire": "#f00",
-        //"earthquake": "#0f0",
         "hurricane": "#84a",
-        //"snow": "#fff",
         "tornado": "#c60",
-        //"typhoon": "#00c",
         "severe storm": "#fa0",
         "flood": "#06f",
-
         "other": "#f0f", //volcano, mud/landslide, snow, "coastal storm", typhoon, earthquake, snow
     };
     hiddenLayers = [];
@@ -145,17 +117,11 @@ export default class Disaster extends Vue {
     }
 
     mounted() {
-        //this.addCount();
-        //console.log("mounted... loading", this.count);
-        this.loadMap();
-    }
 
-    loadMap() {
+        //load map
         this.map = new mapboxgl.Map({
             container: 'map', // HTML container id
             style: 'mapbox://styles/mapbox/light-v10', // style URL
-            //style: 'mapbox://styles/mapbox/streets-v11',
-            //style: 'mapbox://styles/mapbox/dark-v10',
             center: [-110, 41.5], // starting position as [lng, lat]
             minZoom: 2,
             pitch: 30, // pitch in degrees
@@ -173,7 +139,6 @@ export default class Disaster extends Vue {
             closeButton: false,
             offset: [0, -20],
         });
-
 
         this.map.on('load', ()=>{
             this.map.addSource('counties', {
