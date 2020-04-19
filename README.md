@@ -4,15 +4,13 @@ APRED will provide historical insights from the 2011 disaster data,
 as well as a predictive capability that will be used to improve future
 funding decisions by local, state and federal agencies.
 
-## Dataflow
+## Raw Data Extraction
 
-### Raw Data Caching
+All raw data is extracted to `raw` directory. The scripts inside `backend/bin/extract` are used to load various data
 
-All raw data is cached under /raw directory. The following scripts are used to load the cache
+### [StatsAmerica] County Demographics
 
-#### [StatsAmerica] County Demographics
-
-`backend/bin/extract/statsamerica_demo.js` > raw/statsamerica.demo.json
+`statsamerica_demo.js` > raw/statsamerica.demo.json
 
 ```
 { geo_id: 13029, time_id: 2018, code_id: 317, data: 3653 },
@@ -21,9 +19,9 @@ All raw data is cached under /raw directory. The following scripts are used to l
 ...
 ```
 
-#### [StatsAmerica] EDA 2018 Supplemental Data
+### [StatsAmerica] EDA 2018 Supplemental Data
 
-`backend/bin/extract/statsamerica_eda2018.js` > raw/statsamerica.eda2018.json
+`statsamerica_eda2018.js` > raw/statsamerica.eda2018.json
 
 ```
 {
@@ -73,13 +71,14 @@ All raw data is cached under /raw directory. The following scripts are used to l
     "fema_id": "4349"
   }
 }
+
 ```
 
 Some fain doesn't have fema_id, and some counties are empty [].
 
-#### [StatsAmerica] FEMA Disasters
+### [StatsAmerica] FEMA Disasters
 
-`backend/bin/extract/statsamerica_fema_disasters.js`
+`statsamerica_fema_disasters.js`
 
 > raw/statsamerica.disasters.2015-now.json
 
@@ -109,9 +108,9 @@ Some fain doesn't have fema_id, and some counties are empty [].
 
 ```
 
-#### NOAA Storms
+### NOAA Storms
 
-`backend/bin/extract/statsamerica_noaa_storms.js`
+`statsamerica_noaa_storms.js`
 
 > raw/statsamerica.noaa_storms_zones.2019-now.json
 > raw/statsamerica.noaa_storms_counties.2019-now.json
@@ -170,3 +169,83 @@ Some fain doesn't have fema_id, and some counties are empty [].
   DATA_SOURCE: 'PUB' }
 
 ```
+
+### Cutters Indices
+
+`raw/cutters/source_export.csv`
+`raw/cutters/measure_export.csv`
+
+These came directly from Logan. Loaded directly to raw/cutters
+
+### BVI
+
+`raw/bvi.csv`
+
+This came from Logan also. Loaded directly to raw.
+
+## Data transformation
+
+Scripts under `backend/bin/transform` is used to transform data stored under `raw`.
+
+### `count_noaa_storms.js`
+
+This script load `raw/statsamerica.noaa_storms_counties.*.json` and count each storm event for each county / event type / each year.
+It also aggregates counts for the entire state, and US as a whole
+
+## `geojson.js`
+
+This script loads the county geojson data and add list of decleared disasters from  `raw/statsamerica.disasters.2015-now.js`. It creates `data/counties_geo.json`
+
+## `cutters.js`
+
+This script loads `raw/cutters` data and create cutter.json that contains both county specific and us/state avg cutter indicies
+
+## `eda2018.js`
+
+This script cleans up the county name, resolve fips code, and geocode grantee_name/city/state. It used `data/fain_geocode.json` to cache
+previously geocoded location. It generates `data/eda2018.json`
+
+It contains data that looks like
+
+```
+  "4790715701": {
+    "source_file": "2018DisasterSupp",
+    "eda_regional_office": "Atlanta",
+    "fain": "4790715701",
+    "grantee_name": "Industrial Development Board of Daphne",
+    "grantee_city": "Daphne",
+    "grantee_state": "Alabama",
+    "project_state": "Alabama",
+    "grant_purpose": "Infrastructure",
+    "grant_award_date": "2018-07-26T00:00:00.000Z",
+    "award_amount": 1539502,
+    "total_project_funding": 1539502,
+    "statewide": 0,
+    "counties": [
+      {
+        "county": "Baldwin",
+        "stateadd": "AL",
+        "statefips": "01",
+        "countyfips": "003"
+      },
+      {
+        "county": "Mobile",
+        "stateadd": "AL",
+        "statefips": "01",
+        "countyfips": "097"
+      },
+      {
+        "county": "Escambia",
+        "stateadd": "AL",
+        "statefips": "01",
+        "countyfips": "053"
+      }
+    ],
+    "fema_id": "4349",
+    "lat": 30.6035255,
+    "lon": -87.9036047
+  }
+
+```
+
+
