@@ -53,7 +53,7 @@ export default {
     },
     watch: {
         '$route'() {
-            console.log("route changed");
+            //console.log("route changed");
             if(this.$route.meta.menu) this.active = this.$route.meta.menu;
         }
     },

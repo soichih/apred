@@ -27,7 +27,7 @@ const routes = [
     {
         path: '/disasters/:fips',
         name: 'Disaster Declerations (County)',
-        component: DisastersCounty,
+        component: Disasters,
         meta: {
             menu: "disasters_county"
         }
