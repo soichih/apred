@@ -5,7 +5,7 @@
             <div v-if="event.type == 'dr'" class="dd" :class="eventClass" :style="eventStyle">
                 <i class="el-icon-warning"/>
             </div>
-            <div v-else-if="event.type == 'eda2018'" class="eda2018" :class="{'eda2018-state': event.subtype == 'state', 'eda2018-county': event.subtype == 'county'}">
+            <div v-else-if="event.type == 'eda2018'" class="eda2018" :class="{'eda2018-state': event.statewide, 'eda2018-county': !event.statewide}">
                 <i class="el-icon-money" style="background-color: green; border-radius: 50%; color: white;"/>
             </div>
         </div>
@@ -20,12 +20,12 @@
             <br>
         </h3>
 
-        <h3 v-else-if="event.type == 'eda2018'" class="eda2018" :class="{'eda2018-state': event.subtype == 'state', 'eda2018-county': event.subtype == 'county'}">
+        <h3 v-else-if="event.type == 'eda2018'" class="eda2018" :class="{'eda2018-state': event.statewide, 'eda2018-county': !event.statewide}">
             <el-tag size="small" effect="dark" type="success" style="float: right;">fain: {{event.fain}}</el-tag>
-            <b v-if="event.subtype == 'state'">Statewide</b>
+            <b v-if="event.statewide">Statewide</b>
             EDA 2018 Award
             <span style="opacity: 0.5;"> | </span>
-            ${{event.award | formatNumber}}
+            ${{event.award_amount | formatNumber}}
         </h3>
     </div>
 
@@ -40,7 +40,7 @@
                     - <time>{{new Date(event.incidentEndDate).toLocaleDateString()}}</time>
                 </span>
             
-                <p style="line-height: 200%;">
+                <p style="line-height: 200%; margin-bottom: 0;">
                     <!-- https://www.fema.gov/openfema-dataset-disaster-declarations-summaries-v1 -->
                     <el-tag size="small" effect="plain" type="info" v-if="event.hmProgramDeclared" title="hmProgramDeclared">
                         <a href="https://www.fema.gov/media-library/assets/documents/107704">Hazard Mitigation Program</a>
@@ -77,7 +77,6 @@
         </div>
 
         <slot/>
-        <br>
     </div>
 
 </div>
@@ -94,6 +93,7 @@ export default class BarGraph extends Vue {
 
     get eventClass() {
         const c = [];
+        //TODO - I should use declaredCountyArea == 'Statewide' instead?
         if(this.event.countyfips) c.push('dr-county');
         else c.push('dr-state');
 
@@ -119,8 +119,6 @@ export default class BarGraph extends Vue {
             //borderLeft: 'solid 3px '+color, 
             color: color,
         }
-
-        //if(!this.event.countyfips) s.backgroundColor = color+'2'; //statewide
 
         return s;
     }
