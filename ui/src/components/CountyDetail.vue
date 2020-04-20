@@ -121,12 +121,17 @@
             The score you see is the average of all sub-indecies for this indicators.
         </p>
     
-        <p style="font-size: 85%; opacity: 0.8; margin-left: 350px; padding: 0 10px;">
-            <span>Low Resilience</span>
-            <span style="float: right">High Resilience</span>
+        <p style="font-size: 85%; opacity: 0.8; margin-left: 355px; padding: 0 10px;">
+            <span>
+                <i class="el-icon-arrow-left"/> Low Resilience
+            </span>
+            <span style="float: right; margin-right: 50px;">
+                High Resilience
+                <i class="el-icon-arrow-right"/>
+            </span>
         </p>
 
-        <div v-for="(indicator, incode) in detail.cutter" :key="incode" :title="indicator.name" style="padding: 10px;">
+        <div v-for="(indicator, incode) in detail.cutter" :key="incode" :title="indicator.name" style="padding: 10px; border-top: 1px solid #ddd;">
             <div class="indicator-head">
                 <span style="float: left; width: 325px; font-size: 110%; color: black;">
                     {{indicator.name}} <el-tag type="info" size="small">{{incode}}</el-tag>
@@ -143,7 +148,7 @@
                 </div>
                 <br> 
                 <IndicatorInfo :id="incode"/>
-                <el-button @click="shownIndicators.push(incode)" v-if="!shownIndicators.includes(incode)" plain type="info" size="small" style="width: calc(100% - 50px);"><i class="el-icon-caret-right"/> Show Sub-Indices</el-button>
+                <el-button @click="shownIndicators.push(incode)" v-if="!shownIndicators.includes(incode)" plain type="info" size="small"><i class="el-icon-caret-right"/> Show Sub-Indices</el-button>
             </div>
             <div class="indicator-detail" v-if="shownIndicators.includes(incode)">
                 <el-collapse>
@@ -171,96 +176,10 @@
         </div>
     </div>
 
-    <div id="storms">
-        {{detail.storms}}
+    <div class="page" id="storms">
+        <h3>Storm History</h3>
+        <Plotly :data="stormData" :layout="stormLayout" :display-mode-bar="true"></Plotly>
     </div>
-
-
-
-    <div class="page" v-if="countyDetail">
-        <div v-if="stormEvents && countyDetail">
-            <br>
-            <h3>Natural Events Frequencies</h3>
-            <p>
-                This section shows the number of various natural events recorded by NOAA since 1950s.
-            </p>
-            <p>
-                You can see how this county compares to other counties in terms of number of similar natural events.
-                Higher event counts means more frequent events (bad)
-            </p>
-            <div v-for="(count, storm) in countyDetail.storm_counts" :key="storm">
-                <div v-if="count > 5">
-                    <!--<h3 style="margin: 10px 20px;">{{storm}}</h3>-->
-                    <el-collapse>
-                        <el-collapse-item name="1">  
-                            <template slot="title">
-                                <span style="opacity: 0.8; padding-left: 20px">{{storm}}</span> <i class="el-icon-caret-right"/> <b>{{count}}</b>
-                            </template>
-                            <el-table
-                            :data="stormEvents[storm]"
-                            style="width: 100%">
-
-                            <el-table-column fixed width="150"
-                                prop="date"
-                                label="Date">
-                            </el-table-column>
-                            
-                            <el-table-column label="Damage ($)">
-                                <el-table-column width="80"
-                                    prop="damage_property"
-                                    label="Property">
-                                </el-table-column>
-                                <el-table-column width="80"
-                                    prop="crop_property"
-                                    label="Crop">
-                                </el-table-column>
-                            </el-table-column>
-
-                            <el-table-column width="80"
-                                prop="deaths"
-                                label="Death">
-                            </el-table-column>
-
-                            <el-table-column v-if="storm == 'Tornado'" label="Tornado">
-                                <el-table-column width="80"
-                                    prop="tor_f_scale"
-                                    label="F">
-                                </el-table-column>
-                                <el-table-column width="80"
-                                    prop="tor_length"
-                                    label="Length">
-                                </el-table-column>
-                                <el-table-column width="80"
-                                    prop="tor_width"
-                                    label="Width">
-                                </el-table-column>
-                                <el-table-column width="80"
-                                    prop="tor_other_wfo"
-                                    label="wfo">
-                                </el-table-column>
-
-                            </el-table-column>
-
-                            <el-table-column width="500"
-                                prop="event_narrative"
-                                label="Description">
-                            </el-table-column>
-                            </el-table>
-                        </el-collapse-item>
-                    </el-collapse>
-
-                    <Histogram v-if="histograms[storm]" ylabel="# of Counties" xlabel="Event Counts" :value="count" :histogram="histograms[storm]"/>
-                </div><!--v-if count-->
-            </div>
-            <br>
-            <!--TODO - if there are no histogram info, show that we don't have the info-->
-            <br>
-        </div>
-        <br>
-        <br>
-    </div><!--page-->
-    <br>
-    <br>
 </div>
 </template>
 
@@ -280,8 +199,6 @@ import Eligibility2019 from '@/components/Eligibility2019.vue'
 import { Plotly } from 'vue-plotly'
 import VueBarGraph from 'vue-bar-graph'
 
-import cutterIndicators from '@/assets/cutter_indicators.json'
-
 @Component({
     components: { 
         BarGraph, 
@@ -300,21 +217,16 @@ export default class CountyDetail extends Vue {
 
     @Prop() detail;
 
-    //county data
-    countyDetail = null; 
-    stormEvents = null;
-
     history = [];
-    histograms = {};
-
-    indicators = cutterIndicators;
-    cutterMeasures = null;
 
     bvi = [];
     bviEstData = null;
     bviEmpData = null;
     bviEstLayout = null;
     bviEmpLayout = null;
+
+    stormLayout = null;
+    stormData = null;
 
     showPastHistory = false;
     shownIndicators = [];
@@ -331,8 +243,6 @@ export default class CountyDetail extends Vue {
 
         "other": "#f0f", //volcano, mud/landslide, snow, "coastal storm", typhoon, earthquake, snow
     };
-
-    statefips = null;
 
     drSpyderData = {
       type: 'scatterpolar',
@@ -362,12 +272,12 @@ export default class CountyDetail extends Vue {
         },
     }
 
-    indicatorScores = {};
-
+    /*
     @Watch('detail')
     onDetailChange() {
         //console.log("detail changed.."); //never called?
     }
+    */
 
     goto(id) {
         const e = document.getElementById(id);
@@ -383,7 +293,6 @@ export default class CountyDetail extends Vue {
         //Object.keys(this.detail.cutter).forEach(incode=>{
         for(const incode in this.detail.cutter) {
             const value = this.detail.cutter[incode].aggregate.county;
-            //this.indicatorScores[incode] = value;
             this.drSpyderData.r.push(value);
             this.drSpyderData.theta.push(incode);
         }
@@ -535,54 +444,69 @@ export default class CountyDetail extends Vue {
         this.bviEmpData = [traceEt, traceEtV];
     }
 
+    processStorms() {
+        this.stormLayout = {
+            margin: {
+                l: 30,
+                r: 30,
+                t: 30,
+                //b: 30,
+                //pad: 10,
+            },
+            /*
+            'paper_bgcolor': '#0000',
+            'plot_bgcolor': '#fff',
+            height: 400,
+            title: 'Storm History',
+            xaxis: {tickfont: {
+                size: 14,
+                color: 'rgb(107, 107, 107)'
+            }},
+            yaxis: {
+                titlefont: {
+                    size: 16,
+                    color: 'rgb(107, 107, 107)'
+                },
+                tickfont: {
+                    size: 13,
+                    color: 'rgb(107, 107, 107)'
+                }
+            },
+            */
+            legend: {
+                //x: 0,
+                //y: 1.0,
+                bgcolor: 'rgba(255, 255, 255, 0)',
+                bordercolor: 'rgba(255, 255, 255, 0)',
+                orientation: 'h',
+            },
+            //barmode: 'group',
+            //bargroupgap: 0.1
+        }
+
+        this.stormData = [];
+        for(const type in this.detail.storms) {
+            const x = [];
+            const y = [];
+            for(const year in this.detail.storms[type]) {
+                x.push(year);
+                y.push(this.detail.storms[type][year]);
+            }
+            this.stormData.push({
+                x,
+                y,
+                name: type,
+                //marker: {color: 'rgb(100, 100, 100)'},
+                type: 'bar'
+            });
+        }
+    }
+
     mounted() {
         this.processSpyder();
         this.processHistory();
         this.processBVI();
-
-/*
-        const fips = this.$route.params.fips.toString();
-        const statefips = fips.substring(0,2);
-        const countyfips = fips.substring(2);
-
-        this.statefips = statefips;
-
-        const pStormHistogram = this.axios.get("https://dev1.soichi.us/api/apred/storm/histogram").then(res=>{
-            res.data.forEach(rec =>{
-                this.histograms[rec.storm] = rec.histogram;
-            });
-        })
-
-        const pStatestorm = this.axios.get("https://dev1.soichi.us/api/apred/storm/query/"+statefips+"."+countyfips).then(res=>{
-            this.stormEvents = {};
-            if(res.data.length == 0) {
-                this.stormEvents = null;
-                return;
-            }
-            res.data.forEach(rec=>{
-                if(!this.stormEvents[rec.event_type]) this.stormEvents[rec.event_type] = [];
-                rec.narrative = rec.event_narrative + " "+rec.episode_narrative;
-                rec.date = new Date(rec.begin_date_time);
-                //rec.date = rec.begin_date_time.substring(0, 10);
-                rec.deaths = rec.deaths_direct + rec.deaths_indirect;
-                this.stormEvents[rec.event_type].push(rec);
-            });
-        });
-    
-        //secondary stuff..
-        Promise.all([pStormHistogram, pStatestorm]).then(()=>{
-            //process data.
-        })
-*/
-    }
-
-    computeAverage(source) {
-        //if(!source.sources) return 0;
-        const total = source.sources.reduce((a,v)=>a+v.average, 0);
-        return total / source.sources.length;
-    }
-    totalPopulation(demo) { 
-        return demo.reduce((a,v)=>v.value+a, 0);
+        this.processStorms();
     }
 
     populationPoints(demo) { 
@@ -604,6 +528,7 @@ export default class CountyDetail extends Vue {
     }
 
     goback() {
+        //TODO handle a case where we have no history
         this.$router.go(-1);
     }
 
@@ -681,6 +606,7 @@ h3 {
     padding: 20px 0 0 0;
     color: #0006;
     text-transform: uppercase;
+    font-size: 23px;
     font-weight: normal;
 }
 
@@ -783,7 +709,7 @@ h4 {
 }
 .navigator {
 position: sticky; 
-top: 30px;
+top: 10px;
 transition: 1s opacity;
 }
 @media only screen and (max-width: 1500px) {
