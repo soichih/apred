@@ -14,9 +14,11 @@
 
     <div style="background-color: #eee;" id="header">
     <div class="page">
-        <el-row style="clear: both; padding-top: 10px;">
+        <el-row>
             <el-col :span="11">
-                placeholder
+                <div id="statemap"/>
+
+                <!--placeholder-->
             </el-col>
             <el-col :span="8" class="border-left">
                 <span class="sub-heading">Population</span><br>
@@ -27,7 +29,7 @@
                 <vue-bar-graph v-if="detail.demo"
                     :points="populationPoints(detail.demo)"
                     :width="200"
-                    :height="100"
+                    :height="90"
                     :show-x-axis="true" 
                     :show-values="true"
                     bar-color="#999"
@@ -196,6 +198,9 @@ import MeasureInfo from '@/components/MeasureInfo.vue'
 import Eligibility2018 from '@/components/Eligibility2018.vue'
 import Eligibility2019 from '@/components/Eligibility2019.vue'
 
+import mapboxgl from 'mapbox-gl';
+import "mapbox-gl/dist/mapbox-gl.css";
+
 import { Plotly } from 'vue-plotly'
 import VueBarGraph from 'vue-bar-graph'
 
@@ -216,6 +221,10 @@ import VueBarGraph from 'vue-bar-graph'
 export default class CountyDetail extends Vue {
 
     @Prop() detail;
+    @Prop() geojson;
+
+    popup;
+    statemap;
 
     history = [];
 
@@ -263,7 +272,7 @@ export default class CountyDetail extends Vue {
         'paper_bgcolor': '#0000',
         //'plot_bgcolor': '#ffffff99',
         width: 160,
-        height: 125,
+        height: 110,
         margin: {
             l: 10,
             r: 10,
@@ -272,12 +281,19 @@ export default class CountyDetail extends Vue {
         },
     }
 
-    /*
     @Watch('detail')
     onDetailChange() {
-        //console.log("detail changed.."); //never called?
+        this.update();
+        this.showPastHistory = false;
     }
-    */
+
+    update() {
+        this.processSpyder();
+        this.processHistory();
+        this.processBVI();
+        this.processStorms();
+        this.processMap();
+    }
 
     goto(id) {
         const e = document.getElementById(id);
@@ -502,11 +518,99 @@ export default class CountyDetail extends Vue {
         }
     }
 
+    initStateMap() {
+        this.map = new mapboxgl.Map({container: 'statemap'});
+        this.map.scrollZoom.disable();
+        this.map.addSource('counties', { type: "geojson", data: this.geojson });
+
+        //calculate mapbound
+        const bounds = {};
+        this.geojson.features.forEach(feature=>{
+            if(feature.properties.statefips == this.detail.statefips) {
+                feature.geometry.coordinates.forEach(coordinates=>{
+                    coordinates.forEach(points=>{
+                        if(feature.geometry.type == "Polygon") {
+                            points = [points]; 
+                        } else if(feature.geometry.type == "MultiPolygon") {
+                            //nothing to do..
+                        } else {
+                            console.error("unknown feature geometry type", feature.geometry.type);
+                        }
+                        points.forEach(point=>{
+                            const longitude = point[0];
+                            const latitude = point[1];
+                            bounds.xMin = bounds.xMin < longitude ? bounds.xMin : longitude;
+                            bounds.xMax = bounds.xMax > longitude ? bounds.xMax : longitude;
+                            bounds.yMin = bounds.yMin < latitude ? bounds.yMin : latitude;
+                            bounds.yMax = bounds.yMax > latitude ? bounds.yMax : latitude;
+                        });
+                    });
+                });
+            }
+        });
+        this.map.fitBounds([[bounds.xMin, bounds.yMin], [bounds.xMax, bounds.yMax]]);
+
+        this.map.addLayer({
+            "id": "counties",
+            "type": "fill",
+            "source": "counties",
+            "paint": {
+                "fill-color": "rgba(100,100,100,0.3)"
+            },
+            filter: ['==', 'statefips', this.detail.statefips], 
+        });
+        this.map.addLayer({
+            "id": "selected-county",
+            "type": "fill",
+            "source": "counties",
+            "paint": {
+                "fill-color": "#409EFF",
+            },
+            filter: ['==', 'statefips', 'tbd'],
+        });
+
+        this.map.on('click', e=>{
+            const features = this.map.queryRenderedFeatures(e.point, {
+                layers: ['counties']
+            });
+            if(features.length > 0) {
+                const fips = features[0].properties.statefips+features[0].properties.countyfips;
+                this.$router.push('/disasters/'+fips);
+            }
+        });
+
+        this.popup = new mapboxgl.Popup({
+            closeButton: false,
+            //offset: [0, -20],
+        });
+
+        this.map.on('mousemove', 'counties', (e)=> {
+            this.map.getCanvas().style.cursor = 'pointer';
+            const feature = e.features[0];
+            let text = feature.properties.county+", "+feature.properties.state;
+            for(const key in feature.properties) {
+                if(key.startsWith("is")) {
+                    text += " | "+key.substring(2);
+                }
+            }
+            this.popup.setLngLat(e.lngLat).setText(text).addTo(this.map);
+        });
+
+        this.map.on('mouseleave', 'counties', ()=>{
+            this.popup.remove();
+        });
+    }
+
+    processMap() {
+        this.map.setFilter('selected-county', ['all',
+            ['==', 'statefips', this.detail.statefips],
+            ['==', 'countyfips', this.detail.countyfips],
+        ]);
+    }
+
     mounted() {
-        this.processSpyder();
-        this.processHistory();
-        this.processBVI();
-        this.processStorms();
+        this.initStateMap();
+        this.update();
     }
 
     populationPoints(demo) { 
@@ -528,8 +632,7 @@ export default class CountyDetail extends Vue {
     }
 
     goback() {
-        //TODO handle a case where we have no history
-        this.$router.go(-1);
+        this.$router.replace("/disasters");
     }
 
     is2018Eligible(event) {
@@ -664,7 +767,7 @@ h4 {
     border-left: 1px solid #ccc;
     height: 150px;
     padding-left: 20px;
-    margin-bottom: 8px;
+    padding-top: 10px;
 }
 @media only screen and (max-width: 700px) {
     .border-left {
@@ -676,7 +779,7 @@ h4 {
 <style lang="scss"> 
 .countydetail {
     position: fixed;
-    top: 150px;
+    top: 120px;
     bottom: 0;
     z-index: 1;
     scroll-behavior: smooth;
@@ -694,7 +797,7 @@ h4 {
     width: 100%;
     background-color: white;
     z-index: 1;
-    height: 100px;
+    height: 70px;
     box-shadow: 0 0 3px #ddd;
 }
 .header h3 {
@@ -716,5 +819,13 @@ transition: 1s opacity;
     .navigator {
         opacity: 0;
     }
+}
+#statemap {
+    position: relative;
+    width: 100%;
+    height: 150px;
+}
+canvas:focus {
+    outline: none;
 }
 </style>
