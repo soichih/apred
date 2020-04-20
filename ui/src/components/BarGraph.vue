@@ -2,9 +2,10 @@
 <div style="position: relative;">
     <svg width="100%" :height="height.toString()+'px'">
         <defs>
-            <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%" spreadMethod="padded">
+            <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
                 <stop offset="0%" :style="{'stop-color':color1, 'stop-opacity':1}" />
-                <stop offset="100%" :style="{'stop-color':color2, 'stop-opacity':1}" />
+                <stop offset="50%" :style="{'stop-color':color2, 'stop-opacity':1}" />
+                <stop offset="100%" :style="{'stop-color':color3, 'stop-opacity':1}" />
             </linearGradient>
         </defs>
         <rect v-if="value" x="0" y="0" width="100%" :height="height" style="fill:url(#grad1)" />
@@ -35,8 +36,9 @@ export default class BarGraph extends Vue {
     @Prop({default: 1, type: Number}) max;
     @Prop({default: 10, type: Number}) height;
     @Prop({type: Number}) value;
-    @Prop({default: "rgb(255,60,0)", type: String}) color1;
-    @Prop({default: "rgb(0,255,60)", type: String}) color2;
+    @Prop({default: "red", type: String}) color1;
+    @Prop({default: "yellow", type: String}) color2;
+    @Prop({default: "green", type: String}) color3;
     //@Prop({type: Number}) us_avg;
 }
 </script>
