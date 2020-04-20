@@ -1,7 +1,7 @@
 <template>
 <div>
     <br>
-    <el-button type="primary" plain @click="showDetail = true" v-if="!showDetail" style="width: 100%;">
+    <el-button type="primary" plain @click="showDetail = true" v-if="!showDetail">
         <i class="el-icon-caret-right"/> This incident maybe eligible for 2018 disaster supplemental funding
     </el-button>
 
