@@ -194,7 +194,7 @@ It also aggregates counts for the entire state, and US as a whole
 
 ## `geojson.js`
 
-This script loads the county geojson data and add list of decleared disasters from  `raw/statsamerica.disasters.2015-now.js`. It creates `data/counties_geo.json`
+This script loads the county geojson data and add list of decleared disasters from  `raw/statsamerica.disasters.2015-now.js`. It creates `data/counties_geo.json`. This script also pulls `data/eda2018.json` as additional geojson features so that UI can draw circles where eda2018 awards has been granted.
 
 ## `cutters.js`
 

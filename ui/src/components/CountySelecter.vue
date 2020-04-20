@@ -1,69 +1,44 @@
 <template>
-  <el-select
-    v-model="county"
-    filterable
-    remote
-    reserve-keyword
-    placeholder="Search County"
-    :remote-method="remoteMethod"
-    :loading="loading"
-    @change="change">
-    <el-option-group v-for="group in Object.values(optionGroups)" :key="group.label" :label="group.label">
-        <el-option v-for="item in group.options" :key="item.value" :label="item.label" :value="item.value"/>
-    </el-option-group>
+  <el-select v-model="county" filterable placeholder="Search County" @change="change">
+    <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
+        <span style="float: left">{{ item.label }}</span>
+        <span style="float: right; color: #8492a6; font-size: 13px">{{ item.value }}</span>
+    </el-option>
   </el-select>
 </template>
 
 <script>
-/*
-export default class CountySelecter extends Vue {
-  options: 
-}
-*/
-
-  export default {
+export default {
+    props: [ "options"],
     data() {
-      return {
-        optionGroups: {},
-        county: null,
-        loading: false,
-      }
-    },
-    mounted() {
-      /*
-      this.list = this.states.map(item => {
-        return { value: `value:${item}`, label: `label:${item}` };
-      });
-      */
+        return {
+            county: null,
+            loading: false,
+        }
     },
     methods: {
+        /*
+        remoteMethod(query) {
+            if (query !== '') {
+              this.loading = true;
+              //console.log("searching", query);
+              this.axios.get("https://dev1.soichi.us/api/apred/search_fips?q="+query).then(res=>{
+                this.loading = false;
+                this.optionGroups = {};
+                res.data.forEach(rec=>{
+                    if(!this.optionGroups[rec.state]) this.optionGroups[rec.state] = {label: rec.state, options: []};
+                    this.optionGroups[rec.state].options.push({ value: rec.statefips+"."+rec.countyfips, label: rec.county });
+                });
+              });
+            } else {
+              this.optionGroups = {};
+            }
+        },
+        */
 
-      remoteMethod(query) {
-        if (query !== '') {
-          this.loading = true;
-          //console.log("searching", query);
-          this.axios.get("https://dev1.soichi.us/api/apred/search_fips?q="+query).then(res=>{
-            this.loading = false;
-            this.optionGroups = {};
-            res.data.forEach(rec=>{
-                if(!this.optionGroups[rec.state]) this.optionGroups[rec.state] = {label: rec.state, options: []};
-                this.optionGroups[rec.state].options.push({ value: rec.statefips+"."+rec.countyfips, label: rec.county });
-            });
-            /*
-            this.options = this.list.filter(item => {
-              return item.label.toLowerCase()
-                .indexOf(query.toLowerCase()) > -1;
-            });
-            */
-          });
-        } else {
-          this.optionGroups = {};
+        change(v) {
+            this.$emit("selected", v);
         }
-      },
-
-      change(v) {
-        this.$emit("input", v);
-      }
     }
-  }
+}
 </script>
