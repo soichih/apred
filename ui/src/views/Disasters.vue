@@ -30,7 +30,7 @@
             </footer>
         </div>
 
-        <CountyDetail v-if="selected" :detail="selected"/>
+        <CountyDetail v-if="selected && geojson" :detail="selected" :geojson="geojson"/>
     </div>
 
 </div>
@@ -56,6 +56,7 @@ export default class Disaster extends Vue {
 
     popup;
     selected = null;
+    geojson = null;
 
     hiddenLayers = [];
     countyList = [];
@@ -129,6 +130,7 @@ export default class Disaster extends Vue {
         }, 
     };
 
+    /*
     addLayer(color) {
 
         function rawColorValue(color) {
@@ -158,6 +160,7 @@ export default class Disaster extends Vue {
 
         return layer;
     }
+    */
 
     @Watch('$route')
     onRouteChange(to, from) {
@@ -204,6 +207,7 @@ export default class Disaster extends Vue {
             */
 
             fetch("https://dev1.soichi.us/apred-data/counties_geo.json").then(res=>res.json()).then(data=>{
+                this.geojson = data;
                 data.features.forEach(feature=>{
                     const props = feature.properties;
                     if(props.countyfips) {
