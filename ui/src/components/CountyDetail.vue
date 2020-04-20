@@ -534,7 +534,7 @@ export default class CountyDetail extends Vue {
                         } else if(feature.geometry.type == "MultiPolygon") {
                             //nothing to do..
                         } else {
-                            console.error("unknown feature geometry type", feature.geometry.type);
+                            //console.error("unknown feature geometry type", feature.geometry.type);
                         }
                         points.forEach(point=>{
                             const longitude = point[0];
@@ -565,6 +565,7 @@ export default class CountyDetail extends Vue {
             "source": "counties",
             "paint": {
                 "fill-color": "#409EFF",
+                "fill-outline-color": "white",
             },
             filter: ['==', 'statefips', 'tbd'],
         });
