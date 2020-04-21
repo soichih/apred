@@ -1,17 +1,20 @@
 <template>
   <div id="topmenu">
     <div class="page">
+        <!--
         <span class="user">
             <i class="el-icon-user-solid"/>
         </span>
+        -->
+        <a href="https://iu.edu">
+            <img src="../assets/trident-large.png" height="50px" class="trident"/>
+        </a>
         <span class="apred">
-            APRED
+            <a href="https://ctil.iu.edu/" style="color: inherit;">CTIL</a>
         </span>
         <p class="title">
-            <router-link to="/">
-                <img src="../assets/favicon-32x32.png" height="20px" style="margin-right: 10px; position: relative; top: 2px;"/>
-                Predictive Insights
-            </router-link>
+            <b style="color: #900;">APRED</b>
+            <i class="sub-title">Analysis Platform for Risk, Resilience and Expenditure in Disasters</i>
         </p>
     </div>
   </div>
@@ -35,15 +38,21 @@ export default class TopMenu extends Vue {
     height: 50px;
     box-shadow: 0 0 2px #0003;
     background-color: white;
+    min-width: 400px;
 }
 .title {
     color:#999;
-    font-weight: bold;
     margin: 13px 0;
     font-size: 16pt;
 }
-.title a {
-    color: inherit;
+.sub-title {
+    font-size: 12pt;
+    padding-left: 10px;
+}
+@media only screen and (max-width: 700px) {
+    .sub-title {
+        display: none;
+    }
 }
 .user {
     float: right;
@@ -60,5 +69,11 @@ export default class TopMenu extends Vue {
     top: 4px;
     margin-right: 20px;
     opacity: 0.7;
+}
+.trident {
+margin-right: 10px; 
+position: relative; 
+float: right;
+top: -13px;
 }
 </style>
