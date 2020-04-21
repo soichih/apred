@@ -89,7 +89,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 @Component
 export default class BarGraph extends Vue {
     @Prop({type: Object}) event;
-    @Prop({type: Object}) colors;
+    @Prop({type: Object}) layers;
 
     get eventClass() {
         const c = [];
@@ -106,14 +106,14 @@ export default class BarGraph extends Vue {
     }
 
     get eventStyle() {
-        let color = this.colors['other'];
+        let color = this.layers['other'].color;
 
         //use incident specific color if available
         let type = this.event.incidentType.toLowerCase();
         if(~type.indexOf("(")) type = type.substring(0, type.indexOf("(")); 
         //type = type.replace(/\s/g, '');
         type = type.trim();
-        if(this.colors[type]) color = this.colors[type];
+        if(this.layers[type]) color = this.layers[type].color;
 
         const s = {
             //borderLeft: 'solid 3px '+color, 
