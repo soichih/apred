@@ -206,7 +206,7 @@ export default class Disaster extends Vue {
             });
             */
 
-            fetch("https://dev1.soichi.us/apred-data/counties_geo.json").then(res=>res.json()).then(data=>{
+            fetch("https://ctil.iu.edu/projects/apred-data/counties_geo.json").then(res=>res.json()).then(data=>{
                 this.geojson = data;
                 data.features.forEach(feature=>{
                     const props = feature.properties;
@@ -375,13 +375,13 @@ export default class Disaster extends Vue {
             this.selected = null;
             return;
         }
-        fetch("https://dev1.soichi.us/apred-data/counties/county."+fips+".json").then(res=>res.json()).then(data=>{
+        fetch("https://ctil.iu.edu/projects/apred-data/counties/county."+fips+".json").then(res=>res.json()).then(data=>{
             this.selected = data;
         });
     }
 
     countySelected(fips) {
-        this.$router.push('/disasters/'+fips);
+        this.$router.push('/county/'+fips);
     }
 
     toggleLayer(layer) {
