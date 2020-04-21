@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Home from '../views/Home.vue'
+import Sitemap from '../views/Sitemap.vue'
 import Disasters from '../views/Disasters.vue'
 import DisastersCounty from '../views/DisastersCounty.vue'
 import Covid19 from '../views/Covid19.vue'
@@ -9,15 +9,15 @@ Vue.use(VueRouter)
 
 const routes = [
     {
-        path: '/',
-        name: 'Home',
-        component: Home,
+        path: '/sitemap',
+        name: 'Sitemap',
+        component: Sitemap,
         meta: {
-            menu: "home"
+            menu: "sitemap"
         }
     },
     {
-        path: '/disasters',
+        path: '/',
         name: 'Disaster Declerations',
         component: Disasters,
         meta: {
@@ -25,7 +25,7 @@ const routes = [
         }
     },
     {
-        path: '/disasters/:fips',
+        path: '/county/:fips',
         name: 'Disaster Declerations (County)',
         component: Disasters,
         meta: {
