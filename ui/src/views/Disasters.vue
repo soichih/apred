@@ -4,8 +4,8 @@
     <div>
         <div style="position: relative;">
             <div class="page">
-                <p style="opacity: 0.4; float: right; margin-top: 25px;">FEMA delared disasters since 2017</p>
-                <h2 style="margin-bottom: 0px">Disaster Declarations</h2>
+                <p class="secondary">FEMA delared disasters since 2017</p>
+                <h2 style="margin-bottom: 0px">Disaster&nbsp;Declarations</h2>
                 <p><i class="el-icon-caret-right"/> Select a county to show detail</p>
 
                 <CountySelecter style="float: left; top: 15px; z-index: 1; width: 230px;" @selected="countySelected" :options="countyList"/>
@@ -30,7 +30,7 @@
             </footer>
         </div>
 
-        <CountyDetail v-if="selected && geojson" :detail="selected" :geojson="geojson"/>
+        <CountyDetail v-if="selected && geojson" :detail="selected" :layers="layers" :geojson="geojson"/>
     </div>
 
 </div>
@@ -108,7 +108,7 @@ export default class Disaster extends Vue {
             ]
         },
         "other": {
-            color: "#f0f",
+            color: "#90f",
             filter: ["any", 
                 ["==", "isEarthquake", true],
                 ["==", "isCoastalStorm", true],
@@ -402,6 +402,7 @@ p {
     color: #666;
 }
 h2 {
+    font-size: 15pt;
     padding: 20px 0;
     color: #0006;
     text-transform: uppercase;
@@ -484,11 +485,19 @@ h4 {
 }
 footer {
 position: fixed;
-background-color: #333; 
-color: #999; 
-height: 75px;
 bottom: 0;
 width: 100%;
+max-height: 75px;
+}
+.secondary {
+opacity: 0.4; 
+float: right; 
+margin-top: 25px;
+}
+@media (max-width: 800px) {
+    .secondary {
+        display: none;
+    }
 }
 
 </style>
