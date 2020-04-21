@@ -600,7 +600,7 @@ export default class CountyDetail extends Vue {
             });
             if(features.length > 0) {
                 const fips = features[0].properties.statefips+features[0].properties.countyfips;
-                this.$router.push('/disasters/'+fips);
+                this.$router.push('/county/'+fips);
             }
         });
 
@@ -657,7 +657,7 @@ export default class CountyDetail extends Vue {
     }
 
     goback() {
-        this.$router.replace("/disasters");
+        this.$router.replace("/");
     }
 
     is2018Eligible(event) {
