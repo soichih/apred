@@ -35,3 +35,8 @@ export default class IndicatorInfo extends Vue {
     @Prop({default: null, type: String}) id;
 }
 </script>
+<style scoped>
+p {
+margin: 0px;
+}
+</style>

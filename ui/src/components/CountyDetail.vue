@@ -17,14 +17,13 @@
         <el-row>
             <el-col :span="11">
                 <div id="statemap"/>
-
-                <!--placeholder-->
             </el-col>
-            <el-col :span="8" class="border-left">
-                <span class="sub-heading">Population</span><br>
-                <span class="primary" v-if="detail.demo"> {{detail.population | formatNumber}}</span>
-                <div v-else style="padding: 10px 0; opacity: 0.5;">No information</div>
-                <br>
+            <el-col :span="8" class="border-left demo">
+                <p>
+                    <span class="sub-heading">Population</span><br>
+                    <span class="primary" v-if="detail.demo"> {{detail.population | formatNumber}}</span>
+                    <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
+                </p>
 
                 <vue-bar-graph v-if="detail.demo"
                     :points="populationPoints(detail.demo)"
@@ -38,9 +37,10 @@
                 />
             </el-col>
             <el-col :span="5" class="border-left">
-                <span class="sub-heading">Disaster Resilience</span>&nbsp;
-                <i @click="goto('cutter')" class="el-icon-warning-outline"/>
-                <br>
+                <p class="sub-heading">
+                    Disaster Resilience
+                    <i @click="goto('cutter')" class="el-icon-warning-outline"/>
+                </p>
                 <Plotly :data="[drSpyderData]" :layout="drSpyderLayout" :display-mode-bar="false"/>
             </el-col>
         </el-row>
@@ -63,7 +63,7 @@
 
         <p v-if="recentHistory.length == 0" style="opacity: 0.8;">No disaster declared since 2017</p>
         <div v-for="(event, idx) in recentHistory" :key="event._id" class="history">
-            <Event :event="event" :colors="layers">
+            <Event :event="event" :layers="layers">
                 <div class="connecter" v-if="idx < recentHistory.length">
                     <Eligibility2018 v-if="is2018Eligible(event)"/>
                     <Eligibility2019 v-if="is2019Eligible(event)"/>
@@ -78,7 +78,7 @@
             </el-button>
         </div>
         <div v-if="showPastHistory">
-            <Event :event="event" :colors="layers" v-for="event in pastHistory" :key="event._id" class="history"/>
+            <Event :event="event" :layers="layers" v-for="event in pastHistory" :key="event._id" class="history"/>
         </div>
         <br>
         <br>
@@ -112,7 +112,7 @@
 
     <div class="page" id="cutter">
         <h3>Disaster Resilience</h3>
-        <p style="margin: 20px;">
+        <p style="margin: 20px 0;">
             TODO Describe what resilience means, and how it's computed.
 
             Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
@@ -133,11 +133,11 @@
             </span>
         </p>
 
-        <div v-for="(indicator, incode) in detail.cutter" :key="incode" :title="indicator.name" style="padding: 10px; border-top: 1px solid #ddd;">
+        <div v-for="(indicator, incode) in detail.cutter" :key="incode" :title="indicator.name" style="padding: 10px; clear: both;">
             <div class="indicator-head">
-                <span style="float: left; width: 325px; font-size: 110%; color: black;">
+                <div style="float: left; width: 325px;">
                     {{indicator.name}} <el-tag type="info" size="small">{{incode}}</el-tag>
-                </span>
+                </div>
                 <div style="position: relative; margin-left: 355px; margin-right: 50px;">
                     <span style="position: absolute; left: -100px; font-size: 85%;">This County</span>
                     <BarGraph :value="indicator.aggregate.county" :min="0" :max="1" :height="15"/>
@@ -149,27 +149,37 @@
                     <BarGraph :value="indicator.aggregate.us" :min="0" :max="1" :height="15" style="opacity: 0.4;"/>
                 </div>
                 <br> 
-                <IndicatorInfo :id="incode"/>
-                <el-button @click="shownIndicators.push(incode)" v-if="!shownIndicators.includes(incode)" plain type="info" size="small"><i class="el-icon-caret-right"/> Show Sub-Indices</el-button>
+
+                <p style="float: right; margin-right: 50px">
+                    <el-button round @click="toggleIndicator(incode)" plain size="small" style="width: 150px">
+                        <span v-if="!shownIndicators.includes(incode)">
+                            <i class="el-icon-caret-right"/> Show Sub-Indices
+                        </span>
+                        <span v-else>
+                            <i class="el-icon-caret-bottom"/> Hide Sub-Indices
+                        </span>
+                    </el-button>
+                </p>
+                <IndicatorInfo :id="incode" style="margin-right: 175px; opacity: 0.8; font-size: 90%"/>
             </div>
             <div class="indicator-detail" v-if="shownIndicators.includes(incode)">
                 <el-collapse>
                     <div v-for="source in detail.cutter[incode].sources" :key="source.id">
                         <el-collapse-item v-if="source.us">
                             <template slot="title">
-                                <i class="el-icon-caret-right" style="opacity: 0.5;"/>
-                                <span style="float: left; min-width: 340px">{{source.name}}</span>
+                                <i class="el-icon-caret-right" style="padding-left: 10px; opacity: 0.5;"/>
+                                <span style="float: left; min-width: 330px">{{source.name}}</span>
                                 <BarGraph style="margin-right: 30px; width: 100%;" :value="source.county" :min="0" :max="1" />
                             </template>
 
-                            <MeasureInfo :id="source.id"/>
+                            <MeasureInfo :id="source.id" style="padding: 0 10px;"/>
 
-                            <div style="padding: 10px; padding-right: 50px; background-color: #eee;">
-                                <span style="float: left; width: 275px; text-align: right; padding-right: 60px;">State Average</span>
-                                <BarGraph style="margin-left: 345px;" :value="source.states" :min="0" :max="1" color="#8e8e8e"/>
+                            <div style="padding: 10px; padding-right: 50px; background-color: #f7f7f7;">
+                                <span style="float: left; width: 265px; text-align: right; padding-right: 60px;">State Average</span>
+                                <BarGraph style="margin-left: 343px;" :value="source.states" :min="0" :max="1" color="#8e8e8e"/>
                                 <br>
-                                <span style="float: left; width: 275px; text-align: right; padding-right: 60px;">US Average</span>
-                                <BarGraph style="margin-left: 345px;" :value="source.us" :min="0" :max="1" color="#8e8e8e"/>
+                                <span style="float: left; width: 265px; text-align: right; padding-right: 60px;">US Average</span>
+                                <BarGraph style="margin-left: 343px;" :value="source.us" :min="0" :max="1" color="#8e8e8e"/>
                             </div>
                         </el-collapse-item>
                     </div>
@@ -180,8 +190,12 @@
 
     <div class="page" id="storms">
         <h3>Storm History</h3>
+        <p>This graph shows the counts of storm event published by NOAA since 1965.</p>
+        
         <Plotly :data="stormData" :layout="stormLayout" :display-mode-bar="true"></Plotly>
     </div>
+    
+    <Footer/>
 </div>
 </template>
 
@@ -194,6 +208,7 @@ import BarGraph from '@/components/BarGraph.vue'
 import Event from '@/components/Event.vue'
 import IndicatorInfo from '@/components/IndicatorInfo.vue'
 import MeasureInfo from '@/components/MeasureInfo.vue'
+import Footer from '@/components/Footer.vue'
 
 import Eligibility2018 from '@/components/Eligibility2018.vue'
 import Eligibility2019 from '@/components/Eligibility2019.vue'
@@ -215,6 +230,7 @@ import VueBarGraph from 'vue-bar-graph'
         VueBarGraph,
         IndicatorInfo,
         MeasureInfo,
+        Footer,
     },
 })
 
@@ -222,6 +238,7 @@ export default class CountyDetail extends Vue {
 
     @Prop() detail;
     @Prop() geojson;
+    @Prop() layers;
 
     popup;
     statemap;
@@ -240,6 +257,7 @@ export default class CountyDetail extends Vue {
     showPastHistory = false;
     shownIndicators = [];
 
+    /*
     layers = {
         "fire": "#f00",
         //"earthquake": "#0f0",
@@ -252,6 +270,7 @@ export default class CountyDetail extends Vue {
 
         "other": "#f0f", //volcano, mud/landslide, snow, "coastal storm", typhoon, earthquake, snow
     };
+    */
 
     drSpyderData = {
       type: 'scatterpolar',
@@ -287,6 +306,11 @@ export default class CountyDetail extends Vue {
         this.showPastHistory = false;
     }
 
+    toggleIndicator(incode) {
+        const pos = this.shownIndicators.indexOf(incode);
+        if(~pos) this.shownIndicators.splice(pos, 1);
+        else this.shownIndicators.push(incode);
+    }  
     update() {
         this.processSpyder();
         this.processHistory();
@@ -697,7 +721,7 @@ export default class CountyDetail extends Vue {
 <style lang="scss" scoped> 
 p {
     margin-top: 0px;
-    line-height: 150%;
+    line-height: 170%;
     color: #666;
 }
 h2 {
@@ -723,6 +747,7 @@ h4 {
     font-weight: bold;
     font-size: 90%;
     color: black;
+    white-space: nowrap;
 }
 .primary {
     font-weight: bold;
@@ -765,13 +790,13 @@ h4 {
     }
 }
 .border-left {
-    border-left: 1px solid #ccc;
-    height: 150px;
+    border-left: 1px solid #ddd;
+    height: 200px;
     padding-left: 20px;
     padding-top: 10px;
 }
 @media only screen and (max-width: 700px) {
-    .border-left {
+    .demo {
         display: none;
     }
 }
@@ -789,6 +814,7 @@ h4 {
     right: 0;
     background-color: white;
 }
+.el-collapse,
 .el-collapse-item__header {
     border: none;
 }
@@ -814,19 +840,22 @@ h4 {
 .navigator {
 position: sticky; 
 top: 10px;
-transition: 1s opacity;
 }
 @media only screen and (max-width: 1500px) {
     .navigator {
-        opacity: 0;
+        display: none;
     }
 }
 #statemap {
     position: relative;
     width: 100%;
-    height: 150px;
+    height: 200px;
 }
 canvas:focus {
     outline: none;
+}
+.indicator-detail {
+border-left: 3px solid #ddd;
+clear: both;
 }
 </style>

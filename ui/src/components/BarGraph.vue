@@ -36,8 +36,8 @@ export default class BarGraph extends Vue {
     @Prop({default: 1, type: Number}) max;
     @Prop({default: 10, type: Number}) height;
     @Prop({type: Number}) value;
-    @Prop({default: "red", type: String}) color1;
-    @Prop({default: "yellow", type: String}) color2;
+    @Prop({default: "crimson", type: String}) color1;
+    @Prop({default: "gold", type: String}) color2;
     @Prop({default: "green", type: String}) color3;
     //@Prop({type: Number}) us_avg;
 }

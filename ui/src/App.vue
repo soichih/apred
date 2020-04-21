@@ -28,20 +28,6 @@ const store = new Vuex.Store({
     }
 })
 
-/*
-export default class App extends Vue {
-    //isSideMenuCollapsed = false;
-    active = '';
-
-    mounted() {
-    }
-
-    @Watch('$route')
-    onChangeRoute(to, from) {
-    }
-
-}
-*/
 export default {
     name: 'App',
     store,
@@ -71,14 +57,17 @@ font-family: Avenir, Helvetica, Arial, sans-serif;
 /*background-color: #f0f0f0;*/
 color: #555;
 scroll-behavior: smooth;
+min-width: 400px;
 }
 a {
   text-decoration: none;
   color: #409EFF;
 }
+
 #app {
 margin-top: 50px;
 }
+
 p.small {
     font-size: 90%;
     opacity: 0.8;
