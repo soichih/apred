@@ -22,9 +22,9 @@
             <footer>
                 <div class="page">
                     <p style="line-height: 200%; margin-top: 5px;">
-                        APRED: The Analysis Platform for Risk, Resilience and Expenditure for Disasters (APRED) project 
-                        brings data science to decision-makers dealing with the economics of 
+                        This platform brings data science to decision-makers dealing with the economics of 
                         disaster mitigation, analysis, and recovery activities.
+                        Made by <b>CTIL Crisis Technologies Innovation Lab</b> at Indiana University
                     </p>
                 </div>
             </footer>
@@ -487,7 +487,9 @@ footer {
 position: fixed;
 bottom: 0;
 width: 100%;
+height: 75px;
 max-height: 75px;
+background-color: #333;
 }
 .secondary {
 opacity: 0.4; 
