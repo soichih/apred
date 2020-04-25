@@ -2,7 +2,7 @@
 <div class="countydetail" v-if="detail">
     <div class="header">
         <div class="page">
-            <h3 style="position: relative;">
+            <h3 style="position: relative; font-weight: normal;">
                 <el-button type="primary" circle icon="el-icon-back" @click="goback()" class="back-button"/>
                 &nbsp;
                 &nbsp;
@@ -39,7 +39,7 @@
             <el-col :span="5" class="border-left">
                 <p class="sub-heading">
                     Disaster Resilience
-                    <i @click="goto('cutter')" class="el-icon-warning-outline"/>
+                    <i style="color: #409EFF; font-weight: bold;" @click="goto('cutter')" class="el-icon-warning-outline"/>
                 </p>
                 <Plotly :data="[drSpyderData]" :layout="drSpyderLayout" :display-mode-bar="false"/>
             </el-col>
@@ -50,7 +50,7 @@
     <div class="page navigator">
         <div style="position: absolute; right: -250px; width: 200px; margin: 20px;">
             <el-button circle icon="el-icon-arrow-up" @click="goto('header')"/>
-            <h5><a href="javascript:void(0);" @click="goto('disaster')">Recent Disaster Declarations</a></h5>
+            <h5><a href="javascript:void(0);" @click="goto('disaster')">Disaster Declarations</a></h5>
             <h5 v-if="detail.bvis"><a href="javascript:void(0);" @click="goto('bvi')">Business Vulnerability</a></h5>
             <h5><a href="javascript:void(0);" @click="goto('cutter')">Disaster Resilience</a></h5>
             <h5><a href="javascript:void(0);" @click="goto('storms')">Storm History</a></h5>
@@ -58,7 +58,7 @@
     </div>
 
     <div class="page" id="disaster">
-        <h3>Recent Disaster Declarations / EDA Awards</h3>
+        <h3>Disaster Declarations / EDA Awards</h3>
         <p>EDIT ME. The following disasters has been declared and EDA grants awarded in the past.</p>
 
         <p v-if="recentHistory.length == 0" style="opacity: 0.8;">No disaster declared since 2017</p>
@@ -77,9 +77,9 @@
                 <i class="el-icon-caret-right"/> Show Past Disasters ({{pastHistory.length}})
             </el-button>
         </div>
-        <div v-if="showPastHistory">
+        <slide-up-down :active="showPastHistory" :duration="1000">
             <Event :event="event" :layers="layers" v-for="event in pastHistory" :key="event._id" class="history"/>
-        </div>
+        </slide-up-down>
         <br>
         <br>
     </div>
@@ -113,31 +113,28 @@
     <div class="page" id="cutter">
         <h3>Disaster Resilience</h3>
         <p style="margin: 20px 0;">
-            TODO Describe what resilience means, and how it's computed.
-
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
-            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. 
-            Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
-            Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+            TODO Describe what resilience means, and how it's computed. You can expand each index and sub-indicies to show 
+            how each indices are calculated.
 
             The score you see is the average of all sub-indecies for this indicators.
         </p>
     
-        <p style="font-size: 85%; opacity: 0.8; margin-left: 355px; padding: 0 10px;">
-            <span>
+        <p style="font-size: 85%; opacity: 1; font-weight: bold; margin-left: 355px; padding: 0 10px; margin-bottom: 0;">
+            <span style="color: crimson">
                 <i class="el-icon-arrow-left"/> Low Resilience
             </span>
-            <span style="float: right; margin-right: 50px;">
+            <span style="float: right; margin-right: 50px; color: green;">
                 High Resilience
                 <i class="el-icon-arrow-right"/>
             </span>
         </p>
 
-        <div v-for="(indicator, incode) in detail.cutter" :key="incode" :title="indicator.name" style="padding: 10px; clear: both;">
+        <div v-for="(indicator, incode) in detail.cutter" :key="incode" :title="indicator.name" style="margin-bottom: 15px; clear: both;">
             <div class="indicator-head">
-                <div style="float: left; width: 325px;">
+                <div style="background-color: #f6f6f6; padding: 5px 10px; margin: 10px 0; margin-right: 50px;">
                     {{indicator.name}} <el-tag type="info" size="small">{{incode}}</el-tag>
                 </div>
+                <IndicatorInfo :id="incode" style="margin-right: 175px; opacity: 0.8; font-size: 90%; padding: 10px; margin-bottom: 10px;"/>
                 <div style="position: relative; margin-left: 355px; margin-right: 50px;">
                     <span style="position: absolute; left: -100px; font-size: 85%;">This County</span>
                     <BarGraph :value="indicator.aggregate.county" :min="0" :max="1" :height="15"/>
@@ -150,7 +147,7 @@
                 </div>
                 <br> 
 
-                <p style="float: right; margin-right: 50px">
+                <p style="margin-right: 50px; border-top: 1px solid #eee; padding-top: 10px;">
                     <el-button round @click="toggleIndicator(incode)" plain size="small" style="width: 150px">
                         <span v-if="!shownIndicators.includes(incode)">
                             <i class="el-icon-caret-right"/> Show Sub-Indices
@@ -160,31 +157,33 @@
                         </span>
                     </el-button>
                 </p>
-                <IndicatorInfo :id="incode" style="margin-right: 175px; opacity: 0.8; font-size: 90%"/>
             </div>
-            <div class="indicator-detail" v-if="shownIndicators.includes(incode)">
+            <slide-up-down class="indicator-detail" :active="shownIndicators.includes(incode)">
                 <el-collapse>
                     <div v-for="source in detail.cutter[incode].sources" :key="source.id">
                         <el-collapse-item v-if="source.us">
                             <template slot="title">
-                                <i class="el-icon-caret-right" style="padding-left: 10px; opacity: 0.5;"/>
-                                <span style="float: left; min-width: 330px">{{source.name}}</span>
+                                <i class="el-icon-caret-right" style="margin-right: 10px; opacity: 0.5;"/>
+                                <el-tag type="info" size="small" style="margin-right: 10px;">{{source.id}}</el-tag>
+                                <span style="float: left; min-width: 290px">{{source.name}}</span>
                                 <BarGraph style="margin-right: 30px; width: 100%;" :value="source.county" :min="0" :max="1" />
                             </template>
 
-                            <MeasureInfo :id="source.id" style="padding: 0 10px;"/>
+                            <div style="background-color: #eee; padding: 5px 20px;">
+                                <MeasureInfo :id="source.id" style="margin-right: 50px; margin-bottom: 10px;"/>
 
-                            <div style="padding: 10px; padding-right: 50px; background-color: #f7f7f7;">
-                                <span style="float: left; width: 265px; text-align: right; padding-right: 60px;">State Average</span>
-                                <BarGraph style="margin-left: 343px;" :value="source.states" :min="0" :max="1" color="#8e8e8e"/>
-                                <br>
-                                <span style="float: left; width: 265px; text-align: right; padding-right: 60px;">US Average</span>
-                                <BarGraph style="margin-left: 343px;" :value="source.us" :min="0" :max="1" color="#8e8e8e"/>
+                                <div style="margin-bottom: 10px; padding-right: 30px;">
+                                    <span style="float: left; width: 245px; text-align: right;">State Average</span>
+                                    <BarGraph style="margin-left: 333px;" :value="source.states" :min="0" :max="1" color="#8e8e8e"/>
+                                    <br>
+                                    <span style="float: left; width: 255px; text-align: right;">US Average</span>
+                                    <BarGraph style="margin-left: 333px;" :value="source.us" :min="0" :max="1" color="#8e8e8e"/>
+                                </div>
                             </div>
                         </el-collapse-item>
                     </div>
                 </el-collapse>
-            </div>
+            </slide-up-down>
         </div>
     </div>
 
@@ -213,6 +212,8 @@ import Footer from '@/components/Footer.vue'
 import Eligibility2018 from '@/components/Eligibility2018.vue'
 import Eligibility2019 from '@/components/Eligibility2019.vue'
 
+import SlideUpDown from 'vue-slide-up-down'
+
 import mapboxgl from 'mapbox-gl';
 import "mapbox-gl/dist/mapbox-gl.css";
 
@@ -231,6 +232,7 @@ import VueBarGraph from 'vue-bar-graph'
         IndicatorInfo,
         MeasureInfo,
         Footer,
+        SlideUpDown,
     },
 })
 
@@ -369,7 +371,7 @@ export default class CountyDetail extends Vue {
             margin: {
                 l: 30,
                 r: 30,
-                t: 30,
+                t: 100,
                 //b: 30,
                 //pad: 10,
             },
@@ -394,7 +396,7 @@ export default class CountyDetail extends Vue {
             },
             legend: {
                 //x: 0,
-                //y: 1.0,
+                y: 1.15,
                 bgcolor: 'rgba(255, 255, 255, 0)',
                 bordercolor: 'rgba(255, 255, 255, 0)',
                 orientation: 'h',
@@ -407,7 +409,7 @@ export default class CountyDetail extends Vue {
             margin: {
                 l: 30,
                 r: 30,
-                t: 30,
+                t: 100,
                 //b: 30,
                 //pad: 10,
             },
@@ -432,7 +434,7 @@ export default class CountyDetail extends Vue {
             },
             legend: {
                 //x: 0,
-                //y: 1.0,
+                y: 1.15,
                 bgcolor: 'rgba(255, 255, 255, 0)',
                 bordercolor: 'rgba(255, 255, 255, 0)',
                 orientation: 'h',
@@ -463,7 +465,7 @@ export default class CountyDetail extends Vue {
         }
         const traceBtV = {
             x, y: bviBtV,
-            name: 'Vulnerable',
+            name: 'Vulnerable Businesses',
             marker: {color: '#f56c6c'},
             type: 'bar'
         }
@@ -477,7 +479,7 @@ export default class CountyDetail extends Vue {
         }
         const traceEtV = {
             x, y: bviEtV,
-            name: 'Vulnerable',
+            name: 'Vulnerable Employees',
             marker: {color: '#f56c6c'},
             type: 'bar'
         }
@@ -735,7 +737,7 @@ h3 {
     color: #0006;
     text-transform: uppercase;
     font-size: 23px;
-    font-weight: normal;
+    font-weight: bold;
 }
 
 h4 {
@@ -841,6 +843,9 @@ h4 {
 position: sticky; 
 top: 10px;
 }
+.navigator h5 {
+text-transform: uppercase;
+}
 @media only screen and (max-width: 1500px) {
     .navigator {
         display: none;
@@ -855,7 +860,6 @@ canvas:focus {
     outline: none;
 }
 .indicator-detail {
-border-left: 3px solid #ddd;
 clear: both;
 }
 </style>
