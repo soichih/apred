@@ -2,8 +2,7 @@
 <footer>
     <div class="page">
         <p>
-            APRED: The Analysis Platform for Risk, Resilience and Expenditure for Disasters (APRED) project 
-            brings data science to decision-makers dealing with the economics of 
+            This platform brings data science to decision-makers dealing with the economics of 
             disaster mitigation, analysis, and recovery activities.
         </p>
         <h3>CTIL Crisis Technologies Innovation Lab</h3>
