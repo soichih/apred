@@ -190,7 +190,6 @@
     <div class="page" id="storms">
         <h3>Storm History</h3>
         <p>This graph shows the counts of storm event published by NOAA since 1965.</p>
-        
         <Plotly :data="stormData" :layout="stormLayout" :display-mode-bar="true"></Plotly>
     </div>
     
@@ -522,7 +521,7 @@ export default class CountyDetail extends Vue {
                 bordercolor: 'rgba(255, 255, 255, 0)',
                 orientation: 'h',
             },
-            //barmode: 'group',
+            barmode: 'stack',
             //bargroupgap: 0.1
         }
 
