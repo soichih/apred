@@ -1,8 +1,8 @@
 <template>
-<div>
+<div :class="eventClass">
     <div class="event-header">
         <div class="event-icon">
-            <div v-if="event.type == 'dr'" class="dd" :class="eventClass" :style="eventStyle">
+            <div v-if="event.type == 'dr'" :style="eventIconStyle">
                 <i class="el-icon-warning"/>
             </div>
             <div v-else-if="event.type == 'eda2018'" class="eda2018" :class="{'eda2018-state': event.statewide, 'eda2018-county': !event.statewide}">
@@ -10,12 +10,11 @@
             </div>
         </div>
 
-        <h3 v-if="event.type == 'dr'" class="dd" :class="eventClass" :style="eventStyle">
+        <h3 v-if="event.type == 'dr'" :style="eventIconStyle">
             <span style="float: right;">
                 <el-tag size="small" effect="light" type="info">Disaster # {{event.disasterNumber}}</el-tag>&nbsp;
-
             </span>
-            <b v-if="!event.countyfips">STATEWIDE <i class="el-icon-arrow-right"/> </b> &nbsp;
+            <el-tag type="info" style="position: relative; top: -2px;" v-if="event.declaredCountyArea == 'Statewide'">STATEWIDE</el-tag> &nbsp;
             <b>{{event.incidentType}}</b> &nbsp;
             <br>
         </h3>
@@ -43,16 +42,16 @@
             
                 <p style="line-height: 200%; margin-bottom: 0;">
                     <!-- https://www.fema.gov/openfema-dataset-disaster-declarations-summaries-v1 -->
-                    <el-tag size="small" effect="plain" type="info" v-if="event.hmProgramDeclared" title="hmProgramDeclared">
+                    <el-tag class="program-tag" size="small" effect="plain" type="info" v-if="event.hmProgramDeclared">
                         <a href="https://www.fema.gov/media-library/assets/documents/107704">Hazard Mitigation Program</a>
                     </el-tag>&nbsp;
-                    <el-tag size="small" effect="plain" type="info" v-if="event.ihProgramDeclared" title="ihProgramDeclared">
+                    <el-tag class="program-tag" size="small" effect="plain" type="info" v-if="event.ihProgramDeclared">
                         <a href="https://www.fema.gov/media-library/assets/documents/24945">Individuals and Households Program</a>
                     </el-tag>&nbsp;
-                    <el-tag size="small" effect="plain" type="info" v-if="event.iaProgramDeclared" title="iaProgramDeclared">
+                    <el-tag class="program-tag" size="small" effect="plain" type="info" v-if="event.iaProgramDeclared">
                         <a href="https://www.fema.gov/media-library/assets/documents/133744">Individual Assistance Program</a>
                     </el-tag>&nbsp;
-                    <el-tag size="small" effect="plain" type="info" v-if="event.paProgramDeclared" title="paProgramDeclared">
+                    <el-tag class="program-tag" size="small" effect="plain" type="info" v-if="event.paProgramDeclared">
                         <a href="https://www.fema.gov/media-library/assets/documents/90743">Public Assistance Program</a>
                     </el-tag>&nbsp;
                 </p>
@@ -94,9 +93,10 @@ export default class BarGraph extends Vue {
 
     get eventClass() {
         const c = [];
-        //TODO - I should use declaredCountyArea == 'Statewide' instead?
-        if(this.event.countyfips) c.push('dr-county');
-        else c.push('dr-state');
+        if(this.event.type == "dr") {
+            if(this.event.declaredCountyArea == 'Statewide') c.push('dr-state');
+            else c.push('dr-county');
+        }
 
         return c;
     }
@@ -106,22 +106,16 @@ export default class BarGraph extends Vue {
         else return "Disaster Declaration Date";
     }
 
-    get eventStyle() {
+    get eventIconStyle() {
         let color = this.layers['other'].color;
 
         //use incident specific color if available
         let type = this.event.incidentType.toLowerCase();
         if(~type.indexOf("(")) type = type.substring(0, type.indexOf("(")); 
-        //type = type.replace(/\s/g, '');
         type = type.trim();
         if(this.layers[type]) color = this.layers[type].color;
 
-        const s = {
-            //borderLeft: 'solid 3px '+color, 
-            color: color,
-        }
-
-        return s;
+        return { color };
     }
 }
 </script>
@@ -146,6 +140,8 @@ padding-top: 8px;
         display: inline-block;
         width: 50px;
         font-size: 225%;
+        position: relative;
+        top: 2px;
     }
 }
 .event-body {
@@ -157,5 +153,14 @@ padding-top: 8px;
 .eda2018 {
 color: green;
 }
-
+.program-tag a {
+color: gray;
+}
+.dr-state {
+background-color: #eee;
+padding: 5px 10px;
+margin: -5px -10px;
+border-radius: 5px;
+margin-bottom: 5px;
+}
 </style>
