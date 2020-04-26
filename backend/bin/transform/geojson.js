@@ -2,10 +2,11 @@
 const fs = require('fs');
 
 const geojson = require("../../../raw/counties_geo.json");
-const output = "../../../data/counties_geo.json";
 const disasters = require("../../../raw/statsamerica.disasters.2015-now.json");
 const fips = require('../../../data/fips.json');
 const eda2018 = require('../../../data/eda2018.json');
+
+const output = "../../../data/counties_geo.json";
 
 const fips_map = {};
 fips.forEach(f=>{
@@ -130,7 +131,7 @@ geojson.features.forEach(feature=>{
                 case "Severe Ice Storm":
                     feature.properties.isStateSevereIceStorm = true; break;
                 case "Biological":
-                    feature.properties.isStateBiological = true; break; //I don't see any yet.
+                    feature.properties.isStateBiological = true; break;
                 default: 
                     console.log("unknown state disaster type", d);
                     process.exit(1);
