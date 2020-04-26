@@ -62,6 +62,15 @@ export default class Disaster extends Vue {
     countyList = [];
 
     layers = {
+        "biological": {
+            color: "#396",
+            filter: ["any", 
+                ["==", "isBiological", true],
+            ],
+            statefilter: ["any", 
+                ["==", "isStateBiological", true],
+            ]
+        },
         "fire": {
             color: "#f00", 
             filter: ["any", 
@@ -107,17 +116,6 @@ export default class Disaster extends Vue {
                 ["==", "isStateFlood", true],
             ]
         },
-        /*
-        "bio": {
-            color: "#06f",
-            filter: ["any", 
-                ["==", "isBiological", true],
-            ],
-            statefilter: ["any", 
-                ["==", "isStateBiological", true],
-            ]
-        },
-        */
         "other": {
             color: "#90f",
             filter: ["any", 
@@ -128,7 +126,6 @@ export default class Disaster extends Vue {
                 ["==", "isVolcano", true],
                 ["==", "isDamLeveeBreak", true],
                 ["==", "isSevereIceStorm", true],
-                ["==", "isBiological", true], //nothing yet -- all indian reservations
             ],
             statefilter: ["any", 
                 ["==", "isStateEarthquake", true],
@@ -138,42 +135,9 @@ export default class Disaster extends Vue {
                 ["==", "isStateVolcano", true],
                 ["==", "isStateDamLeveeBreak", true],
                 ["==", "isStateSevereIceStorm", true],
-                ["==", "isStateBiological", true], //nothing yet -- all indian reservations
             ]
         }, 
     };
-
-    /*
-    addLayer(color) {
-
-        function rawColorValue(color) {
-            // color looks like #123456
-            //   strip off the '#'
-            return color.split('#')[1];
-        }
-
-        const colorValue = rawColorValue(color);
-
-        const layer = {
-            "id": "counties-highlighted-" + colorValue,
-            "type": "fill",
-            "source": "counties",
-            "source-layer": "original",
-            "paint": {
-                "fill-outline-color": "#888888",
-                "fill-color": color,
-                "fill-opacity": 0.75
-            },
-            "filter": [
-                "in",
-                "COUNTY",
-                ""
-            ]
-        };
-
-        return layer;
-    }
-    */
 
     @Watch('$route')
     onRouteChange(to, from) {
@@ -212,13 +176,6 @@ export default class Disaster extends Vue {
         });
 
         this.map.on('load', ()=>{
-            /*
-            this.map.addSource('counties', {
-                "type": "vector",
-                "url": "mapbox://mapbox.82pkq93d"
-            });
-            */
-
             fetch("https://ctil.iu.edu/projects/apred-data/counties_geo.json").then(res=>res.json()).then(data=>{
                 this.geojson = data;
                 data.features.forEach(feature=>{
