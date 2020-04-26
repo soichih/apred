@@ -2,7 +2,6 @@
 const fs = require('fs');
 
 const geojson = require("../../../raw/counties_geo.json");
-//const demo = require("../../../raw/statsamerica.demo.json");
 const output = "../../../data/counties_geo.json";
 const disasters = require("../../../raw/statsamerica.disasters.2015-now.json");
 const fips = require('../../../data/fips.json');
@@ -87,10 +86,18 @@ geojson.features.forEach(feature=>{
                     feature.properties.isDamLeveeBreak = true; break;
                 case "Severe Ice Storm":
                     feature.properties.isSevereIceStorm = true; break;
+                case "Biological":
+                    feature.properties.isBiological = true; break;
                 default: 
                     console.log("unknown disaster type", d);
                     process.exit(1);
             }
+        }
+
+        if(fips == "28163") {
+            console.log("---------------28163----------------");
+            console.dir(dd[fips]);
+            console.dir(feature.properties);
         }
     }
 
@@ -122,6 +129,8 @@ geojson.features.forEach(feature=>{
                     feature.properties.isStateDamLeveeBreak = true; break;
                 case "Severe Ice Storm":
                     feature.properties.isStateSevereIceStorm = true; break;
+                case "Biological":
+                    feature.properties.isStateBiological = true; break; //I don't see any yet.
                 default: 
                     console.log("unknown state disaster type", d);
                     process.exit(1);
@@ -133,7 +142,8 @@ geojson.features.forEach(feature=>{
     feature.properties.countyfips = feature.properties.COUNTY;
     let f = fips_map[feature.properties.statefips + feature.properties.countyfips];
     if(!f) {
-        console.error("failed to find fips", feature.properties);
+        console.error("failed to find fips - using NAME as county");
+        console.dir(feature);
         feature.properties.county = feature.properties.NAME;
     } else {
         feature.properties.county = f.county;

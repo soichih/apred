@@ -5,8 +5,6 @@ const async = require('async');
 const config = require('../../config');
 const mssql = require('mssql');
 
-//const fips = require('../data/fips.json');
-
 //I can only connect from IU VPN connected IPs - not dev1
 mssql.connect(config.stats_america.db_stats4).then(pool=>{
     console.log("connected");
@@ -56,8 +54,21 @@ function load(pool) {
                 console.log("failed to find statefips:", rec.state);
             }
             */
-            if(!rec.statefips) console.log(rec.disasterNumber, "statfips missing");
-            if(!rec.countyfips) console.log(rec.disasterNumber, "countyfip missing");
+            if(!rec.statefips) {
+                console.log(rec.disasterNumber, "statfips missing");
+                console.dir(rec);
+            }
+            if(!rec.countyfips) {
+                console.log(rec.disasterNumber, "countyfip missing");
+                console.dir(rec);
+            }
+
+            /*
+            if(rec.incidentType == "Biological") {
+                console.dir(rec);
+            }
+            */
+
             dds.push(rec);
         });
 
