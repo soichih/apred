@@ -37,7 +37,8 @@
                 <span style="opacity: 0.6; font-size: 85%;">
                     <!--Declared: <time>{{new Date(event.declarationDate).toLocaleDateString()}}</time>&nbsp; &bull;-->
                     Incident <time>{{new Date(event.incidentBeginDate).toLocaleDateString()}}</time>
-                    - <time>{{new Date(event.incidentEndDate).toLocaleDateString()}}</time>
+                    - <time v-if="event.incidentEndDate">{{new Date(event.incidentEndDate).toLocaleDateString()}}</time>
+                    <span v-else>On Going</span>
                 </span>
             
                 <p style="line-height: 200%; margin-bottom: 0;">

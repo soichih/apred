@@ -129,12 +129,23 @@ for(let fain in eda2018) {
 }
 
 function handle_disaster(rec) {
-    let fips = rec.statefips+rec.countyfips;
-    if(!counties[fips]) {
-        console.error("odd/missing fips in disaster rec", fips);
-        return;
+    if(rec.declaredCountyArea == "Statewide") {
+        //add it to all county in the state
+        for(let fip in counties) {
+            let county = counties[fip];
+            if(fip.startsWith(rec.statefips)) {
+                county.disasters.push(rec);
+            }
+        }
+    } else {
+        //county specific
+        let fips = rec.statefips+rec.countyfips;
+        if(!counties[fips]) {
+            console.error("odd/missing fips in disaster rec", fips);
+            return;
+        }
+        counties[fips].disasters.push(rec);
     }
-    counties[fips].disasters.push(rec);
 }
 
 console.log("loading past disasters");
