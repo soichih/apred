@@ -107,6 +107,17 @@ export default class Disaster extends Vue {
                 ["==", "isStateFlood", true],
             ]
         },
+        /*
+        "bio": {
+            color: "#06f",
+            filter: ["any", 
+                ["==", "isBiological", true],
+            ],
+            statefilter: ["any", 
+                ["==", "isStateBiological", true],
+            ]
+        },
+        */
         "other": {
             color: "#90f",
             filter: ["any", 
@@ -117,6 +128,7 @@ export default class Disaster extends Vue {
                 ["==", "isVolcano", true],
                 ["==", "isDamLeveeBreak", true],
                 ["==", "isSevereIceStorm", true],
+                ["==", "isBiological", true], //nothing yet -- all indian reservations
             ],
             statefilter: ["any", 
                 ["==", "isStateEarthquake", true],
@@ -126,6 +138,7 @@ export default class Disaster extends Vue {
                 ["==", "isStateVolcano", true],
                 ["==", "isStateDamLeveeBreak", true],
                 ["==", "isStateSevereIceStorm", true],
+                ["==", "isStateBiological", true], //nothing yet -- all indian reservations
             ]
         }, 
     };
