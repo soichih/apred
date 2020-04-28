@@ -1,6 +1,6 @@
 #!/usr/bin/env nodejs
 
-const MongoClient = require('mongodb').MongoClient;
+//const MongoClient = require('mongodb').MongoClient;
 const csvParser = require('csv-parser');
 const fs = require('fs');
 const async = require('async');
@@ -18,7 +18,6 @@ let data = {
             "FLOR": {id: "100", name: "Special/Custom"},
         },
     }
-
 }; 
 
 //create cutter source catalog with us/state average/sdev

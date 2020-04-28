@@ -232,7 +232,7 @@ export default class Disaster extends Vue {
                     'id': 'eda-circles-state',
                     'type': 'circle',
                     "source": "counties",
-                    filter: ['==', 'edatype', 'state'],    
+                    filter: ['==', 'eda2018', 'state'],    
                     'paint': {
                         'circle-stroke-color': 'rgba(0,0,0,0)',
                         'circle-stroke-width': 2,
@@ -258,7 +258,7 @@ export default class Disaster extends Vue {
                     'id': 'eda-circles-county',
                     'type': 'circle',
                     "source": "counties",
-                    filter: ['==', 'edatype', 'county'],    
+                    filter: ['==', 'eda2018', 'county'],    
                     'paint': {
                         'circle-stroke-color': 'rgba(103,194,58,0.8)',
                         'circle-stroke-width': 2,
@@ -286,8 +286,8 @@ export default class Disaster extends Vue {
                     "source": "counties",
                     'minzoom': 4,
                     filter: ['any', 
-                        ['==', 'edatype', 'county'],    
-                        ['==', 'edatype', 'state'],    
+                        ['==', 'eda2018', 'county'],    
+                        ['==', 'eda2018', 'state'],    
                     ],
                     'layout': {
                         'text-field': 
