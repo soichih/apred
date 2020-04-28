@@ -237,7 +237,7 @@ disasterNumber,declarationDate,incidentType,pwNumber,applicationTitle,applicantI
     if(!disaster.pa) disaster.pa = [];
     disaster.pa.push({
         pwNumber: rec.pwNumber, 
-        damageCategoryCode: rec.damageCategoryCode,
+        //damageCategoryCode: rec.damageCategoryCode,
         dcc: rec.dcc,
         damageCategory: rec.damageCategory,
         projectSize: rec.projectSize,
