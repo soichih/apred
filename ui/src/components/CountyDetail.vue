@@ -62,7 +62,7 @@
         <p>EDIT ME. The following disasters has been declared and EDA grants awarded in the past.</p>
 
         <p v-if="recentHistory.length == 0" style="opacity: 0.8;">No disaster declared since 2017</p>
-        <div v-for="(event, idx) in recentHistory" :key="event._id" class="history">
+        <div v-for="(event, idx) in recentHistory" :key="idx" class="history">
             <Event :event="event" :layers="layers">
                 <div class="connecter" v-if="idx < recentHistory.length">
                     <Eligibility2018 v-if="is2018Eligible(event)"/>
@@ -78,7 +78,7 @@
             </el-button>
         </div>
         <slide-up-down :active="showPastHistory" :duration="1000">
-            <Event :event="event" :layers="layers" v-for="event in pastHistory" :key="event._id" class="history"/>
+            <Event :event="event" :layers="layers" v-for="(event, idx) in pastHistory" :key="idx" class="history"/>
         </slide-up-down>
         <br>
         <br>
