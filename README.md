@@ -76,6 +76,14 @@ All raw data is extracted to `raw` directory. The scripts inside `backend/bin/ex
 
 Some fain doesn't have fema_id, and some counties are empty [].
 
+### OpenFEMA
+
+`openfema.js`
+
+This loads all FEMA public assictance projects awareded
+
+> raw/PublicAssistanceFundedProjectsDetails.json (620MB)
+
 ### [StatsAmerica] FEMA Disasters
 
 `statsamerica_fema_disasters.js`
