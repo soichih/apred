@@ -1,12 +1,14 @@
 #!/usr/bin/env nodejs
 const fs = require('fs');
 
-const geojson = require("../../../raw/counties_geo.json");
-const disasters = require("../../../raw/statsamerica.disasters.2015-now.json");
-const fips = require('../../../data/fips.json');
-const eda2018 = require('../../../data/eda2018.json');
+console.log("geojson ...........................");
 
-const output = "../../../data/counties_geo.json";
+const geojson = require(__dirname+"/../../../raw/counties_geo.json");
+const disasters = require(__dirname+"/../../../raw/statsamerica.disasters.2015-now.json");
+const fips = require(__dirname+'/../../../data/fips.json');
+const eda2018 = require(__dirname+'/../../../data/eda2018.json');
+
+const output = __dirname+"/../../../data/counties_geo.json";
 
 const fips_map = {};
 fips.forEach(f=>{

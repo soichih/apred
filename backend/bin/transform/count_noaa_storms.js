@@ -1,8 +1,11 @@
 #!/usr/bin/env node
 const fs = require('fs');
 
-const rawdir = "../../../raw";
-const output_file = "../../../data/storm_counts.json";
+console.log("count_noaa_storms---------------------------------");
+
+const rawdir = __dirname+"/../../../raw";
+const output_file = __dirname+"/../../../data/storm_counts.json";
+
 
 //keyed by state/county fips, then keyed by EVENT_TYPE, then keyed by year then count
 const storms = {

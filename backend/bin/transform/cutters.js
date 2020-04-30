@@ -5,6 +5,8 @@ const csvParser = require('csv-parser');
 const fs = require('fs');
 const async = require('async');
 
+console.log("cutters----------------------------------");
+
 let data = {
     fips: [],
     cutter: {
@@ -79,6 +81,7 @@ function load_cutter_combined(cb) {
             source.states = {};
         });
     }
+    console.dir(sources);
 
     console.debug("loading cutter combined");
     let count_missing = 0;
@@ -104,6 +107,7 @@ function load_cutter_combined(cb) {
 
         //aggregate average 
         let source = sources[rec.source];
+	if(!source) console.log("missing"+rec.source);
         source.total += parseFloat(rec.value);
         source.count++;
         if(!source.states[state_fips]) source.states[state_fips] = { total: 0, count: 0 };
