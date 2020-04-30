@@ -1,14 +1,9 @@
 #!/usr/bin/env node
 
-<<<<<<< HEAD
 console.log("counties----------------------------");
 
 const fs = require('fs');
 const geo = require(__dirname+'/../../../data/counties_geo.json');
-=======
-const fs = require('fs');
-const geo = require('../../../data/counties_geo.json');
->>>>>>> 28eac27be053040e551db1f4ba43e1e7cd6a2d44
 const csvParser = require('csv-parser');
 
 const counties = {}; //keyed by fips, then all information for that county
@@ -54,11 +49,7 @@ geo.features.forEach(feature=>{
 
 
 console.log("loading demographics");
-<<<<<<< HEAD
 const demo = require(__dirname+'/../../../raw/statsamerica.demo.json');
-=======
-const demo = require('../../../data/statsamerica.demo.json');
->>>>>>> 28eac27be053040e551db1f4ba43e1e7cd6a2d44
 for(let fips in demo) {
     if(!counties[fips]) {
         console.error("odd fips in demo?", fips);
@@ -77,11 +68,7 @@ for(let fips in counties) {
 }
 
 console.log("loading cutter info");
-<<<<<<< HEAD
 const cutter = require(__dirname+'/../../../data/cutter.json');
-=======
-const cutter = require('../../../data/cutter.json');
->>>>>>> 28eac27be053040e551db1f4ba43e1e7cd6a2d44
 for(let fips in cutter.counties) {
     let tokens = fips.split(".");
     let statefips = tokens[0]; 
@@ -128,11 +115,7 @@ for(let fips in cutter.counties) {
 }
 
 console.log("loading eda2018");
-<<<<<<< HEAD
 const eda2018 = require(__dirname+'/../../../data/eda2018.json');
-=======
-const eda2018 = require('../../../data/eda2018.json');
->>>>>>> 28eac27be053040e551db1f4ba43e1e7cd6a2d44
 for(let fain in eda2018) {
     eda2018[fain].counties.forEach(county=>{
         let fips = county.statefips+county.countyfips;
@@ -141,47 +124,24 @@ for(let fain in eda2018) {
             return;
         }
         counties[fips].eda2018.push(eda2018[fain]);
-<<<<<<< HEAD
-	    /*
-	if(fips == "22053") {
-		console.log("added", fips);
-		console.dir(counties[fips]);
-		process.exit(1);
-	}
-		*/
-=======
->>>>>>> 28eac27be053040e551db1f4ba43e1e7cd6a2d44
-        //console.dir(fips, fain);
     });
     //console.log(JSON.stringify(counties["01003"], null, 4));
     //process.exit(1);
 }
 
 function handle_disaster(rec) {
-<<<<<<< HEAD
     //if(rec.declaredCountyArea == "Statewide") {
     if(rec.designatedArea == "Statewide") {
         //add it to all county in the state
         for(let fip in counties) {
             let county = counties[fip];
             if(fip.startsWith(rec.fipsStateCode)) {
-=======
-    if(rec.declaredCountyArea == "Statewide") {
-        //add it to all county in the state
-        for(let fip in counties) {
-            let county = counties[fip];
-            if(fip.startsWith(rec.statefips)) {
->>>>>>> 28eac27be053040e551db1f4ba43e1e7cd6a2d44
                 county.disasters.push(rec);
             }
         }
     } else {
         //county specific
-<<<<<<< HEAD
         let fips = rec.fipsStateCode+rec.fipsCountyCode;
-=======
-        let fips = rec.statefips+rec.countyfips;
->>>>>>> 28eac27be053040e551db1f4ba43e1e7cd6a2d44
         if(!counties[fips]) {
             console.error("odd/missing fips in disaster rec", fips);
             return;
@@ -191,7 +151,6 @@ function handle_disaster(rec) {
 }
 
 console.log("loading past disasters");
-<<<<<<< HEAD
 const disasters_past = require(__dirname+"/../../../raw/statsamerica.disasters.1953-2015.json");
 disasters_past.forEach(handle_disaster);
 
@@ -201,17 +160,8 @@ disasters_recent.forEach(handle_disaster);
 
 console.log("loading storm counts");
 const storm_counts = require(__dirname+"/../../../data/storm_counts.json");
-=======
-const disasters_past = require("../../../raw/statsamerica.disasters.1953-2015.json");
 disasters_past.forEach(handle_disaster);
 
-console.log("loading recent disasters");
-const disasters_recent = require("../../../raw/statsamerica.disasters.2015-now.json");
-disasters_recent.forEach(handle_disaster);
-
-console.log("loading storm counts");
-const storm_counts = require("../../../data/storm_counts.json");
->>>>>>> 28eac27be053040e551db1f4ba43e1e7cd6a2d44
 for(let fips in storm_counts) {
     let storms = storm_counts[fips];
     fips = fips.replace(".", "");
@@ -223,10 +173,6 @@ for(let fips in storm_counts) {
     counties[fips].storms = storms;
 }
 
-<<<<<<< HEAD
-//TODO - we don't necessary need this ... no business case.. but it might be useful someday?
-=======
->>>>>>> 28eac27be053040e551db1f4ba43e1e7cd6a2d44
 console.log("loading PublicAssistanceFundedProjectsDetails");
 fs.createReadStream(__dirname+'/../../../raw/PublicAssistanceFundedProjectsDetails.csv').pipe(csvParser({
     mapValues({header, index, value}) {
@@ -282,22 +228,12 @@ disasterNumber,declarationDate,incidentType,pwNumber,applicationTitle,applicantI
     //look for county
     let county = counties[fips];
     if(!county) {
-<<<<<<< HEAD
-        //console.error("can't find fip:"+fips+" in counties dict");
-=======
-        console.error("can't find fip:"+fips+" in counties dict");
->>>>>>> 28eac27be053040e551db1f4ba43e1e7cd6a2d44
         return;
     }
 
     //look for disaster
     let disaster = county.disasters.find(disaster=>disaster.disasterNumber == rec.disasterNumber);
     if(!disaster) {
-<<<<<<< HEAD
-        //console.error("can't find disaster"+rec.disasterNumber+" in "+fips);
-=======
-        console.error("can't find disaster"+rec.disasterNumber+" in "+fips);
->>>>>>> 28eac27be053040e551db1f4ba43e1e7cd6a2d44
         return;
     }
     if(!disaster.pa) disaster.pa = [];
@@ -323,11 +259,7 @@ disasterNumber,declarationDate,incidentType,pwNumber,applicationTitle,applicantI
     //console.log(JSON.stringify(data.cutter.indicators, null, 4));
 
     console.log("loading bvi.csv");
-<<<<<<< HEAD
     fs.createReadStream(__dirname+'/../../../raw/bvi.csv').pipe(csvParser({
-=======
-    fs.createReadStream('../../../raw/bvi.csv').pipe(csvParser({
->>>>>>> 28eac27be053040e551db1f4ba43e1e7cd6a2d44
         headers: [ 
             "year","county","estab_total","estab_vuln_total","estab_vuln_pct","mm_employees","emp_vuln_total","emp_vuln_pct"
         ],
@@ -368,11 +300,7 @@ disasterNumber,declarationDate,incidentType,pwNumber,applicationTitle,applicantI
 
         console.log("saving jsons");
         for(let fips in counties) {
-<<<<<<< HEAD
             fs.writeFileSync(__dirname+"/../../../data/counties/county."+fips+".json", JSON.stringify(counties[fips]));
-=======
-            fs.writeFileSync("../../../data/counties/county."+fips+".json", JSON.stringify(counties[fips]));
->>>>>>> 28eac27be053040e551db1f4ba43e1e7cd6a2d44
         }
         console.log("all done");
     });
