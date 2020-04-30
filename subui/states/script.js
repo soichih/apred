@@ -60,9 +60,11 @@ new Vue({
 
                 <p v-if="selected.name == 'Indiana'">For county specific travel advisory, please see <a href="http://www.in.gov/dhs/traveladvisory/">http://www.in.gov/dhs/traveladvisory/</a></p>
 
+                <!--
                 <p v-if="selected.major_disaster_declaration != ''" class="alert">
                     <b>Major Disaster Declared</b>
                 </p>
+                -->
 
                 <p v-if="selected.national_guard_activation != ''" class="alert">
                     <b>National Guard Activated</b>
@@ -102,8 +104,8 @@ new Vue({
                     <td>
                         <!--school closures-->
                         <p class="option" :class="{active: (selected.statewide_closure_school == '')}"><span class="circle"/> No Closure (+0)</p>
-                        <p class="option" :class="{active: (selected.statewide_closure_school == 'Local')}"><span class="circle"/> Local Closure (+0.25)</p>
-                        <p class="option" :class="{active: (selected.statewide_closure_school == 'Yes')}"><span class="circle"/> Statewide Closure (+0.5)</p>
+                        <p class="option" :class="{active: (selected.statewide_closure_school.startsWith('Local'))}"><span class="circle"/> Local Closure (+0.25)</p>
+                        <p class="option" :class="{active: (selected.statewide_closure_school.startsWith('Yes'))}"><span class="circle"/> Statewide Closure (+0.5)</p>
                     </td>
                 </tr>
                 <tr>
@@ -180,23 +182,10 @@ new Vue({
         this.map.scrollZoom.disable();
         this.map.addControl(new mapboxgl.NavigationControl());
 
-        Promise.all([this.loadCSV(), this.loadGeo(), this.loadCounty()]).then(data=>{
+        Promise.all([this.loadCSV(), this.loadGeo()/*, this.loadCounty()*/]).then(data=>{
             //merge csv into geojson
             this.geojson = data[1];
-            //this.geojson.features.forEach(f=>console.dir(f.properties.name));
-            //console.dir(this.geojson.features);
-            
-            /*
-            let r = data[0][55];
-            for(let i = 0;i < r.state.length;i++) console.log(r.state.charCodeAt(i), r.state.charAt(i));
-            console.log(" ".charAt(0));
-            let feature = this.geojson.features.find(feature=>{
-                if(r.state.startsWith(feature.properties.name)) return true;
-            });
-            console.dir(feature);
-            console.log("...............................");
-            */
-
+            console.log("data[0]");
             data[0].forEach(rec=>{
                 let feature = this.geojson.features.find(feature=>rec.state.startsWith(feature.properties.name));
                 if(feature) {
@@ -204,7 +193,7 @@ new Vue({
                     Object.assign(feature.properties, rec);
                     this.props.push(rec);
                 } else {
-                    console.error("couldn't find feature for", rec.state);
+                    console.error("couldn't find feature for "+rec.state);
                 }
             });
 
@@ -249,6 +238,7 @@ new Vue({
                     let csv = ascii.split("\n");
                     let recs = [];
                     let headers = csv.shift();
+                    console.log(headers);
                     
                     //console.dir(headers);
                     for(let l = 0;l < csv.length; ++l) {
@@ -281,65 +271,44 @@ new Vue({
                         }
                         cols.push(buf); //add the last column
                         /*
-                        0 State/Territory,
-                        1 Emergency Declaration,
-                        2 Major Disaster Declaration,
-                        3 National Guard State Activation,
-                        4 State Employee Travel Restrictions,
-                        5 Statewide Limits on Gatherings and Stay at Home Orders,
-                        6 Statewide School Closures,
-
-                        7 Statewide Closure of Non-Essential Businesses ,
-                        8 Statewide Closure of Some or All Non-Essential Businesses ,
-                        9 Essential Business Designations Issued,
-                        10 Statewide Curfew,
-                        11 1135 Waiver Status,
-                        12 Extension of Individual Income Tax Deadlines,
-                        13 Primary Election,
-                        14 Domestic Travel Limitations,
-                        15 Statewide Mask Policy,
-                        16 Ventilator Sharing
-                        */
-                        /*
-                        0 State,
-                        1 Emergency Declaration,
-                        2 Major Disaster Declaration,
-                        3 National Guard State Activation,
-                        4 State Employee Travel Restrictions,
-                        5 Statewide Limits on Gatherings and Stay at Home Orders,
-                        6 Statewide School Closures,
-                        7 Statewide Closure of Non-Essential Business Spaces,
-
-                        8 Essential Business Designations List*,
-                        9 Statewide Curfew,
-                        10 1135 Waiver Status,
-                        11 Extension of Individual Income Tax Deadlines,
-                        12 Primary Election,
-                        13 Domestic Travel Limitations,
-                        14 Using Cloth Face Coverings in Public,
-                        15 Ventilator Sharing
+                            0 State,
+                            1 State Employee Travel Restrictions,
+                            2 Statewide Limits on Gatherings and Stay at Home Orders,
+                            3 Statewide School Closures *state-ordered closure through end of year **recommended closure through end of year,
+                            4 Statewide Closure of Non-Essential Business Spaces,
+                            5 Essential Business Designations List*,
+                            6 Statewide Curfew,
+                            7 1135 Waiver Status,
+                            8 Extension of Individual Income Tax Deadlines,
+                            9 Presidential Primary Election,
+                            10 Domestic Travel Limitations,
+                            11 Using Cloth Face Coverings in Public,
+                            12 Ventilator Sharing,
+                            13 Reopening Plans and Task Forces,
+                            Unnamed: 14,
+                            Unnamed: 15,
+                            Unnamed: 16
                         */
                         let rec = {
                             state: cols[0],
-                            emergency_declaration: (cols[1]=="Yes"),
-                            major_disaster_declaration: cols[2], //Request Approved / Request Made 
-                            national_guard_activation: (cols[3]=="Yes"),
-                            state_employee_travel_restrictions: (cols[4]=="Yes"),
-                            statewide_limits_on_gatherings: cols[5],
-                            statewide_closure_school: cols[6], ///Yes or Local
-                            statewide_closure_nonessential: cols[7], 
-                            essential_designations: cols[8], 
-                            statewide_curfew: cols[9], //Yes or Local
-                            waiver1135: cols[10], //Approved
-                            extension_incometax: cols[11], 
-                            primary_election: cols[12], 
-                            domestic_travel_limit: cols[13], 
-                            statewide_mask: cols[14], 
-                            ventilator_sharing: cols[15], 
+                            state_employee_travel_restrictions: (cols[1]=="Yes"),
+                            statewide_limits_on_gatherings: cols[2],
+                            statewide_closure_school: cols[3], ///Yes or Local
+                            //major_disaster_declaration: cols[2], //Request Approved / Request Made 
+                            statewide_closure_nonessential: cols[4], 
+                            essential_designations: cols[5], 
+                            statewide_curfew: cols[6], //Yes or Local
+                            waiver1135: cols[7], //Approved
+                            extension_incometax: cols[8], 
+                            primary_election: cols[9], 
+                            domestic_travel_limit: cols[10], 
+                            statewide_mask: cols[11], 
+                            ventilator_sharing: cols[12], 
+                            reopening_plans: cols[12], 
+                            //national_guard_activation: (cols[3]=="Yes"),
                         };
                         rec.level = this.scoreLevel(rec);
                         recs.push(rec);
-                        //console.dir(cols);
                     }
                     console.dir(recs[0]);
                     resolve(recs);
@@ -357,8 +326,8 @@ new Vue({
             if(rec.state_employee_travel_restrictions) score += 0.5;
 
             //max 0.5;
-            if(rec.statewide_closure_school == "Yes") score += 0.5;
-            else if(rec.statewide_closure_school == "Local") score += 0.25;
+            if(rec.statewide_closure_school.startsWith("Yes")) score += 0.5;
+            else if(rec.statewide_closure_school.startsWith("Local")) score += 0.25;
 
             //max 0.5
             if(rec.statewide_curfew == "Yes") score += 0.5;
@@ -501,6 +470,7 @@ new Vue({
             let filter_warning = ['in', 'FIPS'];
             let filter_watch = ['in', 'FIPS'];
             let filter_advisory = ['in', 'FIPS'];
+            /*
             this.county.forEach(c=>{
                 if(c.state == "Warning") filter_warning.push(parseInt(c.fips));
                 if(c.state == "Watch") filter_watch.push(parseInt(c.fips));
@@ -545,6 +515,7 @@ new Vue({
                 },
                 'filter': filter_advisory,
             }, firstSymbolId);
+            */
 
             this.map.on('click', e=>{
                 const features = this.map.queryRenderedFeatures(e.point, {
