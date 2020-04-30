@@ -5,9 +5,10 @@ const async = require('async');
 const config = require('../../config');
 const mssql = require('mssql');
 
+console.log("statsamerica_eda2018-----------------------------------");
+
 //I can only connect from IU VPN connected IPs - not dev1
 mssql.connect(config.stats_america.db_red_dr).then(async pool=>{
-    console.log("connected");
     const supp = await pool.request().query(`
         SELECT * FROM eda_disaster_supp;
     `);
@@ -36,7 +37,7 @@ mssql.connect(config.stats_america.db_red_dr).then(async pool=>{
     });
 
     //console.dir(fains);
-    fs.writeFileSync("../../../raw/statsamerica.eda2018.json", JSON.stringify(fains));
+    fs.writeFileSync(__dirname+"/../../../raw/statsamerica.eda2018.json", JSON.stringify(fains));
     pool.close();
 });
 

@@ -6,7 +6,9 @@ const config = require('../../config');
 const mssql = require('mssql');
 
 //const fips = require('../data/fips.json');
+console.log("statsamerica_noaa_storms--------------------------------");
 
+const today = new Date();
 //I can only connect from IU VPN connected IPs - not dev1
 mssql.connect(config.stats_america.db_stats4).then(pool=>{
     console.log("connected");
@@ -17,7 +19,7 @@ function load(pool) {
 
     //years to pull data for
     let years = [];
-    for(let year = 2020/*1950*/; year <= 2020; ++year) {
+    for(let year = today.getFullYear() /*1950*/; year <= today.getFullYear(); ++year) {
         years.push(year); 
     }
 
@@ -55,8 +57,8 @@ function load(pool) {
 		console.dir(res);
 		console.log("writing json");
 		//if(year == 2019) year = "2019-now";
-		fs.writeFileSync("../../../raw/statsamerica.noaa_storms_zones."+year+".json", JSON.stringify(zones));
-		fs.writeFileSync("../../../raw/statsamerica.noaa_storms_counties."+year+".json", JSON.stringify(counties));
+		fs.writeFileSync(__dirname+"/../../../raw/statsamerica.noaa_storms_zones."+year+".json", JSON.stringify(zones));
+		fs.writeFileSync(__dirname+"/../../../raw/statsamerica.noaa_storms_counties."+year+".json", JSON.stringify(counties));
 		next_year();
 	    });
     }, err=>{
