@@ -97,11 +97,13 @@ geojson.features.forEach(feature=>{
             }
         }
 
+        /*
         if(fips == "28163") {
             console.log("---------------28163----------------");
             console.dir(dd[fips]);
             console.dir(feature.properties);
         }
+        */
     }
 
     if(statedd[fips]) {
