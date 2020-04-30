@@ -5,16 +5,10 @@ const async = require('async');
 const config = require('../../config');
 const mssql = require('mssql');
 
-<<<<<<< HEAD
 console.log("statsamerica_eda2018-----------------------------------");
 
 //I can only connect from IU VPN connected IPs - not dev1
 mssql.connect(config.stats_america.db_red_dr).then(async pool=>{
-=======
-//I can only connect from IU VPN connected IPs - not dev1
-mssql.connect(config.stats_america.db_red_dr).then(async pool=>{
-    console.log("connected");
->>>>>>> 28eac27be053040e551db1f4ba43e1e7cd6a2d44
     const supp = await pool.request().query(`
         SELECT * FROM eda_disaster_supp;
     `);
@@ -43,11 +37,7 @@ mssql.connect(config.stats_america.db_red_dr).then(async pool=>{
     });
 
     //console.dir(fains);
-<<<<<<< HEAD
     fs.writeFileSync(__dirname+"/../../../raw/statsamerica.eda2018.json", JSON.stringify(fains));
-=======
-    fs.writeFileSync("../../../raw/statsamerica.eda2018.json", JSON.stringify(fains));
->>>>>>> 28eac27be053040e551db1f4ba43e1e7cd6a2d44
     pool.close();
 });
 
