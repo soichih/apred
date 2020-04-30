@@ -4,12 +4,28 @@ const fs = require('fs');
 const async = require('async');
 const axios = require('axios');
 
+<<<<<<< HEAD
 console.log("eda2018-----------------------------------");
 
 const fips = require(__dirname+'/../../../data/fips.json');
 const geocodes = require(__dirname+'/../../../data/fain_geocodes.json');
 
 const eda2018 = require(__dirname+'/../../../raw/statsamerica.eda2018.json');
+=======
+const fips = require('../../../data/fips.json');
+/*
+  { _id: { '$oid': '5e581c899c2c301b17c0c12f' },
+    county: 'Northwest Arctic',
+    stabb: 'AK',
+    statefips: '02',
+    countyfips: '188',
+    state: 'Alaska' },
+*/
+
+const geocodes = require('../../../data/fain_geocodes.json');
+
+const eda2018 = require('../../../raw/statsamerica.eda2018.json');
+>>>>>>> 28eac27be053040e551db1f4ba43e1e7cd6a2d44
 
 let need_geocode = [];
 

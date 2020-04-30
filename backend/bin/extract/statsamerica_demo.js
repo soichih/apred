@@ -5,10 +5,16 @@ const async = require('async');
 const config = require('../../config');
 const mssql = require('mssql');
 
+<<<<<<< HEAD
 console.log("statsamerica_demo--------------------------");
 
 //I can only connect from IU VPN connected IPs - not dev1
 mssql.connect(config.stats_america.db_stats4).then(pool=>{
+=======
+//I can only connect from IU VPN connected IPs - not dev1
+mssql.connect(config.stats_america.db_stats4).then(pool=>{
+    console.log("connected");
+>>>>>>> 28eac27be053040e551db1f4ba43e1e7cd6a2d44
     load_gemographics(pool);
 });
 
@@ -51,7 +57,12 @@ function load_gemographics(pool) {
         });
     }, err=>{
         if(err) throw err;
+<<<<<<< HEAD
         fs.writeFileSync(__dirname+"/../../../raw/statsamerica.demo.json", JSON.stringify(demo));
+=======
+        console.log("writing json");
+        fs.writeFileSync("../../../raw/statsamerica.demo.json", JSON.stringify(demo));
+>>>>>>> 28eac27be053040e551db1f4ba43e1e7cd6a2d44
         pool.close();
     });
 }
