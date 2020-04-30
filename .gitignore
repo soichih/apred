@@ -24,7 +24,10 @@ backend/bin/scraper/COVID2019StateTrackingChart.pdf
 backend/bin/scraper/COVID2019StateTrackingChart.csv
 
 raw
+<<<<<<< HEAD
 data
+=======
+>>>>>>> 28eac27be053040e551db1f4ba43e1e7cd6a2d44
 
 #loaded in ctil webserver
 data/COVID2019StateTrackingChart.csv
