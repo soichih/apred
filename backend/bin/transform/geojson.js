@@ -12,7 +12,7 @@ const output = __dirname+"/../../../data/counties_geo.json";
 
 const fips_map = {};
 fips.forEach(f=>{
-    fips_map[f.statefips+f.countyfips] = f;
+    fips_map[f.fipsStateCode+f.fipsCountyCode] = f;
 });
 
 //figure out list of declared disasters for each county
@@ -25,12 +25,12 @@ disasters.forEach(rec=>{
     if(date > d2017) {
         if(rec.declaredCountyArea == "Statewide") {
             //TODO - I see only 2 records.. there are more than that according to fema
-            if(!statedd[rec.statefips]) statedd[rec.statefips] = [];
-            if(!statedd[rec.statefips].includes(rec.incidentType)) statedd[rec.statefips].push(rec.incidentType);
+            if(!statedd[rec.fipsStateCode]) statedd[rec.fipsStateCode] = [];
+            if(!statedd[rec.fipsStateCode].includes(rec.incidentType)) statedd[rec.fipsStateCode].push(rec.incidentType);
         } else {
-            let fips = rec.statefips + rec.countyfips;
-            if(!dd[fips]) dd[fips] = [];
-            if(!dd[fips].includes(rec.incidentType)) dd[fips].push(rec.incidentType);
+            let fipscode = rec.fipsStateCode+rec.fipsCountyCode;
+            if(!dd[fipscode]) dd[fipscode] = [];
+            if(!dd[fipscode].includes(rec.incidentType)) dd[fipscode].push(rec.incidentType);
         }
     }
     if(max == null || max < date) max = date;
