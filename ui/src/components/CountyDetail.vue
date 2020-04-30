@@ -383,7 +383,6 @@ export default class CountyDetail extends Vue {
                 color: 'rgb(107, 107, 107)'
             }},
             yaxis: {
-                //title: 'Establishments',
                 titlefont: {
                     size: 16,
                     color: 'rgb(107, 107, 107)'
@@ -458,7 +457,7 @@ export default class CountyDetail extends Vue {
         })
         const traceBt = {
             x,y: bviBt,
-            name: 'Total',
+            name: 'Total Businesses',
             marker: {color: 'rgb(100, 100, 100)'},
             type: 'bar'
         }
@@ -472,7 +471,7 @@ export default class CountyDetail extends Vue {
 
         const traceEt = {
             x,y: bviEt,
-            name: 'Total',
+            name: 'Total Employees',
             marker: {color: 'rgb(100, 100, 100)'},
             type: 'bar'
         }
@@ -708,9 +707,9 @@ export default class CountyDetail extends Vue {
             }
 
             // it also qualifies if incidentTitle includes those names
-            if( event.title.toLowerCase().includes("tornado") ||
-                event.title.toLowerCase().includes("flood") ||
-                event.title.toLowerCase().includes("severe storms")) return true;
+            if( event.incidentType.toLowerCase().includes("tornado") ||
+                event.incidentType.toLowerCase().includes("flood") ||
+                event.incidentType.toLowerCase().includes("severe storms")) return true;
         }
 
         return false;
