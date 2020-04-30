@@ -176,7 +176,8 @@ export default class Disaster extends Vue {
         });
 
         this.map.on('load', ()=>{
-            fetch("https://ctil.iu.edu/projects/apred-data/counties_geo.json").then(res=>res.json()).then(data=>{
+            //fetch("https://ctil.iu.edu/projects/apred-data/counties_geo.json").then(res=>res.json()).then(data=>{
+            fetch("https://gpu1-pestillilab.psych.indiana.edu/apred/counties_geo.json").then(res=>res.json()).then(data=>{
                 this.geojson = data;
                 data.features.forEach(feature=>{
                     const props = feature.properties;
@@ -345,7 +346,8 @@ export default class Disaster extends Vue {
             this.selected = null;
             return;
         }
-        fetch("https://ctil.iu.edu/projects/apred-data/counties/county."+fips+".json").then(res=>res.json()).then(data=>{
+        //fetch("https://ctil.iu.edu/projects/apred-data/counties/county."+fips+".json").then(res=>res.json()).then(data=>{
+        fetch("https://gpu1-pestillilab.psych.indiana.edu/apred/counties/county."+fips+".json").then(res=>res.json()).then(data=>{
             this.selected = data;
         });
     }

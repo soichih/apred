@@ -1,12 +1,7 @@
 #!/usr/bin/python3
 
 #requirement
-<<<<<<< HEAD
 # camelot-py 0.7.3 (I don't think we need this anymore)
-=======
-# camelot-py 0.7.3
-# opencv-python
->>>>>>> 28eac27be053040e551db1f4ba43e1e7cd6a2d44
 # xlrd
 
 import requests
@@ -29,11 +24,7 @@ if len(rgx_matches) != 1:
 url = rgx_matches[0]
 
 # load the excel file
-<<<<<<< HEAD
 response = requests.get(url, headers={'User-Agent':'Mozilla'})
-=======
-response = requests.get(url, headers={'User-Agent':'Mozilla/5.0'})
->>>>>>> 28eac27be053040e551db1f4ba43e1e7cd6a2d44
 table = pd.read_excel(response.content)
 table.to_csv(sys.stdout, index=False)
 
