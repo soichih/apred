@@ -45,11 +45,9 @@ function load(pool) {
 	    });
 	    request.on('done', res=>{
             console.dir(res);
-            console.log("writing json");
-            //if(year == 2019) year = "2019-now";
+            console.log("writing json "+year);
             fs.writeFileSync(__dirname+"/../../../raw/statsamerica.noaa_storms_zones."+year+".json", JSON.stringify(zones));
             fs.writeFileSync(__dirname+"/../../../raw/statsamerica.noaa_storms_counties."+year+".json", JSON.stringify(counties));
-            next_year();
 	    });
     }
 }
