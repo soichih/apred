@@ -14,6 +14,7 @@ mssql.connect(config.stats_america.db_stats4).then(pool=>{
 function load(pool) {
     let dds = [];
 
+    //pool.request().query(`SELECT * from FEMA_disasters WHERE fyDeclared >= '1953' AND fyDeclared < 2015`).then(res=>{
     pool.request().query(`SELECT * from FEMA_disasters WHERE fyDeclared >= '2015'`).then(res=>{
 
         res.recordset.forEach(rec=>{
@@ -73,6 +74,7 @@ function load(pool) {
         });
 
         console.log("writing json");
+        //fs.writeFileSync("../../../raw/statsamerica.disasters.1953-2015.json", JSON.stringify(dds));
         fs.writeFileSync("../../../raw/statsamerica.disasters.2015-now.json", JSON.stringify(dds));
         pool.close();
     });
