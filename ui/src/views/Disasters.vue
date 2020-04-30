@@ -325,7 +325,6 @@ export default class Disaster extends Vue {
                 
                 // Display a popup with the name of the county
                 let text = feature.properties.county+", "+feature.properties.state;
-
                 for(const key in feature.properties) {
                     if(key.startsWith("is")) {
                         text += " | "+key.substring(2);
