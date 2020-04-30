@@ -5,17 +5,26 @@ const async = require('async');
 const config = require('../../config');
 const mssql = require('mssql');
 
+<<<<<<< HEAD
 console.log("statsamerica_fema_disasters-----------------------------------");
 
 //I can only connect from IU VPN connected IPs - not dev1
 mssql.connect(config.stats_america.db_stats4).then(pool=>{
+=======
+//I can only connect from IU VPN connected IPs - not dev1
+mssql.connect(config.stats_america.db_stats4).then(pool=>{
+    console.log("connected");
+>>>>>>> 28eac27be053040e551db1f4ba43e1e7cd6a2d44
     load(pool);
 });
 
 function load(pool) {
     let dds = [];
 
+<<<<<<< HEAD
     //pool.request().query(`SELECT * from FEMA_disasters WHERE fyDeclared >= '1953' AND fyDeclared < 2015`).then(res=>{
+=======
+>>>>>>> 28eac27be053040e551db1f4ba43e1e7cd6a2d44
     pool.request().query(`SELECT * from FEMA_disasters WHERE fyDeclared >= '2015'`).then(res=>{
 
         res.recordset.forEach(rec=>{
@@ -74,8 +83,13 @@ function load(pool) {
             dds.push(rec);
         });
 
+<<<<<<< HEAD
         //fs.writeFileSync(__dirname+"/../../../raw/statsamerica.disasters.1953-2015.json", JSON.stringify(dds));
         fs.writeFileSync(__dirname+"/../../../raw/statsamerica.disasters.2015-now.json", JSON.stringify(dds));
+=======
+        console.log("writing json");
+        fs.writeFileSync("../../../raw/statsamerica.disasters.2015-now.json", JSON.stringify(dds));
+>>>>>>> 28eac27be053040e551db1f4ba43e1e7cd6a2d44
         pool.close();
     });
 

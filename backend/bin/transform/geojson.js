@@ -1,6 +1,7 @@
 #!/usr/bin/env nodejs
 const fs = require('fs');
 
+<<<<<<< HEAD
 console.log("geojson ...........................");
 
 const geojson = require(__dirname+"/../../../raw/counties_geo.json");
@@ -9,6 +10,14 @@ const fips = require(__dirname+'/../../../data/fips.json');
 const eda2018 = require(__dirname+'/../../../data/eda2018.json');
 
 const output = __dirname+"/../../../data/counties_geo.json";
+=======
+const geojson = require("../../../raw/counties_geo.json");
+const disasters = require("../../../raw/statsamerica.disasters.2015-now.json");
+const fips = require('../../../data/fips.json');
+const eda2018 = require('../../../data/eda2018.json');
+
+const output = "../../../data/counties_geo.json";
+>>>>>>> 28eac27be053040e551db1f4ba43e1e7cd6a2d44
 
 const fips_map = {};
 fips.forEach(f=>{
