@@ -5,9 +5,10 @@ const async = require('async');
 const config = require('../../config');
 const mssql = require('mssql');
 
+console.log("statsamerica_fema_disasters-----------------------------------");
+
 //I can only connect from IU VPN connected IPs - not dev1
 mssql.connect(config.stats_america.db_stats4).then(pool=>{
-    console.log("connected");
     load(pool);
 });
 
@@ -73,9 +74,8 @@ function load(pool) {
             dds.push(rec);
         });
 
-        console.log("writing json");
-        //fs.writeFileSync("../../../raw/statsamerica.disasters.1953-2015.json", JSON.stringify(dds));
-        fs.writeFileSync("../../../raw/statsamerica.disasters.2015-now.json", JSON.stringify(dds));
+        //fs.writeFileSync(__dirname+"/../../../raw/statsamerica.disasters.1953-2015.json", JSON.stringify(dds));
+        fs.writeFileSync(__dirname+"/../../../raw/statsamerica.disasters.2015-now.json", JSON.stringify(dds));
         pool.close();
     });
 

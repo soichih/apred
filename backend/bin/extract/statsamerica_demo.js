@@ -5,9 +5,10 @@ const async = require('async');
 const config = require('../../config');
 const mssql = require('mssql');
 
+console.log("statsamerica_demo--------------------------");
+
 //I can only connect from IU VPN connected IPs - not dev1
 mssql.connect(config.stats_america.db_stats4).then(pool=>{
-    console.log("connected");
     load_gemographics(pool);
 });
 
@@ -50,8 +51,7 @@ function load_gemographics(pool) {
         });
     }, err=>{
         if(err) throw err;
-        console.log("writing json");
-        fs.writeFileSync("../../../raw/statsamerica.demo.json", JSON.stringify(demo));
+        fs.writeFileSync(__dirname+"/../../../raw/statsamerica.demo.json", JSON.stringify(demo));
         pool.close();
     });
 }
