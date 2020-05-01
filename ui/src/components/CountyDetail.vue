@@ -1,5 +1,5 @@
 <template>
-<div class="countydetail" v-if="detail">
+<div class="countydetail">
     <div class="header">
         <div class="page">
             <h3 style="position: relative; font-weight: normal;">
@@ -12,44 +12,44 @@
         </div>
     </div>
 
-    <div style="background-color: #eee;" id="header">
-    <div class="page">
-        <el-row>
-            <el-col :span="11">
-                <div id="statemap"/>
-            </el-col>
-            <el-col :span="8" class="border-left demo">
-                <p>
-                    <span class="sub-heading">Population</span><br>
-                    <span class="primary" v-if="detail.demo"> {{detail.population | formatNumber}}</span>
-                    <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
-                </p>
+    <div id="info-header">
+        <div class="page">
+            <el-row>
+                <el-col :span="11">
+                    <div id="statemap"/>
+                </el-col>
+                <el-col :span="8" class="border-left demo">
+                    <p>
+                        <span class="sub-heading">Population</span><br>
+                        <span class="primary" v-if="detail.demo"> {{detail.population | formatNumber}}</span>
+                        <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
+                    </p>
 
-                <vue-bar-graph v-if="detail.demo"
-                    :points="populationPoints(detail.demo)"
-                    :width="200"
-                    :height="90"
-                    :show-x-axis="true" 
-                    :show-values="true"
-                    bar-color="#999"
-                    text-color="#666"
-                    text-alt-color="white"
-                />
-            </el-col>
-            <el-col :span="5" class="border-left">
-                <p class="sub-heading">
-                    Disaster Resilience
-                    <i style="color: #409EFF; font-weight: bold;" @click="goto('cutter')" class="el-icon-warning-outline"/>
-                </p>
-                <Plotly :data="[drSpyderData]" :layout="drSpyderLayout" :display-mode-bar="false"/>
-            </el-col>
-        </el-row>
-    </div>
+                    <vue-bar-graph v-if="detail.demo"
+                        :points="populationPoints(detail.demo)"
+                        :width="200"
+                        :height="90"
+                        :show-x-axis="true" 
+                        :show-values="true"
+                        bar-color="#999"
+                        text-color="#666"
+                        text-alt-color="white"
+                    />
+                </el-col>
+                <el-col :span="5" class="border-left">
+                    <p class="sub-heading">
+                        Disaster Resilience
+                        <i style="color: #409EFF; font-weight: bold;" @click="goto('cutter')" class="el-icon-warning-outline"/>
+                    </p>
+                    <Plotly :data="[drSpyderData]" :layout="drSpyderLayout" :display-mode-bar="false"/>
+                </el-col>
+            </el-row>
+        </div>
     </div>
 
     <div class="page navigator">
         <div style="position: absolute; right: -250px; width: 200px; margin: 20px;">
-            <el-button circle icon="el-icon-arrow-up" @click="goto('header')"/>
+            <el-button circle icon="el-icon-arrow-up" @click="goto('info-header')"/>
             <h5><a href="javascript:void(0);" @click="goto('disaster')">Disaster Declarations</a></h5>
             <h5 v-if="detail.bvis"><a href="javascript:void(0);" @click="goto('bvi')">Business Vulnerability</a></h5>
             <h5><a href="javascript:void(0);" @click="goto('cutter')">Disaster Resilience</a></h5>
@@ -59,7 +59,9 @@
 
     <div class="page" id="disaster">
         <h3>Disaster Declarations / EDA Awards</h3>
-        <p>EDIT ME. The following disasters has been declared and EDA grants awarded in the past.</p>
+        <!--
+        <p>The following disasters has been declared and EDA grants awarded.</p>
+        -->
 
         <p v-if="recentHistory.length == 0" style="opacity: 0.8;">No disaster declared since 2017</p>
         <div v-for="(event, idx) in recentHistory" :key="idx" class="history">
@@ -77,9 +79,11 @@
                 <i class="el-icon-caret-right"/> Show Past Disasters ({{pastHistory.length}})
             </el-button>
         </div>
-        <slide-up-down :active="showPastHistory" :duration="1000">
+
+        <!-- don't use slide-down.. it will be slow :active="showPastHistory" :duration="1000"-->
+        <div v-if="showPastHistory">
             <Event :event="event" :layers="layers" v-for="(event, idx) in pastHistory" :key="idx" class="history"/>
-        </slide-up-down>
+        </div>
         <br>
         <br>
     </div>
@@ -119,7 +123,7 @@
             The score you see is the average of all sub-indecies for this indicators.
         </p>
     
-        <p style="font-size: 85%; opacity: 1; font-weight: bold; margin-left: 355px; padding: 0 10px; margin-bottom: 0;">
+        <p style="font-size: 85%; opacity: 1; font-weight: bold; margin-left: 355px; margin-bottom: 0;">
             <span style="color: crimson">
                 <i class="el-icon-arrow-left"/> Low Resilience
             </span>
@@ -164,8 +168,9 @@
                         <el-collapse-item v-if="source.us">
                             <template slot="title">
                                 <i class="el-icon-caret-right" style="margin-right: 10px; opacity: 0.5;"/>
-                                <el-tag type="info" size="small" style="margin-right: 10px;">{{source.id}}</el-tag>
-                                <span style="float: left; min-width: 290px">{{source.name}}</span>
+                                <span style="float: left; min-width: 330px">{{source.name}}
+                                    <el-tag type="info" size="small">{{source.id}}</el-tag>
+                                </span>
                                 <BarGraph style="margin-right: 30px; width: 100%;" :value="source.county" :min="0" :max="1" />
                             </template>
 
@@ -173,7 +178,7 @@
                                 <MeasureInfo :id="source.id" style="margin-right: 50px; margin-bottom: 10px;"/>
 
                                 <div style="margin-bottom: 10px; padding-right: 30px;">
-                                    <span style="float: left; width: 245px; text-align: right;">State Average</span>
+                                    <span style="float: left; width: 255px; text-align: right;">State Average</span>
                                     <BarGraph style="margin-left: 333px;" :value="source.states" :min="0" :max="1" color="#8e8e8e"/>
                                     <br>
                                     <span style="float: left; width: 255px; text-align: right;">US Average</span>
@@ -189,8 +194,8 @@
 
     <div class="page" id="storms">
         <h3>Storm History</h3>
-        <p>This graph shows the counts of storm event published by NOAA since 1965.</p>
-        <Plotly :data="stormData" :layout="stormLayout" :display-mode-bar="true"></Plotly>
+        <p>This graph shows the counts of storm event published by NOAA since 1955.</p>
+        <Plotly :data="stormData" :layout="stormLayout" :display-mode-bar="false"></Plotly>
     </div>
     
     <Footer/>
@@ -258,21 +263,6 @@ export default class CountyDetail extends Vue {
     showPastHistory = false;
     shownIndicators = [];
 
-    /*
-    layers = {
-        "fire": "#f00",
-        //"earthquake": "#0f0",
-        "hurricane": "#84a",
-        //"snow": "#fff",
-        "tornado": "#c60",
-        //"typhoon": "#00c",
-        "severe storm": "#fa0",
-        "flood": "#06f",
-
-        "other": "#f0f", //volcano, mud/landslide, snow, "coastal storm", typhoon, earthquake, snow
-    };
-    */
-
     drSpyderData = {
       type: 'scatterpolar',
       r: [],
@@ -333,6 +323,7 @@ export default class CountyDetail extends Vue {
 
         //Object.keys(this.detail.cutter).forEach(incode=>{
         for(const incode in this.detail.cutter) {
+            if(!this.detail.cutter[incode]) return; //we have some indices that we ignore
             const value = this.detail.cutter[incode].aggregate.county;
             this.drSpyderData.r.push(value);
             this.drSpyderData.theta.push(incode);
@@ -355,7 +346,8 @@ export default class CountyDetail extends Vue {
         
         this.detail.disasters.forEach(rec=>{
             rec.type = "dr";
-            rec.date = new Date(rec.declarationDate);
+            //rec.date = new Date(rec.declarationDate);
+            rec.date = new Date(rec.incidentBeginDate);
             this.history.push(rec);
         }); 
 
@@ -383,7 +375,6 @@ export default class CountyDetail extends Vue {
                 color: 'rgb(107, 107, 107)'
             }},
             yaxis: {
-                //title: 'Establishments',
                 titlefont: {
                     size: 16,
                     color: 'rgb(107, 107, 107)'
@@ -458,7 +449,7 @@ export default class CountyDetail extends Vue {
         })
         const traceBt = {
             x,y: bviBt,
-            name: 'Total',
+            name: 'Total Businesses',
             marker: {color: 'rgb(100, 100, 100)'},
             type: 'bar'
         }
@@ -472,7 +463,7 @@ export default class CountyDetail extends Vue {
 
         const traceEt = {
             x,y: bviEt,
-            name: 'Total',
+            name: 'Total Employees',
             marker: {color: 'rgb(100, 100, 100)'},
             type: 'bar'
         }
@@ -489,34 +480,14 @@ export default class CountyDetail extends Vue {
         this.stormLayout = {
             margin: {
                 l: 30,
-                r: 30,
-                t: 30,
-                //b: 30,
+                r: 0,
+                t: 0,
+                b: 30,
                 //pad: 10,
             },
-            /*
-            'paper_bgcolor': '#0000',
-            'plot_bgcolor': '#fff',
-            height: 400,
-            title: 'Storm History',
-            xaxis: {tickfont: {
-                size: 14,
-                color: 'rgb(107, 107, 107)'
-            }},
-            yaxis: {
-                titlefont: {
-                    size: 16,
-                    color: 'rgb(107, 107, 107)'
-                },
-                tickfont: {
-                    size: 13,
-                    color: 'rgb(107, 107, 107)'
-                }
-            },
-            */
             legend: {
                 //x: 0,
-                //y: 1.0,
+                y: 1.15,
                 bgcolor: 'rgba(255, 255, 255, 0)',
                 bordercolor: 'rgba(255, 255, 255, 0)',
                 orientation: 'h',
@@ -573,7 +544,7 @@ export default class CountyDetail extends Vue {
                 });
             }
         });
-        this.map.fitBounds([[bounds.xMin, bounds.yMin], [bounds.xMax, bounds.yMax]]);
+        this.map.fitBounds([[bounds.xMin, bounds.yMin-0.2], [bounds.xMax, bounds.yMax+0.2]]);
 
         this.map.addLayer({
             "id": "counties",
@@ -584,6 +555,23 @@ export default class CountyDetail extends Vue {
             },
             filter: ['==', 'statefips', this.detail.statefips], 
         });
+
+        /* slow--?
+        for(const t in this.layers) {
+            const layer = this.layers[t];
+            this.map.addLayer({
+                id: 'county_disaster_'+t,
+                type: 'fill',
+                source: 'counties',
+                paint: {
+                    'fill-color': layer.color,
+                    'fill-opacity': (layer.opacity||1)*0.75
+                },
+                filter: ['==', 'statefips', this.detail.statefips], 
+            });
+        }
+        */
+
         this.map.addLayer({
             "id": "selected-county",
             "type": "fill",
@@ -663,7 +651,8 @@ export default class CountyDetail extends Vue {
 
     is2018Eligible(event) {
         const begin = new Date(event.incidentBeginDate);
-        if( begin > new Date("2016-12-31") && begin < new Date("2018-01-01") ) {
+        const end = new Date(event.incidentEndDate);
+        if( begin > new Date("2016-12-31") && end < new Date("2018-01-01") ) {
             // ignore some incidentType 
             switch(event.incidentType) {
             case "Chemical":
@@ -683,7 +672,8 @@ export default class CountyDetail extends Vue {
 
     is2019Eligible(event) {
         const begin = new Date(event.incidentBeginDate);
-        if( begin > new Date("2017-12-31") && begin < new Date("2019-01-01") ) {
+        const end = new Date(event.incidentBeginDate);
+        if( begin > new Date("2017-12-31") && end < new Date("2019-01-01") ) {
             // ignore some incidentType 
             switch(event.incidentType) {
             case "Chemical":
@@ -708,9 +698,9 @@ export default class CountyDetail extends Vue {
             }
 
             // it also qualifies if incidentTitle includes those names
-            if( event.title.toLowerCase().includes("tornado") ||
-                event.title.toLowerCase().includes("flood") ||
-                event.title.toLowerCase().includes("severe storms")) return true;
+            if( event.incidentType.toLowerCase().includes("tornado") ||
+                event.incidentType.toLowerCase().includes("flood") ||
+                event.incidentType.toLowerCase().includes("severe storms")) return true;
         }
 
         return false;
@@ -828,6 +818,12 @@ h4 {
     height: 70px;
     box-shadow: 0 0 3px #ddd;
 }
+
+#info-header {
+/*border-top: 20px solid white;*/
+background-color: #eee;
+}
+
 .header h3 {
     margin: 0;
 }
@@ -854,6 +850,7 @@ text-transform: uppercase;
     position: relative;
     width: 100%;
     height: 200px;
+/* top: -20px;*/
 }
 canvas:focus {
     outline: none;

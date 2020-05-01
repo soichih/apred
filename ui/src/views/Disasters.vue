@@ -64,6 +64,7 @@ export default class Disaster extends Vue {
     layers = {
         "biological": {
             color: "#396",
+            opacity: 0.5,
             filter: ["any", 
                 ["==", "isBiological", true],
             ],
@@ -71,53 +72,8 @@ export default class Disaster extends Vue {
                 ["==", "isStateBiological", true],
             ]
         },
-        "fire": {
-            color: "#f00", 
-            filter: ["any", 
-                ["==", "isFire", true],
-            ],
-            statefilter: ["any", 
-                ["==", "isStateFire", true],
-            ]
-        },
-        "hurricane": {
-            color: "#84a", 
-            filter: ["any", 
-                ["==", "isHurricane", true],
-            ],
-            statefilter: ["any", 
-                ["==", "isStateHurricane", true],
-            ]
-        },
-        "tornado": {
-            color: "#c60", 
-            filter: ["any", 
-                ["==", "isTornado", true],
-            ],
-            statefilter: ["any", 
-                ["==", "isStateTornado", true],
-            ]
-        },
-        "severe storm": { 
-            color: "#fa0", 
-            filter: ["any", 
-                ["==", "isSevereStorm", true],
-            ],
-            statefilter: ["any", 
-                ["==", "isStateSevereStorm", true],
-            ]
-        },
-        "flood": {
-            color: "#06f",
-            filter: ["any", 
-                ["==", "isFlood", true],
-            ],
-            statefilter: ["any", 
-                ["==", "isStateFlood", true],
-            ]
-        },
         "other": {
-            color: "#90f",
+            color: "#999",
             filter: ["any", 
                 ["==", "isEarthquake", true],
                 ["==", "isCoastalStorm", true],
@@ -137,6 +93,54 @@ export default class Disaster extends Vue {
                 ["==", "isStateSevereIceStorm", true],
             ]
         }, 
+
+        "hurricane": {
+            color: "#0af", 
+            filter: ["any", 
+                ["==", "isHurricane", true],
+            ],
+            statefilter: ["any", 
+                ["==", "isStateHurricane", true],
+            ]
+        },
+        /*
+        "tornado": {
+            color: "#c60", 
+            filter: ["any", 
+                ["==", "isTornado", true],
+            ],
+            statefilter: ["any", 
+                ["==", "isStateTornado", true],
+            ]
+        },
+        */
+        "severe storm": { 
+            color: "#fa0", 
+            filter: ["any", 
+                ["==", "isSevereStorm", true],
+            ],
+            statefilter: ["any", 
+                ["==", "isStateSevereStorm", true],
+            ]
+        },
+        "flood": {
+            color: "#06f",
+            filter: ["any", 
+                ["==", "isFlood", true],
+            ],
+            statefilter: ["any", 
+                ["==", "isStateFlood", true],
+            ]
+        },
+        "fire": {
+            color: "#f00", 
+            filter: ["any", 
+                ["==", "isFire", true],
+            ],
+            statefilter: ["any", 
+                ["==", "isStateFire", true],
+            ]
+        },
     };
 
     @Watch('$route')
@@ -206,7 +210,7 @@ export default class Disaster extends Vue {
                         source: 'counties',
                         paint: {
                             'fill-color': layer.color,
-                            'fill-opacity': 0.75
+                            'fill-opacity': (layer.opacity||1)*0.75
                         },
                         filter: layer.filter,
                         layout: {
@@ -220,7 +224,7 @@ export default class Disaster extends Vue {
                         'source': 'counties',
                         'paint': {
                             'fill-color': layer.color,
-                            'fill-opacity': 0.2,
+                            'fill-opacity': (layer.opacity||1)*0.2,
                         },
                         'filter': layer.statefilter,
                         layout: {
@@ -345,8 +349,11 @@ export default class Disaster extends Vue {
             this.selected = null;
             return;
         }
+
         //fetch("https://ctil.iu.edu/projects/apred-data/counties/county."+fips+".json").then(res=>res.json()).then(data=>{
         fetch("https://gpu1-pestillilab.psych.indiana.edu/apred/counties/county."+fips+".json").then(res=>res.json()).then(data=>{
+            delete data.cutter.INST;
+            delete data.cutter.FLOR;
             this.selected = data;
         });
     }
