@@ -81,6 +81,7 @@ for(let fips in cutter.counties) {
     }
     counties[sfips].cutter = JSON.parse(JSON.stringify(cutter.indicators));
     for(let indicator in counties[sfips].cutter) {
+        //if(indicator == "INST" || indicator == "FLOR") continue; //ignore institutional or special/custerom index
 
         //aggregate for the whole indicator
         let sum = {
