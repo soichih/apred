@@ -16,7 +16,7 @@ function load(pool) {
     let dds = [];
 
     //pool.request().query(`SELECT * from FEMA_disasters WHERE fyDeclared >= '1953' AND fyDeclared < 2015`).then(res=>{
-    pool.request().query(`SELECT * from FEMA_disasters WHERE fyDeclared >= '2015'`).then(res=>{
+    pool.request().query(`SELECT * from FEMA_disasters WHERE declarationType = 'DR' AND fyDeclared >= '2015'`).then(res=>{
 
         res.recordset.forEach(rec=>{
             /*
@@ -56,11 +56,11 @@ function load(pool) {
                 console.log("failed to find statefips:", rec.state);
             }
             */
-            if(!rec.statefips) {
+            if(!rec.fipsStateCode) {
                 console.log(rec.disasterNumber, "statfips missing");
                 console.dir(rec);
             }
-            if(!rec.countyfips) {
+            if(!rec.fipsCountyCode) {
                 console.log(rec.disasterNumber, "countyfip missing");
                 console.dir(rec);
             }
@@ -70,9 +70,18 @@ function load(pool) {
                 console.dir(rec);
             }
             */
+            if(rec.incidentType.startsWith("\"")) {
+                console.dir(rec);
+                console.log("incidentType should not start with double quote");
+                process.exit(1);
+            }
+
+            //console.log(rec.incidentType);
 
             dds.push(rec);
         });
+
+        console.log(dds.length);
 
         //fs.writeFileSync(__dirname+"/../../../raw/statsamerica.disasters.1953-2015.json", JSON.stringify(dds));
         fs.writeFileSync(__dirname+"/../../../raw/statsamerica.disasters.2015-now.json", JSON.stringify(dds));
