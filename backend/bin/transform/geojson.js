@@ -12,7 +12,7 @@ const output = __dirname+"/../../../data/counties_geo.json";
 
 const fips_map = {};
 fips.forEach(f=>{
-    fips_map[f.fipsStateCode+f.fipsCountyCode] = f;
+    fips_map[f.statefips+f.countyfips] = f;
 });
 
 //figure out list of declared disasters for each county
@@ -23,10 +23,13 @@ let max = null;
 disasters.forEach(rec=>{
     let date = new Date(rec.declarationDate);
     if(date > d2017) {
-        if(rec.declaredCountyArea == "Statewide") {
+        //if(rec.declaredCountyArea == "Statewide") {
+        if(rec.designatedArea == "Statewide") {
             //TODO - I see only 2 records.. there are more than that according to fema
             if(!statedd[rec.fipsStateCode]) statedd[rec.fipsStateCode] = [];
             if(!statedd[rec.fipsStateCode].includes(rec.incidentType)) statedd[rec.fipsStateCode].push(rec.incidentType);
+            //console.log("state disaster for", rec.fipsStateCode);
+            //console.dir(statedd[rec.fipsStateCode]);
         } else {
             let fipscode = rec.fipsStateCode+rec.fipsCountyCode;
             if(!dd[fipscode]) dd[fipscode] = [];
@@ -50,7 +53,6 @@ geojson.features.forEach(feature=>{
    { type: 'MultiPolygon',
      coordinates: [ [Array], [Array], [Array] ] } }
      */
-    let fips = feature.properties.STATE+feature.properties.COUNTY; 
     
     /* TODO - why do we need population?
     //sum population total
@@ -61,9 +63,10 @@ geojson.features.forEach(feature=>{
         console.error("couldn't find demo info for", fips);
     }
     */
-    if(dd[fips]) {
+    let county_fips = feature.properties.STATE+feature.properties.COUNTY; 
+    if(dd[county_fips]) {
         //feature.properties.dd = dd[fips].join("|"); //mapbox can't handle property array
-        for(let d of dd[fips]) {
+        for(let d of dd[county_fips]) {
             switch(d){
                 case "Flood":
                     feature.properties.isFlood = true; break;
@@ -106,9 +109,11 @@ geojson.features.forEach(feature=>{
         */
     }
 
-    if(statedd[fips]) {
+    let state_fips = feature.properties.STATE;
+    if(statedd[state_fips]) {
         //feature.properties.dd = dd[fips].join("|"); //mapbox can't handle property array
-        for(let d of statedd[fips]) {
+        for(let d of statedd[state_fips]) {
+            //console.log(state_fips, d);
             switch(d){
                 case "Flood":
                     feature.properties.isStateFlood = true; break;
@@ -143,11 +148,14 @@ geojson.features.forEach(feature=>{
         }
     }
 
+    //console.dir(statedd["28"]);
+
     feature.properties.statefips = feature.properties.STATE;
     feature.properties.countyfips = feature.properties.COUNTY;
-    let f = fips_map[feature.properties.statefips + feature.properties.countyfips];
+    let fipscode = feature.properties.statefips + feature.properties.countyfips;
+    let f = fips_map[fipscode];
     if(!f) {
-        console.error("failed to find fips - using NAME as county");
+        console.error("failed to find fips ("+fipscode+") - using NAME as county");
         console.dir(feature);
         feature.properties.county = feature.properties.NAME;
     } else {
