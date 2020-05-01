@@ -8,6 +8,8 @@
         <h3>CTIL Crisis Technologies Innovation Lab</h3>
         <a href="mailto:ctil@iu.edu">ctil@iu.edu</a>
     </div>
+    <br>
+    <br>
 </footer>
 </template>
 
