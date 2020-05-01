@@ -12,9 +12,11 @@
 
         <h3 v-if="event.type == 'dr'" :style="eventIconStyle">
             <span style="float: right;">
-                <el-tag size="small" effect="light" type="info">Disaster # {{event.disasterNumber}}</el-tag>&nbsp;
+                <a :href="'https://www.fema.gov/disaster/'+event.disasterNumber" target="fema">
+                    <el-tag size="small" effect="light" type="info">Disaster # {{event.disasterNumber}}</el-tag>&nbsp;
+                </a>
             </span>
-            <el-tag type="info" style="position: relative; top: -2px;" v-if="event.declaredCountyArea == 'Statewide'">STATEWIDE</el-tag> &nbsp;
+            <el-tag type="info" style="position: relative; top: -2px;" v-if="event.designatedArea== 'Statewide'">STATEWIDE</el-tag> &nbsp;
             <b>{{event.incidentType}}</b> &nbsp;
             <br>
         </h3>
@@ -29,62 +31,79 @@
     </div>
 
     <div class="event-body">
-        <div class="event-date" :title="eventDateTitle">{{event.date.toLocaleDateString()}}</div>
+        <div class="event-date">
+            <time title="Incident Begin Date">{{new Date(event.incidentBeginDate).toLocaleDateString()}}</time>
+            <small>
+                - <time v-if="event.incidentEndDate" title="Incident End Date">{{new Date(event.incidentEndDate).toLocaleDateString()}}</time>
+                <span v-else>ongoing</span>
+            </small>
+        </div>
         <div v-if="event.type == 'dr'">
-            <span style="font-size: 85%;">{{event.title}}</span> &nbsp;
+            <span style="opacity: 0.9; font-style: italic;">{{event.declarationTitle}}</span> &nbsp;
             <span style="opacity: 0.6; font-size: 85%;">
-                <!--Declared: <time>{{new Date(event.declarationDate).toLocaleDateString()}}</time>&nbsp; &bull;-->
-                Incident <time>{{new Date(event.incidentBeginDate).toLocaleDateString()}}</time>
-                - <time v-if="event.incidentEndDate">{{new Date(event.incidentEndDate).toLocaleDateString()}}</time>
-                <span v-else>On Going</span>
+                declared on {{event.date.toLocaleDateString()}}
             </span>
         
             <p style="line-height: 200%; margin-bottom: 0;">
                 <!-- https://www.fema.gov/openfema-dataset-disaster-declarations-summaries-v1 -->
+
+                <el-tag class="program-tag" size="small" effect="plain" type="info" style="cursor: pointer"
+                    title="Total project amount"
+                    v-if="event.paProgramDeclared" @click="show_pa = !show_pa">
+                    <i class="el-icon-caret-right" v-if="!show_pa"/> 
+                    <i class="el-icon-caret-bottom" v-if="show_pa"/> 
+                    Public Assistance Program 
+                    <span v-if="event.pa">({{event.pa.length}} projects | ${{totalPA(event.pa)|formatNumber}})</span>
+                </el-tag>&nbsp;
+
                 <el-tag class="program-tag" size="small" effect="plain" type="info" v-if="event.hmProgramDeclared">
-                    <a href="https://www.fema.gov/media-library/assets/documents/107704">Hazard Mitigation Program</a>
+                    <a href="https://www.fema.gov/media-library/assets/documents/107704" target="fema">Hazard Mitigation Program</a>
                 </el-tag>&nbsp;
                 <el-tag class="program-tag" size="small" effect="plain" type="info" v-if="event.ihProgramDeclared">
-                    <a href="https://www.fema.gov/media-library/assets/documents/24945">Individuals and Households Program</a>
+                    <a href="https://www.fema.gov/media-library/assets/documents/24945" target="fema">Individuals and Households Program</a>
                 </el-tag>&nbsp;
                 <el-tag class="program-tag" size="small" effect="plain" type="info" v-if="event.iaProgramDeclared">
-                    <a href="https://www.fema.gov/media-library/assets/documents/133744">Individual Assistance Program</a>
-                </el-tag>&nbsp;
-                <el-tag class="program-tag" size="small" effect="plain" type="info" v-if="event.paProgramDeclared">
-                    <a href="https://www.fema.gov/media-library/assets/documents/90743">Public Assistance Program</a>
+                    <a href="https://www.fema.gov/media-library/assets/documents/133744" target="fema">Individual Assistance Program</a>
                 </el-tag>&nbsp;
             </p>
 
-            <div v-if="event.pa">
-                <br>
-                <div style="margin-bottom: 5px">
-                    <el-button type="success" size="mini" @click="show_pa = true" v-if="!show_pa">
-                        <i class="el-icon-caret-right"/> Show Funded Projects
-                    </el-button>
-                    <el-button type="success" size="mini" @click="show_pa = false" v-if="show_pa">
-                        <i class="el-icon-caret-bottom"/> Hide Funded Projects
-                    </el-button>
+            <!--
+            <br>
+            <div style="margin-bottom: 5px">
+                <el-button type="success" size="mini" @click="show_pa = true" v-if="!show_pa">
+                    <i class="el-icon-caret-right"/> Show Funded Projects
+                </el-button>
+                <el-button type="success" size="mini" @click="show_pa = false" v-if="show_pa">
+                    <i class="el-icon-caret-bottom"/> Hide Funded Projects
+                </el-button>
+            </div>
+            -->
+            <slide-up-down :active="show_pa" style="background-color: #eee; padding: 10px;">
+                <div v-if="!event.pa">
+                    <p>
+                        There are no funded PA project associated with this disaster.
+                    </p>
                 </div>
-                <div v-if="show_pa">
-                    <p style="font-size: 95%; opacity: 0.7">This table shows FEMA funded Public-Assistance projects associated with this disaster declaration.</p>
-                    <el-table border :data="event.pa" style="width: 100%" :default-sort="{prop: 'obligatedDate', order: 'ascending'}">
+                <div v-if="event.pa">
+                    <p style="font-size: 95%; opacity: 0.7">FEMA funded Public-Assistance projects associated with this disaster declaration.</p>
+                    <el-table border :data="event.pa" style="width: 100%" :default-sort="{prop: 'obligatedDate', order: 'ascending'}" height="400">
                         <el-table-column prop="pwNumber" label="PW" width="60"/>
                         <el-table-column prop="dcc" label="" width="40"/>
                         <el-table-column sortable prop="damageCategory" label="Damage Category" width="175"/>
                         <el-table-column sortable prop="projectSize" label="Project Size"/>
                         <el-table-column sortable prop="projectAmount" label="Project Amount">
                             <template slot-scope="scope">
-                                ${{scope.row.projectAmount.toFixed(2)}}
+                                ${{scope.row.projectAmount|formatNumber}}
                             </template>
                         </el-table-column>
                         <el-table-column sortable prop="totalObligated" label="Total Obligated">
                             <template slot-scope="scope">
-                                ${{scope.row.totalObligated.toFixed(2)}}
+                                ${{scope.row.totalObligated|formatNumber}}
                             </template>
                         </el-table-column>
                         <el-table-column sortable prop="federalShareObligated" label="Federal Share Obligated">
                             <template slot-scope="scope">
-                                ${{scope.row.federalShareObligated.toFixed(2)}}
+                                ${{scope.row.federalShareObligated|formatNumber}}
                             </template>
                         </el-table-column>
                         <el-table-column sortable prop="obligatedDate" label="Obligated Date">
@@ -94,7 +113,11 @@
                         </el-table-column>
                     </el-table>
                 </div>
-            </div>
+                <p>
+                    For more information, please see 
+                    <a href="https://www.fema.gov/media-library/assets/documents/90743" target="fema">Public Assistance Program</a>
+                </p>
+            </slide-up-down>
         </div>
 
         <div v-else-if="event.type == 'eda2018'">
@@ -127,7 +150,13 @@
 <script>
 import { Component, Prop, Vue } from 'vue-property-decorator';
 
-@Component
+import SlideUpDown from 'vue-slide-up-down'
+
+@Component({
+    components: {
+        SlideUpDown,
+    }
+})
 export default class Event extends Vue {
     @Prop({type: Object}) event;
     @Prop({type: Object}) layers;
@@ -137,7 +166,7 @@ export default class Event extends Vue {
     get eventClass() {
         const c = [];
         if(this.event.type == "dr") {
-            if(this.event.declaredCountyArea == 'Statewide') c.push('dr-state');
+            if(this.event.designatedArea == 'Statewide') c.push('dr-state');
             else c.push('dr-county');
         }
 
@@ -146,7 +175,7 @@ export default class Event extends Vue {
 
     get eventDateTitle() {
         if(this.event.type == "eda2018") return "Grant Award Date";
-        else return "Disaster Declaration Date";
+        else return "Incident Date";
     }
 
     get eventIconStyle() {
@@ -159,6 +188,12 @@ export default class Event extends Vue {
         if(this.layers[type]) color = this.layers[type].color;
 
         return { color };
+    }
+
+    totalPA(pas) {
+        return pas.reduce((a,v)=>{
+            return a + v.projectAmount;
+        }, 0);
     }
 }
 </script>
@@ -204,6 +239,6 @@ background-color: #eee;
 padding: 5px 10px;
 margin: -5px -10px;
 border-radius: 5px;
-margin-bottom: 5px;
+margin-bottom: 10px;
 }
 </style>
