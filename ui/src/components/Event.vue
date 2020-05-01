@@ -31,18 +31,20 @@
     </div>
 
     <div class="event-body">
-        <div class="event-date">
-            <time title="Incident Begin Date">{{new Date(event.incidentBeginDate).toLocaleDateString()}}</time>
-            <small>
-                - <time v-if="event.incidentEndDate" title="Incident End Date">{{new Date(event.incidentEndDate).toLocaleDateString()}}</time>
-                <span v-else>ongoing</span>
-            </small>
-        </div>
         <div v-if="event.type == 'dr'">
+            <div class="event-date">
+                <small style="opacity: 0.6;">Incident on </small>
+                &nbsp;
+                <time title="Incident Begin Date">{{new Date(event.incidentBeginDate).toLocaleDateString()}}</time>
+                <small>
+                    - <time v-if="event.incidentEndDate" title="Incident End Date">{{new Date(event.incidentEndDate).toLocaleDateString()}}</time>
+                    <span v-else>ongoing</span>
+                </small>
+            </div>
             <span style="opacity: 0.9; font-style: italic;">{{event.declarationTitle}}</span> &nbsp;
-            <span style="opacity: 0.6; font-size: 85%;">
+            <small style="opacity: 0.6;">
                 declared on {{event.date.toLocaleDateString()}}
-            </span>
+            </small>
         
             <p style="line-height: 200%; margin-bottom: 0;">
                 <!-- https://www.fema.gov/openfema-dataset-disaster-declarations-summaries-v1 -->
@@ -121,6 +123,11 @@
         </div>
 
         <div v-else-if="event.type == 'eda2018'">
+            <div class="event-date">
+                <small style="opacity: 0.6;">grant awarded on </small>
+                &nbsp;
+                <time title="Grant Award Date">{{new Date(event.grant_award_date).toLocaleDateString()}}</time>
+            </div>
 
             <b>To:</b> <!--{{event.grantee}},-->{{event.grantee_name}},
             {{event.grantee_city}}, {{event.grantee_state}}<br>
