@@ -224,7 +224,7 @@ export default class Disaster extends Vue {
                         'source': 'counties',
                         'paint': {
                             'fill-color': layer.color,
-                            'fill-opacity': (layer.opacity||1)*0.1,
+                            'fill-opacity': (layer.opacity||1)*0.2,
                         },
                         'filter': layer.statefilter,
                         layout: {
