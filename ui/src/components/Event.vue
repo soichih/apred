@@ -24,7 +24,7 @@
         <h3 v-else-if="event.type == 'eda2018'" class="eda2018" :class="{'eda2018-state': event.statewide, 'eda2018-county': !event.statewide}">
             <el-tag size="small" effect="dark" type="success" style="float: right;">fain: {{event.fain}}</el-tag>
             <b v-if="event.statewide">Statewide</b>
-            EDA 2018 Award
+            EDA 2018 Disaster Supplemental Award
             <span style="opacity: 0.5;"> | </span>
             ${{event.award_amount | formatNumber}}
         </h3>
@@ -128,8 +128,9 @@
             <br>
 
             <b>For:</b> {{event.grant_purpose}} 
+            <!--
             <span>&gt; Project Funding: ${{event.total_project_funding | formatNumber}}</span>
-    j
+            -->
             <br>
             <br>
             <b>Regional Office:</b> {{event.eda_regional_office}}
