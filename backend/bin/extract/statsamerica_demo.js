@@ -12,6 +12,13 @@ mssql.connect(config.stats_america.db_stats4).then(pool=>{
     load_gemographics(pool);
 });
 
+function padfront(str, pad, len) {
+    while(str.length < len) {
+        str = pad + str;
+    }
+    return str;
+}
+
 function load_gemographics(pool) {
     let groups = [
 	     { code_id: 312, description: 'Population 0 to 4' },
@@ -44,8 +51,12 @@ function load_gemographics(pool) {
 { geo_id: 13039, time_id: 2018, code_id: 317, data: 6436 },
             */
             res.recordset.forEach(rec=>{
-                if(!demo[rec.geo_id]) demo[rec.geo_id] = [];
-                demo[rec.geo_id].push({group: rec.code_id, value: rec.data});
+                let geo_id = rec.geo_id.toString();
+                if(geo_id.length == 6) {
+                    geo_id = geo_id.substring(1);
+                }
+                if(!demo[geo_id]) demo[geo_id] = [];
+                demo[geo_id].push({group: rec.code_id, value: rec.data});
             });
             next_group();
         });
