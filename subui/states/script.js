@@ -209,12 +209,13 @@ new Vue({
     methods: {
         loadGeo() {
             return new Promise((resolve, reject)=>{
-                axios.get("covid19states.geojson").then(res=>{
+                axios.get("https://gpu1-pestillilab.psych.indiana.edu/apred/covid19states.geojson").then(res=>{
                     resolve(res.data);
                 });
             });
         },
 
+            /*
         loadCounty() {
             return new Promise((resolve, reject)=>{
                 axios.get("travelrestriction.json").then(res=>{
@@ -223,6 +224,7 @@ new Vue({
                 });
             });
         },
+            */
 
         loadCSV() {
             return new Promise((resolve, reject)=>{
