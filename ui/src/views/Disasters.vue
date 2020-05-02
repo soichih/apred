@@ -10,7 +10,7 @@
 
                 <CountySelecter style="float: left; top: 15px; z-index: 1; width: 230px;" @selected="countySelected" :options="countyList"/>
                 <div class="legend">
-                    <div v-for="(info, layer) in layers" :key="layer" class="legend-item" :class="{hidden: hiddenLayers.includes(layer)}" @click.stop="toggleLayer(layer)" style="clear: both;">
+                    <div v-for="(info, layer) in layers" :key="layer" class="legend-item" :class="{hidden: hiddenLayers.includes(layer)}" @click.stop="toggleLayer(layer)" style="clear: both;" :title="info.title">
                         <input type="checkbox" :checked="!hiddenLayers.includes(layer)" style="float: right;"/>
                         <span class="legend-color" :style="{backgroundColor: info.color}">&nbsp;</span>&nbsp;{{layer}}
                     </div>
@@ -73,6 +73,7 @@ export default class Disaster extends Vue {
             ]
         },
         "other": {
+            title: "EarthQuake, Coastal Storm, Snow, Mud/Landslide, Volcane, Dam/Levee Break, Severe Ice Storm",
             color: "#999",
             filter: ["any", 
                 ["==", "isEarthquake", true],
