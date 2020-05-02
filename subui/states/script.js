@@ -209,12 +209,13 @@ new Vue({
     methods: {
         loadGeo() {
             return new Promise((resolve, reject)=>{
-                axios.get("covid19states.geojson").then(res=>{
+                axios.get("https://gpu1-pestillilab.psych.indiana.edu/apred/covid19states.geojson").then(res=>{
                     resolve(res.data);
                 });
             });
         },
 
+            /*
         loadCounty() {
             return new Promise((resolve, reject)=>{
                 axios.get("travelrestriction.json").then(res=>{
@@ -223,10 +224,11 @@ new Vue({
                 });
             });
         },
+            */
 
         loadCSV() {
             return new Promise((resolve, reject)=>{
-                axios.get("COVID2019StateTrackingChart.csv").then(res=>{
+                axios.get("https://gpu1-pestillilab.psych.indiana.edu/apred/COVID2019StateTrackingChart.csv").then(res=>{
                     //csv contains &nbsp; for space.. I need to replace it with space so we can compare names
                     this.modified = res.headers["last-modified"];
                     let re = new RegExp(String.fromCharCode(160), "g");
