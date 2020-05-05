@@ -25,7 +25,6 @@ export default class Footer extends Vue {
 footer {
 background-color: #333; 
 color: #999; 
-margin-top: 20px;
 padding: 30px 0;
 }
 p {
