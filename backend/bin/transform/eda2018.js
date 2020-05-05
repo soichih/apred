@@ -80,7 +80,7 @@ async.eachSeries(need_geocode, (fain, next_fain)=>{
     console.log("done");
 
     //store previously coded geocode
-    fs.writeFileSync('../../../data/fain_geocodes.json', JSON.stringify(geocodes));
+    fs.writeFileSync(__dirname+'/../../../data/fain_geocodes.json', JSON.stringify(geocodes));
 
-    fs.writeFileSync('../../../data/eda2018.json', JSON.stringify(eda2018));
+    fs.writeFileSync(__dirname+'/../../../data/eda2018.json', JSON.stringify(eda2018));
 });
