@@ -1,8 +1,8 @@
 <template>
 <div>
     <br>
-    <el-button type="success" plain @click="showDetail = true" v-if="!showDetail">
-        <i class="el-icon-caret-right"/> This incident maybe eligible for 2019 disaster supplemental funding
+    <el-button type="primary" plain @click="showDetail = true" v-if="!showDetail">
+        <i class="el-icon-caret-right"/> This incident maybe eligible for <b>2019</b> disaster supplemental funding
     </el-button>
     <div v-if="showDetail">
         <p>
@@ -23,7 +23,7 @@
             </ul>
         </p>
         <p>
-            <el-button @click="apply" type="success" style="width: 100%;"><i class="el-icon-caret-right"/> Apply</el-button>
+            <el-button @click="apply" type="primary" style="width: 100%;"><i class="el-icon-caret-right"/> Apply</el-button>
         </p>
         <br>
     </div><!--showDetail-->

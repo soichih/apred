@@ -33,18 +33,19 @@
     <div class="event-body">
         <div v-if="event.type == 'dr'">
             <div class="event-date">
-                <small style="opacity: 0.6;">Incident on </small>
+                <small style="opacity: 0.6;">Incident date from </small>
                 &nbsp;
                 <time title="Incident Begin Date">{{new Date(event.incidentBeginDate).toLocaleDateString()}}</time>
                 <small>
-                    - <time v-if="event.incidentEndDate" title="Incident End Date">{{new Date(event.incidentEndDate).toLocaleDateString()}}</time>
-                    <span v-else>ongoing</span>
+                    <time v-if="event.incidentEndDate" title="Incident End Date"> to {{new Date(event.incidentEndDate).toLocaleDateString()}}</time>
+                    <span v-else> - ongoing</span>
                 </small>
             </div>
             <span style="opacity: 0.9; font-style: italic;">{{event.declarationTitle}}</span> &nbsp;
             <small style="opacity: 0.6;">
                 declared on {{event.date.toLocaleDateString()}}
             </small>
+            <slot/>
         
             <p style="line-height: 200%; margin-bottom: 0;">
                 <!-- https://www.fema.gov/openfema-dataset-disaster-declarations-summaries-v1 -->
@@ -141,6 +142,7 @@
             <br>
             <br>
             <b>Regional Office:</b> {{event.eda_regional_office}}
+            <slot/>
         </div>
 
         <!--other things?-->
@@ -148,7 +150,6 @@
             {{event}}
         </div>
 
-        <slot/>
     </div>
 
 </div>

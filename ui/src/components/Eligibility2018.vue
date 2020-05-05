@@ -2,7 +2,7 @@
 <div>
     <br>
     <el-button type="primary" plain @click="showDetail = true" v-if="!showDetail">
-        <i class="el-icon-caret-right"/> This incident maybe eligible for 2018 disaster supplemental funding
+        <i class="el-icon-caret-right"/> This incident maybe eligible for <b>2018</b> disaster supplemental funding
     </el-button>
 
     <div v-if="showDetail">
