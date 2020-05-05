@@ -88,7 +88,7 @@
         <br>
     </div>
 
-    <div style="background-color: #eee" v-if="detail.bvis" id="bvi">
+    <div style="background-color: #f9f9f9" v-if="detail.bvis" id="bvi">
     <div class="page">
         <br>
         <h3>Business Vulnerability</h3>
@@ -192,10 +192,15 @@
         </div>
     </div>
 
-    <div class="page" id="storms">
-        <h3>Storm History</h3>
-        <p>This graph shows the counts of storm event published by NOAA since 1955.</p>
-        <Plotly :data="stormData" :layout="stormLayout" :display-mode-bar="false"></Plotly>
+    <div id="storms" style="background-color: #f9f9f9;">
+        <div class="page">
+            <h3>Storm History</h3>
+            <p>This graph shows the counts of storm event published by NOAA since 1950s.</p>
+            <Plotly :data="stormData" :layout="stormLayout" :display-mode-bar="false"></Plotly>
+            <br>
+            <br>
+            <br>
+        </div>
     </div>
     
     <Footer/>
@@ -480,8 +485,8 @@ export default class CountyDetail extends Vue {
         this.stormLayout = {
             margin: {
                 l: 30,
-                r: 0,
-                t: 0,
+                r: 30,
+                t: 10,
                 b: 30,
                 //pad: 10,
             },
@@ -493,6 +498,7 @@ export default class CountyDetail extends Vue {
                 orientation: 'h',
             },
             barmode: 'stack',
+
             //bargroupgap: 0.1
         }
 
@@ -508,8 +514,19 @@ export default class CountyDetail extends Vue {
                 x,
                 y,
                 name: type,
-                //marker: {color: 'rgb(100, 100, 100)'},
-                type: 'bar'
+
+                //for bar graph
+                type: 'bar',
+
+                //for line chart
+                /*
+                stackgroup: 'one',
+                line: {
+                    width: 0,
+                    shape: 'spline',
+                    smoothing: 0.8,
+                },
+                */
             });
         }
     }
