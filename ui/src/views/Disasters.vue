@@ -4,8 +4,14 @@
     <div>
         <div style="position: relative;">
             <div class="page">
-                <p class="secondary">FEMA delared disasters since 2017</p>
-                <h2 style="margin-bottom: 0px">Disaster&nbsp;Declarations</h2>
+                <!--
+                <p class="secondary">
+                    FEMA delared disasters since 2017
+                </p>
+                -->
+                <h2 style="margin-bottom: 0px">FEMA Disaster&nbsp;Declarations
+                    <span style="opacity: 0.8; font-size: 70%; font-weight: normal; text-transform: none;">between 2017 - <time v-if="updatedDate">{{new Date(updatedDate).toLocaleDateString()}}</time></span>
+                </h2>
                 <p><i class="el-icon-caret-right"/> Select a county to show detail</p>
 
                 <CountySelecter style="float: left; top: 15px; z-index: 1; width: 230px;" @selected="countySelected" :options="countyList"/>
@@ -61,6 +67,8 @@ export default class Disaster extends Vue {
     hiddenLayers = [];
     countyList = [];
 
+    updatedDate = null;
+
     layers = {
         "biological": {
             color: "#396",
@@ -104,9 +112,8 @@ export default class Disaster extends Vue {
                 ["==", "isStateHurricane", true],
             ]
         },
-        /*
         "tornado": {
-            color: "#c60", 
+            color: "#f6f", 
             filter: ["any", 
                 ["==", "isTornado", true],
             ],
@@ -114,7 +121,6 @@ export default class Disaster extends Vue {
                 ["==", "isStateTornado", true],
             ]
         },
-        */
         "severe storm": { 
             color: "#fa0", 
             filter: ["any", 
@@ -182,12 +188,19 @@ export default class Disaster extends Vue {
 
         this.map.on('load', ()=>{
             //fetch("https://ctil.iu.edu/projects/apred-data/counties_geo.json").then(res=>res.json()).then(data=>{
-            fetch("https://gpu1-pestillilab.psych.indiana.edu/apred/counties_geo.json").then(res=>res.json()).then(data=>{
+            fetch("https://gpu1-pestillilab.psych.indiana.edu/apred/counties_geo.json").then(res=>{ 
+                this.updatedDate = res.headers.get("last-modified")
+                return res.json()
+            }).then(data=>{
                 this.geojson = data;
                 data.features.forEach(feature=>{
                     const props = feature.properties;
                     if(props.countyfips) {
                         this.countyList.push({value: props.statefips+props.countyfips, label: props.county+", "+props.state});
+                    }
+
+                    if(props.award) {
+                        props.awardStr = "$"+this.$options.filters.formatNumber(props.award/1000)+"k";
                     }
                 });
 
@@ -242,7 +255,8 @@ export default class Disaster extends Vue {
                     'paint': {
                         'circle-stroke-color': 'rgba(0,0,0,0)',
                         'circle-stroke-width': 2,
-                        'circle-color': 'rgba(103,194,58,0.8)',
+                        //'circle-color': 'rgba(103,194,58,0.8)',
+                        'circle-color': 'rgba(200,255,100,0.9)',
                         'circle-opacity': 0.75,
                         'circle-radius': {
                             base: 1.75,
@@ -266,7 +280,8 @@ export default class Disaster extends Vue {
                     "source": "counties",
                     filter: ['==', 'eda2018', 'county'],    
                     'paint': {
-                        'circle-stroke-color': 'rgba(103,194,58,0.8)',
+                        //'circle-stroke-color': 'rgba(103,194,58,0.8)',
+                        'circle-stroke-color': 'rgba(200,255,100,0.9)',
                         'circle-stroke-width': 2,
                         'circle-color': 'rgba(0,0,0,0)',
                         'circle-opacity': 0.75,
@@ -297,15 +312,26 @@ export default class Disaster extends Vue {
                     ],
                     'layout': {
                         'text-field': 
-                            ['get', 'award'],
+                            ['get', 'awardStr'],
+                        /*
                         'text-font': [
-                            'Open Sans Bold',
+                            'Open Sans',
                             'Arial Unicode MS Bold'
                         ],
-                        'text-size': 11,
+                        */
+                        'text-size': [
+                            "interpolate", 
+                            [ "linear" ],
+                            [ "zoom" ], 
+                            2,
+                            [ "interpolate", [ "linear" ], [ "get", "award" ], 500, 3, 5000, 6 ],
+                            9,
+                            [ "interpolate", [ "linear" ], [ "get", "award" ], 500, 10, 5000, 30 ]
+                        ]
                     },
                     'paint': {
                         'text-color': 'rgba(0,0,0,1)'
+                        //'text-color': 'rgba(255,255,255,1)'
                     }
                 });
 
