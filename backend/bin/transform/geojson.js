@@ -82,8 +82,8 @@ geojson.features.forEach(feature=>{
                     feature.properties.isFire = true; break;
                 case "Snow":
                     feature.properties.isSnow = true; break;
-                //case "Tornado":
-                //    feature.properties.isTornado = true; break;
+                case "Tornado":
+                    feature.properties.isTornado = true; break;
                 case "Mud/Landslide":
                     feature.properties.isMudLandslide = true; break;
                 case "Volcano":
@@ -96,7 +96,7 @@ geojson.features.forEach(feature=>{
                     feature.properties.isBiological = true; break;
                 default: 
                     console.log("unknown disaster type", d);
-                    process.exit(1);
+                    //process.exit(1);
             }
         }
 
@@ -129,8 +129,8 @@ geojson.features.forEach(feature=>{
                     feature.properties.isStateFire = true; break;
                 case "Snow":
                     feature.properties.isStateSnow = true; break;
-                //case "Tornado":
-                //    feature.properties.isStateTornado = true; break;
+                case "Tornado":
+                    feature.properties.isStateTornado = true; break;
                 case "Mud/Landslide":
                     feature.properties.isStateMudLandslide = true; break;
                 case "Volcano":

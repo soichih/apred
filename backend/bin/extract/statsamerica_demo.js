@@ -36,12 +36,11 @@ function load_gemographics(pool) {
         console.log(group);
 
         pool.request().query(`
-        SELECT 
-            A.[geo_id] ,A.[time_id] ,A.[code_id] ,A.[data]
-            FROM [stats_dms5].[dbo].[ACS_common_items_extract] A
-            JOIN [stats_dms5].[dbo].[GEOGRAPHY_NAME] G ON G.[sumlev]='050' AND G.[geo_id] = A.[geo_id]
-            WHERE A.[time_id] = '2018' AND A.[code_id]='${group.code_id}'
+        SELECT *
+            FROM [stats_dms5].[dbo].[ACS_common_items_extract]
+            WHERE time_id = '2018' AND code_id='${group.code_id}'
         `).then(res=>{
+            //JOIN [stats_dms5].[dbo].[GEOGRAPHY_NAME] G ON G.[sumlev]='050' AND G.[geo_id] = A.[geo_id]
             /*
 { geo_id: 13029, time_id: 2018, code_id: 317, data: 3653 },
 { geo_id: 13031, time_id: 2018, code_id: 317, data: 8175 },
@@ -55,13 +54,16 @@ function load_gemographics(pool) {
                 if(geo_id.length == 6) {
                     geo_id = geo_id.substring(1);
                 }
+                if(geo_id.length != 5) return; //ignore odd ones
                 if(!demo[geo_id]) demo[geo_id] = [];
                 demo[geo_id].push({group: rec.code_id, value: rec.data});
+                //if(geo_id.startsWith("72")) console.dir(rec);
             });
             next_group();
         });
     }, err=>{
         if(err) throw err;
+        //console.dir(demo);
         fs.writeFileSync(__dirname+"/../../../raw/statsamerica.demo.json", JSON.stringify(demo));
         pool.close();
     });
