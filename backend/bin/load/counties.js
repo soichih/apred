@@ -66,7 +66,6 @@ for(let fips in counties) {
         console.error("demo missing for", fips);
     }
 }
-process.exit(1);
 
 console.log("loading cutter info");
 const cutter = require(__dirname+'/../../../data/cutter.json');
