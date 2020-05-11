@@ -34,6 +34,7 @@ geo.features.forEach(feature=>{
         disasters: [],
         storms: null,
         bvis: null, //keyed by each year
+        gdp: null, 
     } 
     //lookup state name
     /*
@@ -52,8 +53,7 @@ console.log("loading demographics");
 const demo = require(__dirname+'/../../../raw/statsamerica.demo.json');
 for(let fips in demo) {
     if(!counties[fips]) {
-        console.error("odd fips in demo?", fips);
-        //console.dir(demo[fips]);
+        //console.error("odd fips in demo?", fips);
         continue;
     }
     counties[fips].demo = demo[fips];
@@ -67,6 +67,34 @@ for(let fips in counties) {
     }
 }
 
+console.log("loading bea county gdb");
+const gdps = require(__dirname+'/../../../raw/statsamerica.bea.gdp.json');
+for(let gdp of gdps) {
+    /*
+    {
+      statefips: '02',
+      countyfips: '158',
+      linecd: '0036',
+      year: '2001',
+      disc_c: '0',
+      gcp_c: 3940,
+      disc_r: '0',
+      gcp_r: 4278,
+      disc_idx: '0',
+      gcp_idx: 90.032
+    }
+    */
+    let fips = gdp.statefips+gdp.countyfips;
+    if(!counties[fips]) {
+        //console.error("odd fips in gdp?", fips);
+        //console.dir(gdp);
+        continue;
+    }
+    //counties[fips].demo = demo[fips];
+    //counties[fips].population = demo[fips].reduce((t,v)=>{ return t+v.value }, 0);
+    counties[fips].gdp = gdp.gcp_c; //TODO - asked Brittany which field I should be using
+}
+
 console.log("loading cutter info");
 const cutter = require(__dirname+'/../../../data/cutter.json');
 for(let fips in cutter.counties) {
@@ -76,7 +104,7 @@ for(let fips in cutter.counties) {
     sfips = statefips+countyfips;
     let county_measures = cutter.counties[fips];
     if(!counties[sfips]) {
-        console.error("odd fips in cutter?", sfips);
+        //console.error("odd fips in cutter?", sfips);
         continue;
     }
     counties[sfips].cutter = JSON.parse(JSON.stringify(cutter.indicators));
@@ -121,7 +149,7 @@ for(let fain in eda2018) {
     eda2018[fain].counties.forEach(county=>{
         let fips = county.statefips+county.countyfips;
         if(!counties[fips]) {
-            console.error("odd/missing fips in eda2018", county);
+            //console.error("odd/missing fips in eda2018", county);
             return;
         }
         counties[fips].eda2018.push(eda2018[fain]);
@@ -167,7 +195,7 @@ for(let fips in storm_counts) {
     let storms = storm_counts[fips];
     fips = fips.replace(".", "");
     if(!counties[fips]) {
-        console.error("odd fips in storm counts?", fips);
+        //console.error("odd fips in storm counts?", fips);
         continue;
     }
     //console.log(fips, storms);
@@ -285,8 +313,8 @@ disasterNumber,declarationDate,incidentType,pwNumber,applicationTitle,applicantI
         */
         let fips = rec.county.toString()
         if(!counties[fips]) {
-            console.error("odd fips in bvi (rec.county)", fips);
-            console.dir(rec);
+            //console.error("odd fips in bvi (rec.county)", fips);
+            //console.dir(rec);
             return;
         }
         if(!counties[fips].bvis) counties[fips].bvis = [];
