@@ -35,6 +35,7 @@ geo.features.forEach(feature=>{
         storms: null,
         bvis: null, //keyed by each year
         gdp: null, 
+        medianincome: null, 
     } 
     //lookup state name
     /*
@@ -66,6 +67,22 @@ for(let fips in counties) {
         console.error("demo missing for", fips);
     }
 }
+
+console.log("loading median income");
+const medianincome = require(__dirname+'/../../../raw/statsamerica.acs.medianincome.json');
+for(let rec of medianincome) {
+    let fips = rec.geo_id;
+    if(!counties[fips]) {
+        //console.error("odd fips in medianincome?", fips);
+        continue;
+    }
+    //{"geo_id":33647834,"time_id":2011,"code_id":307,"data":56404}
+    
+    //counties[fips].demo = demo[fips];
+    //counties[fips].population = demo[fips].reduce((t,v)=>{ return t+v.value }, 0);
+    counties[fips].medianincome = rec.data;
+}
+
 
 console.log("loading bea county gdb");
 const gdps = require(__dirname+'/../../../raw/statsamerica.bea.gdp.json');
@@ -172,7 +189,7 @@ function handle_disaster(rec) {
         //county specific
         let fips = rec.fipsStateCode+rec.fipsCountyCode;
         if(!counties[fips]) {
-            console.error("odd/missing fips in disaster rec", fips);
+            //console.error("odd/missing fips in disaster rec", fips);
             return;
         }
         counties[fips].disasters.push(rec);
