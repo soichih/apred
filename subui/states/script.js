@@ -120,7 +120,7 @@ new Vue({
                 <tr>
                     <th>Business Closure</th>
                     <td>
-                        <i>{{selected.statewide_closure_nonessential}}</i> (+{{scoreStatewideClosure(selected.statewide_closure_nonessential)}})
+                        <i>{{selected.statewide_closure_nonessential||'none'}}</i> (+{{scoreStatewideClosure(selected.statewide_closure_nonessential)}})
                     </td>
                 </tr>
                 <tr>
@@ -128,10 +128,12 @@ new Vue({
                     <td>
                         <p class="option" :class="{active: (selected.statewide_limits_on_gatherings == '')}"><span class="circle"/> No Limit (+0)</p>
                         <p class="option" :class="{active: (
-                    selected.statewide_limits_on_gatherings.startsWith('Recommended') ||
-                    selected.statewide_limits_on_gatherings.startsWith('Local') ||
-                    selected.statewide_limits_on_gatherings.startsWith('Yes- unspecified'))}">
-                            <span class="circle"/> Recommended (+0.4)</p>
+                            selected.statewide_limits_on_gatherings.startsWith('Recommended') ||
+                            selected.statewide_limits_on_gatherings.startsWith('Local') ||
+                            selected.statewide_limits_on_gatherings.startsWith('Yes- unspecified'))}">
+                            <span class="circle"/> Recommended (+0.2)
+                        </p>
+                        <p class="option" :class="{active: (selected.statewide_limits_on_gatherings.startsWith('Yes - 50 or more'))}"><span class="circle"/> For 50 or more (+0.4)</p>
                         <p class="option" :class="{active: (selected.statewide_limits_on_gatherings.startsWith('Yes- 10 or more'))}"><span class="circle"/> For 10 or more (+0.6)</p>
                         <p class="option" :class="{active: (selected.statewide_limits_on_gatherings.startsWith('Yes- 5 or more'))}"><span class="circle"/> For 5 or more (+0.8)</p>
                         <p class="option" :class="{active: (selected.statewide_limits_on_gatherings.startsWith('Yes- stay at'))}"><span class="circle"/> Stay at home (+1)</p>
@@ -183,9 +185,11 @@ new Vue({
         this.map.addControl(new mapboxgl.NavigationControl());
 
         Promise.all([this.loadCSV(), this.loadGeo()/*, this.loadCounty()*/]).then(data=>{
+            //console.log("loaded data");
             //merge csv into geojson
             this.geojson = data[1];
-            console.log("data[0]");
+            //console.log("data[0]");
+            //console.dir(this.geojson.features);
             data[0].forEach(rec=>{
                 let feature = this.geojson.features.find(feature=>rec.state.startsWith(feature.properties.name));
                 if(feature) {
@@ -240,12 +244,17 @@ new Vue({
                     let csv = ascii.split("\n");
                     let recs = [];
                     let headers = csv.shift();
-                    console.log(headers);
-                    
-                    //console.dir(headers);
+                    console.dir(headers);
+                    //console.dir(csv);
+
                     for(let l = 0;l < csv.length; ++l) {
                         let line = csv[l];
                         if(line == "") continue;
+                        if(line[0] == "*") continue;
+                        if(line[0] == ",") continue;
+                        line = line.replace(/\"\"/g, "'");
+
+                        //console.log(line);
 
                         let cols = [];
                         let buf = "";
@@ -261,9 +270,14 @@ new Vue({
                                         i++;
                                         if(i == line.length) {
                                             //reach the end of line without ending double quote.. try reading the next line
-                                            l++;
-                                            i = 0;
-                                            line = csv[l];
+                                            while(true) {
+                                                l++;
+                                                i = 0;
+                                                line = csv[l];
+                                                line = line.replace(/\"\"/g, "'");
+                                                //console.log(line.length, line);
+                                                if(line.length) break;
+                                            }
                                         }
                                     }
                                 } else {
@@ -272,27 +286,33 @@ new Vue({
                             }
                         }
                         cols.push(buf); //add the last column
+
                         /*
-                            0 State,
-                            1 State Employee Travel Restrictions,
-                            2 Statewide Limits on Gatherings and Stay at Home Orders,
-                            3 Statewide School Closures *state-ordered closure through end of year **recommended closure through end of year,
-                            4 Statewide Closure of Non-Essential Business Spaces,
-                            5 Essential Business Designations List*,
-                            6 Statewide Curfew,
-                            7 1135 Waiver Status,
-                            8 Extension of Individual Income Tax Deadlines,
-                            9 Presidential Primary Election,
-                            10 Domestic Travel Limitations,
-                            11 Using Cloth Face Coverings in Public,
-                            12 Ventilator Sharing,
-                            13 Reopening Plans and Task Forces,
-                            Unnamed: 14,
-                            Unnamed: 15,
-                            Unnamed: 16
+                        0 State (ST)
+                        1 State Employee Travel Restrictions	
+                        2 Statewide Limits on Gatherings and Stay at Home Orders	
+                        3 Statewide School Closures *state-ordered closure through end of year **recommended closure through end of year	
+                        4 Statewide Closure of Non-Essential Business Spaces	
+                        5 Essential Business Designations List*	
+                        6 Statewide Curfew	
+                        7 Extension of Individual Income Tax Deadlines	
+                        8 Presidential Primary Election	
+                        9 Domestic Travel Limitations	
+                        10 Using Cloth Face Coverings in Public	
+                        11 Ventilator Sharing	
+                        12 Reopening Plans and Task Forces	
+                        Unnamed: 13	
+                        Unnamed: 14	
+                        Unnamed: 15
                         */
+                        /*
+                        let state_begin = cols[0].indexOf("(");
+                        let state_end = cols[0].indexOf(")");
+                        let state = cols[0].substring(state_begin+1, state_end);
+                        */
+                        let state = cols[0].split("(")[0];
                         let rec = {
-                            state: cols[0],
+                            state,
                             state_employee_travel_restrictions: (cols[1]=="Yes"),
                             statewide_limits_on_gatherings: cols[2],
                             statewide_closure_school: cols[3], ///Yes or Local
@@ -300,26 +320,26 @@ new Vue({
                             statewide_closure_nonessential: cols[4], 
                             essential_designations: cols[5], 
                             statewide_curfew: cols[6], //Yes or Local
-                            waiver1135: cols[7], //Approved
-                            extension_incometax: cols[8], 
-                            primary_election: cols[9], 
-                            domestic_travel_limit: cols[10], 
-                            statewide_mask: cols[11], 
-                            ventilator_sharing: cols[12], 
+                            //waiver1135: cols[7], //Approved
+                            extension_incometax: cols[7], 
+                            primary_election: cols[8], 
+                            domestic_travel_limit: cols[9], 
+                            statewide_mask: cols[10], 
+                            ventilator_sharing: cols[11], 
                             reopening_plans: cols[12], 
                             //national_guard_activation: (cols[3]=="Yes"),
                         };
                         rec.level = this.scoreLevel(rec);
+                        //console.dir(rec);
                         recs.push(rec);
                     }
-                    console.dir(recs[0]);
+                    //console.dir(recs[0]);
                     resolve(recs);
                 }).catch(err=>{
                     reject(err);
                 });
             });
         },
-
 
         scoreLevel(rec) {
             let score = 0;
@@ -336,13 +356,14 @@ new Vue({
             else if(rec.statewide_curfew == "Local") score += 0.25;
 
             //max 1
-            if(rec.statewide_limits_on_gatherings.startsWith("Yes- stay")) score += 1;
+            if(rec.statewide_limits_on_gatherings.startsWith("Yes- stay at home")) score += 1;
             else if(rec.statewide_limits_on_gatherings.startsWith("Yes- 5 or more")) score += 0.8;
             else if(rec.statewide_limits_on_gatherings.startsWith("Yes- 10 or more")) score += 0.6;
-            else if(rec.statewide_limits_on_gatherings.startsWith("Recommended") ||
+            else if(rec.statewide_limits_on_gatherings.startsWith("Yes- 50 or more")) score += 0.4;
+            else if(
                 rec.statewide_limits_on_gatherings.startsWith("Local") ||
-                rec.statewide_limits_on_gatherings.startsWith("Yes- 50 or more") ||
-                rec.statewide_limits_on_gatherings.startsWith("Yes- unspecified")) score += 0.4;
+                rec.statewide_limits_on_gatherings.startsWith("Recommended") ||
+                rec.statewide_limits_on_gatherings.startsWith("Yes- unspecified")) score += 0.2;
 
             //max 1
             score += this.scoreStatewideClosure(rec.statewide_closure_nonessential);
