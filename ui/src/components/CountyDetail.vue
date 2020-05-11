@@ -15,10 +15,10 @@
     <div id="info-header">
         <div class="page">
             <el-row>
-                <el-col :span="11">
+                <el-col :span="9">
                     <div id="statemap"/>
                 </el-col>
-                <el-col :span="8" class="border-left demo">
+                <el-col :span="6" class="border-left demo">
                     <p>
                         <span class="sub-heading">Population</span><br>
                         <span class="primary" v-if="detail.demo"> {{detail.population | formatNumber}}</span>
@@ -27,16 +27,28 @@
 
                     <vue-bar-graph v-if="detail.demo"
                         :points="populationPoints(detail.demo)"
-                        :width="200"
-                        :height="90"
+                        :width="175"
+                        :height="100"
                         :show-x-axis="true" 
                         :show-values="true"
                         bar-color="#999"
                         text-color="#666"
-                        text-alt-color="white"
-                    />
+                        text-alt-color="white"/>
+                    <br>
                 </el-col>
-                <el-col :span="5" class="border-left">
+                <el-col :span="5" class="border-left gdp">
+                    <p>
+                        <span class="sub-heading">GDP</span> <small>(2018)</small><br>
+                        <span class="primary" v-if="detail.gdp"> ${{detail.gdp | formatNumber}}</span>
+                        <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
+                    </p>
+                    <p>
+                        <span class="sub-heading">Median Income</span> <small>(2018)</small><br>
+                        <span class="primary" v-if="detail.medianincome"> ${{detail.medianincome | formatNumber}}</span>
+                        <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
+                    </p>
+               </el-col>
+                <el-col :span="4" class="border-left">
                     <p class="sub-heading">
                         Disaster Resilience
                         <i style="color: #409EFF; font-weight: bold;" @click="goto('cutter')" class="el-icon-warning-outline"/>
@@ -798,13 +810,18 @@ h4 {
     }
 }
 .border-left {
-    border-left: 1px solid #ddd;
+    border-left: 1px solid #0001;
     height: 200px;
     padding-left: 20px;
     padding-top: 10px;
 }
-@media only screen and (max-width: 700px) {
+@media only screen and (max-width: 850px) {
     .demo {
+        display: none;
+    }
+}
+@media only screen and (max-width: 1000px) {
+    .gdp {
         display: none;
     }
 }
