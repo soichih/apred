@@ -129,6 +129,7 @@ new Vue({
                         <p class="option" :class="{active: (selected.statewide_limits_on_gatherings == '')}"><span class="circle"/> No Limit (+0)</p>
                         <p class="option" :class="{active: (
                             selected.statewide_limits_on_gatherings.startsWith('Recommended') ||
+                            selected.statewide_limits_on_gatherings.startsWith('Guidance to avoid') ||
                             selected.statewide_limits_on_gatherings.startsWith('Local') ||
                             selected.statewide_limits_on_gatherings.startsWith('Yes- unspecified'))}">
                             <span class="circle"/> Recommended (+0.2)
@@ -363,6 +364,7 @@ new Vue({
             else if(
                 rec.statewide_limits_on_gatherings.startsWith("Local") ||
                 rec.statewide_limits_on_gatherings.startsWith("Recommended") ||
+                rec.statewide_limits_on_gatherings.startsWith("Guidance to avoid") ||
                 rec.statewide_limits_on_gatherings.startsWith("Yes- unspecified")) score += 0.2;
 
             //max 1
