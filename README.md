@@ -191,6 +191,26 @@ These came directly from Logan. Loaded directly to raw/cutters
 
 This came from Logan also. Loaded directly to raw.
 
+### BEA/GDP
+
+`./backend/bin/extract/statsamerica_bea_gdp.js`
+
+This script downloads data from bea_gdp_uscnty table for 2018 GDP information. This is a one time pull.
+
+Data is stored in `raw/statsamerica.bea.gdp.json`
+
+### ACS Tables
+
+`./backend/bin/extract/statsamerica_acs.js`
+
+This script does the one time pull of the acs_common_items_extract table for 2018 data.
+
+* code_id: 307 `statsamerica.acs.medianincome.json`
+* code_id: 365 `statsamerica.acs.over65.json`
+* code_id: 411 `statsamerica.acs.under18.json`
+* code_id: 364 `statsamerica.acs.poverty_individuals.json`
+* code_id: 385 `statsamerica.acs.poverty_universe.json`
+
 ## Data transformation
 
 Scripts under `backend/bin/transform` is used to transform data stored under `raw`.
