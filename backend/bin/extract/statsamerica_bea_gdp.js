@@ -33,7 +33,7 @@ function load(pool) {
         },
 
         next=>{
-            pool.request().query(`SELECT * FROM bea_gdp_uscnty WHERE YEAR = 2018`).then(res=>{
+            pool.request().query(`SELECT * FROM bea_gdp_uscnty WHERE linecd = 0001 AND YEAR = 2018`).then(res=>{
                 /*
                 {
                     "statefips": "02",
