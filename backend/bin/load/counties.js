@@ -75,7 +75,7 @@ for(let rec of medianincome) {
     if(fips.length > 6) continue; //ignore odd one
     if(fips.length == 6 && fips[0] == "1") fips = fips.substring(1);
     if(!counties[fips]) {
-        console.error("odd fips in medianincome?", fips);
+        //console.error("odd fips in medianincome?", fips);
         continue;
     }
     //{"geo_id":33647834,"time_id":2011,"code_id":307,"data":56404}
