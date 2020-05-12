@@ -71,13 +71,14 @@ for(let fips in counties) {
 console.log("loading median income");
 const medianincome = require(__dirname+'/../../../raw/statsamerica.acs.medianincome.json');
 for(let rec of medianincome) {
-    let fips = rec.geo_id;
+    let fips = rec.geo_id.toString();
+    if(fips.length > 6) continue; //ignore odd one
+    if(fips.length == 6 && fips[0] == "1") fips = fips.substring(1);
     if(!counties[fips]) {
-        //console.error("odd fips in medianincome?", fips);
+        console.error("odd fips in medianincome?", fips);
         continue;
     }
     //{"geo_id":33647834,"time_id":2011,"code_id":307,"data":56404}
-    
     //counties[fips].demo = demo[fips];
     //counties[fips].population = demo[fips].reduce((t,v)=>{ return t+v.value }, 0);
     counties[fips].medianincome = rec.data;
