@@ -104,8 +104,8 @@ new Vue({
                     <td>
                         <!--school closures-->
                         <p class="option" :class="{active: (selected.statewide_closure_school == '')}"><span class="circle"/> No Closure (+0)</p>
-                        <p class="option" :class="{active: (selected.statewide_closure_school.startsWith('Local'))}"><span class="circle"/> Local Closure (+0.25)</p>
-                        <p class="option" :class="{active: (selected.statewide_closure_school.startsWith('Yes'))}"><span class="circle"/> Statewide Closure (+0.5)</p>
+                        <p class="option" :class="{active: (selected.statewide_closure_school.startsWith('recommended closure'))}"><span class="circle"/> Recommended Closure (+0.25)</p>
+                        <p class="option" :class="{active: (selected.statewide_closure_school.startsWith('statewide closure'))}"><span class="circle"/> Statewide Closure (+0.5)</p>
                     </td>
                 </tr>
                 <tr>
@@ -311,6 +311,7 @@ new Vue({
                         let state_end = cols[0].indexOf(")");
                         let state = cols[0].substring(state_begin+1, state_end);
                         */
+                        //console.log(cols[3]);
                         let state = cols[0].split("(")[0];
                         let rec = {
                             state,
@@ -334,7 +335,10 @@ new Vue({
                         //console.dir(rec);
                         recs.push(rec);
                     }
-                    //console.dir(recs[0]);
+
+                    console.dir(headers);
+                    console.dir(recs[0]);
+
                     resolve(recs);
                 }).catch(err=>{
                     reject(err);
@@ -349,8 +353,8 @@ new Vue({
             if(rec.state_employee_travel_restrictions) score += 0.5;
 
             //max 0.5;
-            if(rec.statewide_closure_school.startsWith("Yes")) score += 0.5;
-            else if(rec.statewide_closure_school.startsWith("Local")) score += 0.25;
+            if(rec.statewide_closure_school.startsWith("statewide closure")) score += 0.5;
+            else if(rec.statewide_closure_school.startsWith("recommended closure")) score += 0.25;
 
             //max 0.5
             if(rec.statewide_curfew == "Yes") score += 0.5;
