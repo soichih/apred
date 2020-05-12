@@ -101,6 +101,9 @@ for(let gdp of gdps) {
       disc_idx: '0',
       gcp_idx: 90.032
     }
+    GCP_C = GDP in current dollars
+    GCP_R = Real GDP in chained dollars (2012 dollars)
+    GCP_IDX = Quantity indexes for real GDP
     */
     let fips = gdp.statefips+gdp.countyfips;
     if(!counties[fips]) {
@@ -110,7 +113,7 @@ for(let gdp of gdps) {
     }
     //counties[fips].demo = demo[fips];
     //counties[fips].population = demo[fips].reduce((t,v)=>{ return t+v.value }, 0);
-    counties[fips].gdp = gdp.gcp_c; //TODO - asked Brittany which field I should be using
+    counties[fips].gdp = gdp.gcp_c; //GDP in current dollars
 }
 
 console.log("loading cutter info");
