@@ -193,7 +193,6 @@ export default class Disaster extends Vue {
                 return res.json()
             }).then(data=>{
                 this.geojson = data;
-                console.log("processing counties_geo.json");
                 data.features.forEach(feature=>{
                     const props = feature.properties;
                     if(props.countyfips) {
@@ -369,7 +368,7 @@ export default class Disaster extends Vue {
             });
 
             this.map.on('idle', ()=>{
-                console.log("map is idle");
+                //console.log("map is idle");
             });
         })
     }
