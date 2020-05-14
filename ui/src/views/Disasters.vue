@@ -193,6 +193,7 @@ export default class Disaster extends Vue {
                 return res.json()
             }).then(data=>{
                 this.geojson = data;
+                console.log("processing counties_geo.json");
                 data.features.forEach(feature=>{
                     const props = feature.properties;
                     if(props.countyfips) {
@@ -334,9 +335,7 @@ export default class Disaster extends Vue {
                         //'text-color': 'rgba(255,255,255,1)'
                     }
                 });
-
             });
-
 
             this.map.on('click', e=>{
                 const features = this.map.queryRenderedFeatures(e.point, {
@@ -367,6 +366,10 @@ export default class Disaster extends Vue {
 
             this.map.on('mouseleave', 'counties', ()=>{
                 this.popup.remove();
+            });
+
+            this.map.on('idle', ()=>{
+                console.log("map is idle");
             });
         })
     }
