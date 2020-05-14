@@ -80,7 +80,7 @@
             <Event :event="event" :layers="layers">
                 <div class="connecter" v-if="idx < recentHistory.length">
                     <Eligibility2018 v-if="is2018Eligible(event)"/>
-                    <Eligibility2019 v-if="is2019Eligible(event)"/>
+                    <Eligibility2019 v-if="is2019Eligible(event) || is2019FloodEligible(event)"/>
                 </div>
             </Event>
         </div>
@@ -363,7 +363,6 @@ export default class CountyDetail extends Vue {
         
         this.detail.disasters.forEach(rec=>{
             rec.type = "dr";
-            //rec.date = new Date(rec.declarationDate);
             rec.date = new Date(rec.incidentBeginDate);
             this.history.push(rec);
         }); 
@@ -679,60 +678,85 @@ export default class CountyDetail extends Vue {
     }
 
     is2018Eligible(event) {
-        const begin = new Date(event.incidentBeginDate);
-        const end = new Date(event.incidentEndDate);
-        if( begin > new Date("2016-12-31") && end < new Date("2018-01-01") ) {
-            // ignore some incidentType 
-            switch(event.incidentType) {
-            case "Chemical":
-            case "Human Cause":
-            case "Terrorist":
-            case "Toxic Substances":
-                break;
-            default:
-                //all other are eligible
-                return true;
-            }
 
-            return true;
+        // some incidentType is not eligible
+        switch(event.incidentType) {
+        case "Chemical":
+        case "Human Cause":
+        case "Terrorist":
+        case "Toxic Substances":
+        case "Biological": //TODO confirm with Jason
+            return false;
         }
-        return false;
+
+        const eligBegin = new Date("2017-01-01");
+        const eligEnd = new Date("2018-01-01");
+
+        // check data range
+        let begin = new Date();
+        if(event.incidentBeginDate) begin = new Date(event.incidentBeginDate);
+        let end = new Date();
+        if(event.incidentEndDate) end = new Date(event.incidentEndDate);
+        if( !(begin >= eligBegin && begin < eligEnd) &&
+            !(end >= eligBegin && end < eligEnd) ) return false;
+
+        return true;
     }
 
     is2019Eligible(event) {
-        const begin = new Date(event.incidentBeginDate);
-        const end = new Date(event.incidentBeginDate);
-        if( begin > new Date("2017-12-31") && end < new Date("2019-01-01") ) {
-            // ignore some incidentType 
-            switch(event.incidentType) {
-            case "Chemical":
-            case "Human Cause":
-            case "Terrorist":
-            case "Toxic Substances":
-                break;
-            default:
-                //all other are eligible
-                return true;
-            }
-
+        // ignore some incidentType 
+        switch(event.incidentType) {
+        case "Chemical":
+        case "Human Cause":
+        case "Terrorist":
+        case "Toxic Substances":
+        case "Biological": //TODO confirm with Jason
+            return false;
         }
 
-        if( begin > new Date("2018-12-31") && begin < new Date("2020-01-01") ) {
-            //console.dir(event);
-            switch(event.incidentType) {
-            case "Severe Storm(s)":
-            case "Tornado":
-            case "Flood":
-                return true;
-            }
+        const eligBegin = new Date("2018-01-01");
+        const eligEnd = new Date("2019-01-01");
 
-            // it also qualifies if incidentTitle includes those names
-            if( event.incidentType.toLowerCase().includes("tornado") ||
-                event.incidentType.toLowerCase().includes("flood") ||
-                event.incidentType.toLowerCase().includes("severe storms")) return true;
+        //check date range
+        let begin = new Date();
+        if(event.incidentBeginDate) begin = new Date(event.incidentBeginDate);
+        let end = new Date();
+        if(event.incidentEndDate) end = new Date(event.incidentEndDate);
+        if( !(begin >= eligBegin && begin < eligEnd) &&
+            !(end >= eligBegin && end < eligEnd) ) return false;
+
+
+        return true;
+    }
+
+    is2019FloodEligible(event) {
+        switch(event.incidentType) {
+        case "Tornado":
+        case "Flood":
+        case "Severe Storm(s)":
+            //good
+            break;
+        default:
+            // also qualifies if incidentTitle includes those names
+            if( 
+                event.incidentTitle &&
+                !event.incidentTitle.toLowerCase().includes("tornado") &&
+                !event.incidentTitle.toLowerCase().includes("flood") &&
+                !event.incidentTitle.toLowerCase().includes("severe storms")) return false;
         }
 
-        return false;
+        const eligBegin = new Date("2019-01-01");
+        const eligEnd = new Date("2020-01-01");
+
+        //check date range
+        let begin = new Date();
+        if(event.incidentBeginDate) begin = new Date(event.incidentBeginDate);
+        let end = new Date();
+        if(event.incidentEndDate) end = new Date(event.incidentEndDate);
+        if( !(begin >= eligBegin && begin < eligEnd) &&
+            !(end >= eligBegin && end < eligEnd) ) return false;
+
+        return true;
     }
 }
 
