@@ -4,23 +4,20 @@
     <div>
         <div style="position: relative;">
             <div class="page">
-                <!--
-                <p class="secondary">
-                    FEMA delared disasters since 2017
-                </p>
-                -->
                 <h2 style="margin-bottom: 0px">FEMA Disaster&nbsp;Declarations
                     <span style="opacity: 0.8; font-size: 70%; font-weight: normal; text-transform: none;">between 2017 - <time v-if="updatedDate">{{new Date(updatedDate).toLocaleDateString()}}</time></span>
                 </h2>
-                <p><i class="el-icon-caret-right"/> Select a county to show detail</p>
-
-                <CountySelecter style="float: left; top: 15px; z-index: 1; width: 230px;" @selected="countySelected" :options="countyList"/>
-                <div class="legend">
-                    <div v-for="(info, layer) in layers" :key="layer" class="legend-item" :class="{hidden: hiddenLayers.includes(layer)}" @click.stop="toggleLayer(layer)" style="clear: both;" :title="info.title">
-                        <input type="checkbox" :checked="!hiddenLayers.includes(layer)" style="float: right;"/>
-                        <span class="legend-color" :style="{backgroundColor: info.color}">&nbsp;</span>&nbsp;{{layer}}
+                <div style="margin-top: 10px; float: left; z-index: 1; position: relative; width: 230px;">
+                    <div class="legend">
+                        <div v-for="(info, layer) in layers" :key="layer" class="legend-item" :class="{hidden: hiddenLayers.includes(layer)}" @click.stop="toggleLayer(layer)" style="clear: both;" :title="info.title">
+                            <input type="checkbox" :checked="!hiddenLayers.includes(layer)" style="float: right;"/>
+                            <span class="legend-color" :style="{backgroundColor: info.color}">&nbsp;</span>&nbsp;{{layer}}
+                        </div>
+                        <span class="legend-eda"/> EDA Award ($)
                     </div>
-                    <span class="legend-eda"/> EDA Award ($)
+                </div>
+                <div style="margin-top: 10px; padding-right: 30px; float: right; z-index: 1; position: relative; width: 230px;">
+                    <CountySelecter class="county-selecter" @selected="countySelected" :options="countyList"/>
                 </div>
             </div>
 
@@ -368,7 +365,9 @@ export default class Disaster extends Vue {
             });
 
             this.map.on('idle', ()=>{
-                //console.log("map is idle");
+                //play tutorial
+                const legend = document.getElementsByClassName("legend")[0];
+                //console.dir(legend);
             });
         })
     }
@@ -428,7 +427,7 @@ h4 {
 #map {
     position: fixed;
     width: 100%;
-    top: 160px;
+    top: 110px;
     bottom: 75px;
 }
 
@@ -455,10 +454,6 @@ h4 {
     color: #409EFF;
 }
 .legend {
-    position: absolute;
-    display: block;
-    z-index: 1;
-    top: 180px;
     background-color: #fff9;
     padding: 10px;
     text-transform: uppercase;
@@ -498,13 +493,8 @@ height: 75px;
 max-height: 75px;
 background-color: #333;
 }
-.secondary {
-opacity: 0.4; 
-float: right; 
-margin-top: 25px;
-}
-@media (max-width: 800px) {
-    .secondary {
+@media (max-width: 600px) {
+    .county-selecter {
         display: none;
     }
 }

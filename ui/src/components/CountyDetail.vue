@@ -71,9 +71,16 @@
 
     <div class="page" id="disaster">
         <h3>Disaster Declarations / EDA Awards</h3>
-        <!--
-        <p>The following disasters has been declared and EDA grants awarded.</p>
-        -->
+        <p>
+        This section provides information on the disaster declarations that may be eligible for investment assistance from the <a href="https://www.eda.gov/" target="eda">EDA (U.S.Economic Development Administration)</a>.
+        </p>
+        <p>
+        The EDA provides investment assistance to help communities and regions devise and implement long-term economic recovery strategies 
+        through a variety of non-construction and construction projects.
+        These projects addresse economic challenges in areas where a Presidential declaration of a major disaster was issued 
+        under the Robert T. Stafford Disaster Relief and Emergency Assistance Act (42 U.S.C. § 5121 et seq.) (Stafford Act).
+        </p>
+        <br>
 
         <p v-if="recentHistory.length == 0" style="opacity: 0.8;">No disaster declared since 2017</p>
         <div v-for="(event, idx) in recentHistory" :key="idx" class="history">
@@ -128,11 +135,8 @@
 
     <div class="page" id="cutter">
         <h3>Disaster Resilience</h3>
-        <p style="margin: 20px 0;">
-            TODO Describe what resilience means, and how it's computed. You can expand each index and sub-indicies to show 
-            how each indices are calculated.
-
-            The score you see is the average of all sub-indecies for this indicators.
+        <p>
+            Disaster resilience measures the capacity of a community to recover from disaster events without losing their socioeconomic and infrastructural viability (Combaz, 2015; UNISDR, 2005). Using the framework provided by Cutter et al. (2010) this section merges the resilient and vulnerable variables of a city into a unified set of indices - to produce aggregated information on disaster resilience levels. Click <b>Show Sub-Indicies</b> buttons below to see the details.
         </p>
     
         <p style="font-size: 85%; opacity: 1; font-weight: bold; margin-left: 355px; margin-bottom: 0;">
