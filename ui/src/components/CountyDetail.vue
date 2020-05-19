@@ -1,5 +1,5 @@
 <template>
-<div class="countydetail">
+<div class="countydetail" ref="scrolled-area" @scroll="handleScroll">
     <div class="header">
         <div class="page">
             <h3 style="position: relative; font-weight: normal;">
@@ -19,12 +19,13 @@
                     <div id="statemap"/>
                 </el-col>
                 <el-col :span="6" class="border-left demo">
-                    <p>
+                    <p style="margin: 0">
                         <span class="sub-heading">Population</span><br>
                         <span class="primary" v-if="detail.demo"> {{detail.population | formatNumber}}</span>
                         <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
                     </p>
 
+                    <!--
                     <vue-bar-graph v-if="detail.demo"
                         :points="populationPoints(detail.demo)"
                         :width="175"
@@ -34,16 +35,18 @@
                         bar-color="#999"
                         text-color="#666"
                         text-alt-color="white"/>
+                    -->
+                    <Plotly :data="[demoGraphData]" :layout="demoGraphLayout" :display-mode-bar="false"/>
                     <br>
                 </el-col>
                 <el-col :span="5" class="border-left gdp">
                     <p>
-                        <span class="sub-heading">GDP</span> <small>(2018)</small><br>
+                        <span class="sub-heading">GDP</span> <small>(BEA 2018)</small><br>
                         <span class="primary" v-if="detail.gdp"> ${{detail.gdp | formatNumber}}</span>
                         <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
                     </p>
                     <p>
-                        <span class="sub-heading">Median Income</span> <small>(2018)</small><br>
+                        <span class="sub-heading">Median Income</span> <small>(BEA 2018)</small><br>
                         <span class="primary" v-if="detail.medianincome"> ${{detail.medianincome | formatNumber}}</span>
                         <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
                     </p>
@@ -59,13 +62,15 @@
         </div>
     </div>
 
-    <div class="page navigator">
+    <div class="page sidebar">
         <div style="position: absolute; right: -250px; width: 200px; margin: 20px;">
             <el-button circle icon="el-icon-arrow-up" @click="goto('info-header')"/>
-            <h5><a href="javascript:void(0);" @click="goto('disaster')">Disaster Declarations</a></h5>
-            <h5 v-if="detail.bvis"><a href="javascript:void(0);" @click="goto('bvi')">Business Vulnerability</a></h5>
-            <h5><a href="javascript:void(0);" @click="goto('cutter')">Disaster Resilience</a></h5>
-            <h5><a href="javascript:void(0);" @click="goto('storms')">Storm History</a></h5>
+            <div class="navigator">
+                <h5 ref="nav-disaster" class="navigator-item navigator-item-active" @click="goto('disaster')">Disaster Declarations</h5>
+                <h5 ref="nav-bvi" class="navigator-item" v-if="detail.bvis" @click="goto('bvi')">Business Vulnerability</h5>
+                <h5 ref="nav-cutter" class="navigator-item" @click="goto('cutter')">Disaster Resilience</h5>
+                <h5 ref="nav-storms" class="navigator-item" @click="goto('storms')">Storm History</h5>
+            </div>
         </div>
     </div>
 
@@ -243,7 +248,18 @@ import mapboxgl from 'mapbox-gl';
 import "mapbox-gl/dist/mapbox-gl.css";
 
 import { Plotly } from 'vue-plotly'
-import VueBarGraph from 'vue-bar-graph'
+//import VueBarGraph from 'vue-bar-graph'
+
+Vue.directive('scroll', {
+  inserted: function (el, binding) {
+    const f = function (evt) {
+      if (binding.value(evt, el)) {
+        window.removeEventListener('scroll', f)
+      }
+    }
+    window.addEventListener('scroll', f)
+  }
+})
 
 @Component({
     components: { 
@@ -253,7 +269,7 @@ import VueBarGraph from 'vue-bar-graph'
         Event, 
         Eligibility2018, 
         Eligibility2019,
-        VueBarGraph,
+        //VueBarGraph,
         IndicatorInfo,
         MeasureInfo,
         Footer,
@@ -312,6 +328,36 @@ export default class CountyDetail extends Vue {
         },
     }
 
+    demoGraphData = {};
+    demoGraphLayout = {
+        'plot_bgcolor': '#0000',
+        'paper_bgcolor': '#0000',
+        width: 200,
+        height: 120,
+        margin: {
+            l: 0,
+            r: 0,
+            t: 0,
+            b: 30,
+        },
+        xaxis: {
+            //tickangle:45,
+            //automargin: true,
+            tickfont: {
+                size: 10,
+            },
+            title: {
+                text: "Age Groups",
+                //standoff: 10,
+            },
+            titlefont: {
+                //family: 'Arial, sans-serif',
+                size: 10,
+                //color: 'lightgrey'
+            },
+        },
+    }
+
     @Watch('detail')
     onDetailChange() {
         this.update();
@@ -323,12 +369,14 @@ export default class CountyDetail extends Vue {
         if(~pos) this.shownIndicators.splice(pos, 1);
         else this.shownIndicators.push(incode);
     }  
+
     update() {
         this.processSpyder();
         this.processHistory();
         this.processBVI();
         this.processStorms();
         this.processMap();
+        this.processDemo();
     }
 
     goto(id) {
@@ -342,7 +390,6 @@ export default class CountyDetail extends Vue {
         this.drSpyderData.r = [];
         this.drSpyderData.theta = [];
 
-        //Object.keys(this.detail.cutter).forEach(incode=>{
         for(const incode in this.detail.cutter) {
             if(!this.detail.cutter[incode]) return; //we have some indices that we ignore
             const value = this.detail.cutter[incode].aggregate.county;
@@ -546,6 +593,32 @@ export default class CountyDetail extends Vue {
         }
     }
 
+    processDemo() {
+        const y = [
+            this.detail.demo[0].value,
+            this.detail.demo[1].value,
+            this.detail.demo[2].value,
+            this.detail.demo[3].value,
+            this.detail.demo[4].value,
+            this.detail.demo[5].value,
+        ];
+        this.demoGraphData = {
+            x: [ '0-4', '5-17', '18-24', '25-44', '45-64', '>65'],
+            y,
+            text: y.map(String),
+            textposition: 'auto',
+            textfont: {
+                size: 9,
+            },
+            hoverinfo: 'none',
+            type: 'bar',
+            marker: {
+                color: 'rgb(0,0,0)',
+                opacity: 0.4,
+            }
+        }
+    }
+
     initStateMap() {
         this.map = new mapboxgl.Map({container: 'statemap'});
         this.map.scrollZoom.disable();
@@ -657,6 +730,25 @@ export default class CountyDetail extends Vue {
     mounted() {
         this.initStateMap();
         this.update();
+    }
+
+    handleScroll() {
+        const targets = ["disaster", "bvi", "cutter", "storms"];
+
+        //clear active
+        targets.forEach(id=>{
+            this.$refs["nav-"+id].classList.remove("navigator-item-active");
+        });
+
+        //set current active
+        const e = this.$refs["scrolled-area"];
+        const pagemid = e.scrollTop + e.clientHeight/2;
+        targets.forEach(id=>{
+            const target = document.getElementById(id);
+            if(target.offsetTop < pagemid && (target.offsetTop + target.scrollHeight) > pagemid) { 
+                this.$refs["nav-"+id].classList.add("navigator-item-active");
+            }
+        });
     }
 
     populationPoints(demo) { 
@@ -896,15 +988,29 @@ background-color: #eee;
     font-size: 100%;
     margin-right: 20px;
 }
-.navigator {
+.sidebar {
 position: sticky; 
 top: 10px;
 }
-.navigator h5 {
-text-transform: uppercase;
+.navigator {
+    margin-top: 20px;
+    .navigator-item {
+        color: gray;
+        cursor: pointer;
+        padding: 10px 10px;
+        margin: 0;
+        border-left: 3px solid #0000;
+    }
+    .navigator-item:hover {
+        background-color: #eee;
+    }
+    .navigator-item-active {
+        color: #409EFF;
+        border-color: #409EFF;
+    }
 }
 @media only screen and (max-width: 1500px) {
-    .navigator {
+    .sidebar {
         display: none;
     }
 }
@@ -919,5 +1025,8 @@ canvas:focus {
 }
 .indicator-detail {
 clear: both;
+}
+small {
+opacity: 0.5;
 }
 </style>
