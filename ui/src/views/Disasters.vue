@@ -12,7 +12,9 @@
                         <input type="checkbox" :checked="!hiddenLayers.includes(layer)" style="float: right;"/>
                         <span class="legend-color" :style="{backgroundColor: info.color}">&nbsp;</span>&nbsp;{{layer}}
                     </div>
+                    <!--
                     <span class="legend-eda"/> EDA Award ($)
+                    -->
                 </div>
                 <div class="county-selecter" style="width: 230px">
                     <CountySelecter style="width: 230px" @selected="countySelected" :options="countyList"/>
@@ -263,6 +265,7 @@ export default class Disaster extends Vue {
                     });
                 }
 
+                /*
                 this.map.addLayer({
                     'id': 'eda-circles-state',
                     'type': 'circle',
@@ -316,6 +319,7 @@ export default class Disaster extends Vue {
                         },              
                     }
                 });
+                */
 
                 this.map.addLayer({
                     'id': 'eda-labels',
@@ -425,7 +429,10 @@ export default class Disaster extends Vue {
             break;
         default:
             tutorial.classList.remove("tutorial-active");
-            tutorial.style.display = "none";
+            tutorial.style.opacity = "0";
+            setTimeout(()=>{
+                tutorial.style.display = "none";
+            }, 1000);
             return;
         }
 
