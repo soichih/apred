@@ -737,7 +737,8 @@ export default class CountyDetail extends Vue {
 
         //clear active
         targets.forEach(id=>{
-            this.$refs["nav-"+id].classList.remove("navigator-item-active");
+            const e = this.$refs["nav-"+id];
+            if(e) e.classList.remove("navigator-item-active");
         });
 
         //set current active
@@ -745,6 +746,7 @@ export default class CountyDetail extends Vue {
         const pagemid = e.scrollTop + e.clientHeight/2;
         targets.forEach(id=>{
             const target = document.getElementById(id);
+            if(!target) return;
             if(target.offsetTop < pagemid && (target.offsetTop + target.scrollHeight) > pagemid) { 
                 this.$refs["nav-"+id].classList.add("navigator-item-active");
             }
