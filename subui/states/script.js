@@ -134,18 +134,23 @@ new Vue({
                             selected.statewide_limits_on_gatherings.startsWith('Yes- unspecified'))}">
                             <span class="circle"/> Recommended (+0.2)
                         </p>
-                        <p class="option" :class="{active: (selected.statewide_limits_on_gatherings.startsWith('Yes - 50 or more'))}"><span class="circle"/> For 50 or more (+0.4)</p>
-                        <p class="option" :class="{active: (selected.statewide_limits_on_gatherings.startsWith('Yes- 10 or more'))}"><span class="circle"/> For 10 or more (+0.6)</p>
-                        <p class="option" :class="{active: (selected.statewide_limits_on_gatherings.startsWith('Yes- 5 or more'))}"><span class="circle"/> For 5 or more (+0.8)</p>
-                        <p class="option" :class="{active: (selected.statewide_limits_on_gatherings.startsWith('Yes- stay at'))}"><span class="circle"/> Stay at home (+1)</p>
+                        <p class="option" :class="{active: (selected.statewide_limits_on_gatherings.startsWith('Yes-50or'))}"><span class="circle"/> For 50 or more (+0.3)</p>
+                        <p class="option" :class="{active: (selected.statewide_limits_on_gatherings.startsWith('Yes-30or'))}"><span class="circle"/> For 30 or more (+0.4)</p>
+                        <p class="option" :class="{active: (selected.statewide_limits_on_gatherings.startsWith('Yes-25or'))}"><span class="circle"/> For 25 or more (+0.5)</p>
+                        <p class="option" :class="{active: (selected.statewide_limits_on_gatherings.startsWith('Yes-15or'))}"><span class="circle"/> For 15 or more (+0.6)</p>
+                        <p class="option" :class="{active: (selected.statewide_limits_on_gatherings.startsWith('Yes-10or'))}"><span class="circle"/> For 10 or more (+0.7)</p>
+                        <p class="option" :class="{active: (selected.statewide_limits_on_gatherings.startsWith('Yes-5or'))}"><span class="circle"/> For 5 or more (+0.8)</p>
+                        <p class="option" :class="{active: (selected.statewide_limits_on_gatherings.startsWith('Yes-3or'))}"><span class="circle"/> For 3 or more (+0.9)</p>
+                        <p class="option" :class="{active: (selected.statewide_limits_on_gatherings.startsWith('Yes-all'))}"><span class="circle"/> All Gathering (+1)</p>
                     </td>
                 </tr>
                 <tr>
                     <th>Domestic Travel Limitations</th>
                     <td>
                         <p class="option" :class="{active: (selected.domestic_travel_limit == '')}"><span class="circle"/> No Limit (+0)</p>
-                        <p class="option" :class="{active: (selected.domestic_travel_limit.includes('Recommendation'))}"><span class="circle"/> Recommended (+0.5)</p>
-                        <p class="option" :class="{active: (selected.domestic_travel_limit.includes('Executive'))}"><span class="circle"/> Executive Order (+1)</p>
+                        <p class="option" :class="{active: (selected.domestic_travel_limit.startsWith('Recommendation'))}"><span class="circle"/> Recommended (+0.5)</p>
+                        <p class="option" :class="{active: (selected.domestic_travel_limit.startsWith('Mandatory'))}"><span class="circle"/> Mandatory (+0.75)</p>
+                        <p class="option" :class="{active: (selected.domestic_travel_limit.startsWith('Executive'))}"><span class="circle"/> Executive Order (+1)</p>
                     </td>
                 </tr>
                 <tr>
@@ -287,58 +292,48 @@ new Vue({
                             }
                         }
                         cols.push(buf); //add the last column
-
                         /*
-                        0 State (ST)
-                        1 State Employee Travel Restrictions	
-                        2 Statewide Limits on Gatherings and Stay at Home Orders	
-                        3 Statewide School Closures *state-ordered closure through end of year **recommended closure through end of year	
-                        4 Statewide Closure of Non-Essential Business Spaces	
-                        5 Essential Business Designations List*	
-                        6 Statewide Curfew	
-                        7 Extension of Individual Income Tax Deadlines	
-                        8 Presidential Primary Election	
-                        9 Domestic Travel Limitations	
-                        10 Using Cloth Face Coverings in Public	
-                        11 Ventilator Sharing	
-                        12 Reopening Plans and Task Forces	
-                        Unnamed: 13	
-                        Unnamed: 14	
-                        Unnamed: 15
+                        0 State,
+                        1 State Employee Travel Restrictions,
+                        2 Statewide Stay at Home Orders and Guidance*,
+                        3 Statewide Limits on Gatherings,
+                        4 Statewide School Closures ,
+                        5 Statewide Closure of Certain Business Spaces,
+                        6 Resources on Business Openings/Closures*,
+                        7 Statewide Curfew,
+                        8 Extension of Individual Income Tax Deadlines,
+                        9 Presidential Primary Election,
+                        10 Quarantine Requirements for Interstate Travel,
+                        11 Using Cloth Face Coverings in Public,
+                        12 Ventilator Sharing,
+                        13 Reopening Plans and Task Forces,
+                        Unnamed: 14,
+                        Unnamed: 15,
+                        Unnamed: 16
                         */
-                        /*
-                        let state_begin = cols[0].indexOf("(");
-                        let state_end = cols[0].indexOf(")");
-                        let state = cols[0].substring(state_begin+1, state_end);
-                        */
-                        //console.log(cols[3]);
                         let state = cols[0].split("(")[0];
                         let rec = {
                             state,
                             state_employee_travel_restrictions: (cols[1]=="Yes"),
-                            statewide_limits_on_gatherings: cols[2],
-                            statewide_closure_school: cols[3], ///Yes or Local
-                            //major_disaster_declaration: cols[2], //Request Approved / Request Made 
-                            statewide_closure_nonessential: cols[4], 
-                            essential_designations: cols[5], 
-                            statewide_curfew: cols[6], //Yes or Local
-                            //waiver1135: cols[7], //Approved
-                            extension_incometax: cols[7], 
-                            primary_election: cols[8], 
-                            domestic_travel_limit: cols[9], 
-                            statewide_mask: cols[10], 
-                            ventilator_sharing: cols[11], 
-                            reopening_plans: cols[12], 
-                            //national_guard_activation: (cols[3]=="Yes"),
+                            stay_at_home_order: cols[2],
+                            statewide_limits_on_gatherings: cols[3].replace(/ /g, ""),
+                            statewide_closure_school: cols[4], ///Yes or Local
+                            statewide_closure_nonessential: cols[5], 
+                            essential_designations: cols[6], 
+                            statewide_curfew: cols[7], //Yes or Local
+                            extension_incometax: cols[8], 
+                            primary_election: cols[9], 
+                            domestic_travel_limit: cols[10], 
+                            statewide_mask: cols[11], 
+                            ventilator_sharing: cols[12], 
+                            reopening_plans: cols[13], 
                         };
                         rec.level = this.scoreLevel(rec);
                         //console.dir(rec);
                         recs.push(rec);
                     }
-
-                    console.dir(headers);
-                    console.dir(recs[0]);
-
+                    //console.dir(headers);
+                    //console.dir(recs[0]);
                     resolve(recs);
                 }).catch(err=>{
                     reject(err);
@@ -355,28 +350,34 @@ new Vue({
             //max 0.5;
             if(rec.statewide_closure_school.startsWith("statewide closure")) score += 0.5;
             else if(rec.statewide_closure_school.startsWith("recommended closure")) score += 0.25;
+            else if(rec.statewide_closure_school.startsWith("option")) score += 0.1;
 
             //max 0.5
-            if(rec.statewide_curfew == "Yes") score += 0.5;
+            if(rec.statewide_curfew.startsWith("Yes")) score += 0.5;
             else if(rec.statewide_curfew == "Local") score += 0.25;
 
             //max 1
-            if(rec.statewide_limits_on_gatherings.startsWith("Yes- stay at home")) score += 1;
-            else if(rec.statewide_limits_on_gatherings.startsWith("Yes- 5 or more")) score += 0.8;
-            else if(rec.statewide_limits_on_gatherings.startsWith("Yes- 10 or more")) score += 0.6;
-            else if(rec.statewide_limits_on_gatherings.startsWith("Yes- 50 or more")) score += 0.4;
+            if(rec.statewide_limits_on_gatherings.startsWith("Yes-all")) score += 1;
+            else if(rec.statewide_limits_on_gatherings.startsWith("Yes-3or")) score += 0.9;
+            else if(rec.statewide_limits_on_gatherings.startsWith("Yes-5or")) score += 0.8;
+            else if(rec.statewide_limits_on_gatherings.startsWith("Yes-10")) score += 0.7;
+            else if(rec.statewide_limits_on_gatherings.startsWith("Yes-15")) score += 0.6;
+            else if(rec.statewide_limits_on_gatherings.startsWith("Yes-25")) score += 0.5;
+            else if(rec.statewide_limits_on_gatherings.startsWith("Yes-30")) score += 0.4;
+            else if(rec.statewide_limits_on_gatherings.startsWith("Yes-50")) score += 0.3;
             else if(
-                rec.statewide_limits_on_gatherings.startsWith("Local") ||
-                rec.statewide_limits_on_gatherings.startsWith("Recommended") ||
-                rec.statewide_limits_on_gatherings.startsWith("Guidance to avoid") ||
-                rec.statewide_limits_on_gatherings.startsWith("Yes- unspecified")) score += 0.2;
+                rec.statewide_limits_on_gatherings.startsWith("SupremeCourt") ||
+                rec.statewide_limits_on_gatherings.startsWith("Yes-unspecified")) score += 0.2;
+            //else console.log(rec.statewide_limits_on_gatherings);
 
             //max 1
             score += this.scoreStatewideClosure(rec.statewide_closure_nonessential);
 
             //max 1
-            if(rec.domestic_travel_limit.includes('Executive')) score += 1;
-            else if(rec.domestic_travel_limit.includes('Recommendation')) score += 0.5;
+            if(rec.domestic_travel_limit.startsWith('Executive')) score += 1;
+            else if(rec.domestic_travel_limit.startsWith('Mandatory')) score += 0.75;
+            else if(rec.domestic_travel_limit.startsWith('Recommendation')) score += 0.5;
+            else console.log(rec.domestic_travel_limit);
 
             //max 0.5
             if(rec.statewide_mask.startsWith('Rec') || rec.statewide_mask.startsWith('Yes')) score += 0.25;
@@ -411,47 +412,6 @@ new Vue({
                 data: this.geojson,
             });
 
-            /*
-            this.map.addLayer({
-                'id': 'allstates',
-                'source': 'statedata',
-                'type': 'fill',
-                'paint': { 'fill-color': '#000', 'fill-opacity': 0.1, }
-            });
-            */
-
-            /*
-            this.map.addLayer({
-                'id': 'employee_travel_restrictions',
-                'source': 'statedata',
-                'type': 'fill',
-                'filter': ['==', 'state_employee_travel_restrictions', true],
-                'paint': { 'fill-color': '#0f0', 'fill-opacity': 0.5, }
-            });
-            this.map.loadImage('https://www.nationalguard.mil/portals/31/Images/Image%20Gallery/Graphics/ARNG-small.png', (err, image)=>{
-                if(err) throw err;
-                this.map.addImage('soldier', image);
-                this.map.addLayer({
-                    'id': 'points',
-                    'type': 'symbol',
-                    'source': 'statedata',
-                    'filter': ['==', 'national_guard_activation', true],
-                    'layout': {
-                        "icon-allow-overlap": true,
-                        'icon-image': 'soldier',
-                        'icon-size': 0.05,
-                    }
-                });
-            });
-
-            this.map.addLayer({
-                'id': 'national_guard_activation',
-                'source': 'statedata',
-                'type': 'fill',
-                'filter': ['==', 'national_guard_activation', true],
-                'paint': { 'fill-color': '#f00', 'fill-opacity': 0.5, }
-            });
-            */
 
             this.map.addLayer({
                 'id': 'level',
@@ -499,52 +459,6 @@ new Vue({
             let filter_warning = ['in', 'FIPS'];
             let filter_watch = ['in', 'FIPS'];
             let filter_advisory = ['in', 'FIPS'];
-            /*
-            this.county.forEach(c=>{
-                if(c.state == "Warning") filter_warning.push(parseInt(c.fips));
-                if(c.state == "Watch") filter_watch.push(parseInt(c.fips));
-                if(c.state == "Advisory") filter_advisory.push(parseInt(c.fips));
-            });
-            this.map.addLayer({
-                "id": "counties-warning",
-                "type": "fill",
-                "source": "counties",
-                minzoom: 5,
-                "source-layer": "original",
-                "paint": {
-                    'fill-outline-color': '#444',
-                    'fill-color': 'red',
-                    'fill-opacity': 0.75,
-                },
-                'filter': filter_warning,
-            }, firstSymbolId);
-            this.map.addLayer({
-                "id": "counties-watch",
-                "type": "fill",
-                "source": "counties",
-                minzoom: 5,
-                "source-layer": "original",
-                "paint": {
-                    'fill-outline-color': '#444',
-                    'fill-color': 'orange',
-                    'fill-opacity': 0.75,
-                },
-                'filter': filter_watch,
-            }, firstSymbolId);
-            this.map.addLayer({
-                "id": "counties-advisory",
-                "type": "fill",
-                "source": "counties",
-                minzoom: 5,
-                "source-layer": "original",
-                "paint": {
-                    'fill-outline-color': '#444',
-                    'fill-color': 'yellow',
-                    'fill-opacity': 0.75,
-                },
-                'filter': filter_advisory,
-            }, firstSymbolId);
-            */
 
             this.map.on('click', e=>{
                 const features = this.map.queryRenderedFeatures(e.point, {
