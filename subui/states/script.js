@@ -128,12 +128,12 @@ new Vue({
                     <td>
                         <p class="option" :class="{active: (selected.statewide_limits_on_gatherings == '')}"><span class="circle"/> No Limit (+0)</p>
                         <p class="option" :class="{active: (
-                            selected.statewide_limits_on_gatherings.startsWith('Recommended') ||
-                            selected.statewide_limits_on_gatherings.startsWith('Guidance to avoid') ||
-                            selected.statewide_limits_on_gatherings.startsWith('Local') ||
-                            selected.statewide_limits_on_gatherings.startsWith('Yes- unspecified'))}">
-                            <span class="circle"/> Recommended (+0.2)
+                            selected.statewide_limits_on_gatherings.startsWith('SupremeCourt') ||
+                            selected.statewide_limits_on_gatherings.startsWith('Yes-unspecified'))}">
+                            <span class="circle"/> Yes (+0.1)
                         </p>
+                        <p class="option" :class="{active: (selected.statewide_limits_on_gatherings.startsWith('Yes-250or'))}"><span class="circle"/> For 250 or more (+0.15)</p>
+                        <p class="option" :class="{active: (selected.statewide_limits_on_gatherings.startsWith('Yes-100or'))}"><span class="circle"/> For 100 or more (+0.2)</p>
                         <p class="option" :class="{active: (selected.statewide_limits_on_gatherings.startsWith('Yes-50or'))}"><span class="circle"/> For 50 or more (+0.3)</p>
                         <p class="option" :class="{active: (selected.statewide_limits_on_gatherings.startsWith('Yes-30or'))}"><span class="circle"/> For 30 or more (+0.4)</p>
                         <p class="option" :class="{active: (selected.statewide_limits_on_gatherings.startsWith('Yes-25or'))}"><span class="circle"/> For 25 or more (+0.5)</p>
@@ -351,24 +351,40 @@ new Vue({
             if(rec.statewide_closure_school.startsWith("statewide closure")) score += 0.5;
             else if(rec.statewide_closure_school.startsWith("recommended closure")) score += 0.25;
             else if(rec.statewide_closure_school.startsWith("option")) score += 0.1;
+            else if(rec.statewide_closure_school == "") score += 0;
+            else {
+                console.log("unknown statewide_closure_school", rec.statewide_closure_school);
+                console.dir(rec);
+            }
 
             //max 0.5
             if(rec.statewide_curfew.startsWith("Yes")) score += 0.5;
             else if(rec.statewide_curfew == "Local") score += 0.25;
+            else if(rec.statewide_curfew == "") score += 0;
+            else {
+                console.log("unknown statewide_curfew", rec.statewide_curfew);
+                console.dir(rec);
+            }
 
             //max 1
             if(rec.statewide_limits_on_gatherings.startsWith("Yes-all")) score += 1;
             else if(rec.statewide_limits_on_gatherings.startsWith("Yes-3or")) score += 0.9;
             else if(rec.statewide_limits_on_gatherings.startsWith("Yes-5or")) score += 0.8;
-            else if(rec.statewide_limits_on_gatherings.startsWith("Yes-10")) score += 0.7;
-            else if(rec.statewide_limits_on_gatherings.startsWith("Yes-15")) score += 0.6;
-            else if(rec.statewide_limits_on_gatherings.startsWith("Yes-25")) score += 0.5;
-            else if(rec.statewide_limits_on_gatherings.startsWith("Yes-30")) score += 0.4;
-            else if(rec.statewide_limits_on_gatherings.startsWith("Yes-50")) score += 0.3;
+            else if(rec.statewide_limits_on_gatherings.startsWith("Yes-10or")) score += 0.7;
+            else if(rec.statewide_limits_on_gatherings.startsWith("Yes-15or")) score += 0.6;
+            else if(rec.statewide_limits_on_gatherings.startsWith("Yes-25or")) score += 0.5;
+            else if(rec.statewide_limits_on_gatherings.startsWith("Yes-30or")) score += 0.4;
+            else if(rec.statewide_limits_on_gatherings.startsWith("Yes-50or")) score += 0.3;
+            else if(rec.statewide_limits_on_gatherings.startsWith("Yes-100or")) score += 0.2;
+            else if(rec.statewide_limits_on_gatherings.startsWith("Yes-250or")) score += 0.15;
             else if(
                 rec.statewide_limits_on_gatherings.startsWith("SupremeCourt") ||
-                rec.statewide_limits_on_gatherings.startsWith("Yes-unspecified")) score += 0.2;
-            //else console.log(rec.statewide_limits_on_gatherings);
+                rec.statewide_limits_on_gatherings.startsWith("Yes-unspecified")) score += 0.1;
+            else if(rec.statewide_limits_on_gatherings == "") score += 0;
+            else {
+                console.log("unknown statewide_limits_on_gatherings", rec.statewide_limits_on_gatherings);
+                console.dir(rec);
+            }
 
             //max 1
             score += this.scoreStatewideClosure(rec.statewide_closure_nonessential);
@@ -377,11 +393,20 @@ new Vue({
             if(rec.domestic_travel_limit.startsWith('Executive')) score += 1;
             else if(rec.domestic_travel_limit.startsWith('Mandatory')) score += 0.75;
             else if(rec.domestic_travel_limit.startsWith('Recommendation')) score += 0.5;
-            else console.log(rec.domestic_travel_limit);
+            else if(rec.domestic_travel_limit == "") score += 0;
+            else {
+                console.log("unknown domestic_travel_limit", rec.domestic_travel_limit);
+                console.dir(rec);
+            }
 
             //max 0.5
             if(rec.statewide_mask.startsWith('Rec') || rec.statewide_mask.startsWith('Yes')) score += 0.25;
-            if(rec.statewide_mask.startsWith('Mandatory')) score += 0.5;
+            else if(rec.statewide_mask.startsWith('Mandatory')) score += 0.5;
+            else if(rec.statewide_mask == "") score += 0;
+            else {
+                console.log("unknown statewide_mask", rec.statewide_mask);
+                console.dir(rec);
+            }
 
             return score;
         },
