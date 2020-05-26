@@ -140,7 +140,10 @@
     <div class="page" id="cutter">
         <h3>Disaster Resilience</h3>
         <p>
-            Disaster resilience measures the capacity of a community to recover from disaster events without losing their socioeconomic and infrastructural viability (Combaz, 2015; UNISDR, 2005). Using the framework provided by <a href="https://doi.org/10.2202/1547-7355.1732">Cutter et al. (2010)</a>, this section merges the resilient and vulnerable variables of a city into a unified set of indices - to produce aggregated information on disaster resilience levels. Expand each measures to show more detail
+            Disaster resilience measures the capacity of a community to recover from disaster events without losing their socioeconomic and infrastructural viability [Combaz, 2015] <a href="https://www.unisdr.org/2005/wcdr/intergover/official-doc/L-docs/Hyogo-framework-for-action-english.pdf">[UNISDR, 2005]</a>. Using the framework provided by <a href="https://doi.org/10.2202/1547-7355.1732">[Cutter et al. 2010]</a>, this section merges the resilient and vulnerable variables of a city into a unified set of indices - to produce aggregated information on disaster resilience levels. Expand each measures to show more detail.
+        </p>
+        <p>
+            Resilience values are normalized on a 0 to 1 scale, with 1 being the county with the highest resilience value and 0 being the county with the lowest resilience value. The top and bottom 5% of values are combined to control for outliers.
         </p>
     
         <p style="font-size: 85%; opacity: 1; font-weight: bold; margin-left: 355px; margin-bottom: 0;">
