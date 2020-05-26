@@ -11,7 +11,7 @@
         <rect v-if="value" x="0" y="0" width="100%" :height="height" style="fill:url(#grad1)" />
         <rect :x="(value*100)+'%'" y="0" width="100%" :height="height" style="fill:rgb(220,220,220)" />
     </svg>
-    <span v-if="value" style="position: absolute; font-size: 85%; font-weight: bold;" :style="{left: 'calc('+(value*100)+'% + 5px)'}">{{value.toFixed(2)}}</span>
+    <span v-if="value" style="position: absolute; font-size: 85%; font-weight: bold;" :style="{left: 'calc('+(value*100)+'% + 5px)', top: '-2px'}">{{value.toFixed(2)}}</span>
     <!--
     <span v-if="us_avg" class="us-avg" :style="{left: 'calc('+(us_avg*100)+'% - 25px)'}">
         US {{us_avg.toFixed(2)}}<br>
@@ -34,7 +34,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 export default class BarGraph extends Vue {
     @Prop({default: 0, type: Number}) min;
     @Prop({default: 1, type: Number}) max;
-    @Prop({default: 10, type: Number}) height;
+    @Prop({default: 13, type: Number}) height;
     @Prop({type: Number}) value;
     @Prop({default: "crimson", type: String}) color1;
     @Prop({default: "gold", type: String}) color2;
