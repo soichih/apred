@@ -82,7 +82,7 @@
         <p>
         The EDA provides investment assistance to help communities and regions devise and implement long-term economic recovery strategies 
         through a variety of non-construction and construction projects.
-        These projects addresse economic challenges in areas where a Presidential declaration of a major disaster was issued 
+        These projects address economic challenges in areas where a Presidential declaration of a major disaster was issued 
         under the Robert T. Stafford Disaster Relief and Emergency Assistance Act (42 U.S.C. § 5121 et seq.) (Stafford Act).
         </p>
         <br>
@@ -121,8 +121,7 @@
             that are believed to be <i>vulnerable</i> to various natural disasters.
         </p>
         <p>
-            To calculate the BVI, we isolated businesses by NAICS[1] code from the U.S. Census’ most recent County Business Patterns (part of Census: https://www.census.gov/econ/overview/mu0800.html)
-            based on their vulnerability to natural disaster (farmers, transportation companies, etc..)
+            To calculate the BVI, we isolated businesses by NAICS[1] code from the U.S. Census' most recent <a href="https://www.census.gov/econ/overview/mu0800.html">County Business Patterns</a>  based on their vulnerability to natural disaster (farmers, transportation companies, etc..)
             Businesses that were identified to be especially vulnerable to a disaster are those which are dependent on supply chains,
             have a high reliance on public utilities like water and electricity, or have a large infrastructure footprint and low infrastructure mobility.
         </p>
@@ -141,7 +140,7 @@
     <div class="page" id="cutter">
         <h3>Disaster Resilience</h3>
         <p>
-            Disaster resilience measures the capacity of a community to recover from disaster events without losing their socioeconomic and infrastructural viability (Combaz, 2015; UNISDR, 2005). Using the framework provided by Cutter et al. (2010) this section merges the resilient and vulnerable variables of a city into a unified set of indices - to produce aggregated information on disaster resilience levels. Click <b>Show Sub-Indicies</b> buttons below to see the details.
+            Disaster resilience measures the capacity of a community to recover from disaster events without losing their socioeconomic and infrastructural viability (Combaz, 2015; UNISDR, 2005). Using the framework provided by <a href="https://doi.org/10.2202/1547-7355.1732">Cutter et al. (2010)</a>, this section merges the resilient and vulnerable variables of a city into a unified set of indices - to produce aggregated information on disaster resilience levels. Click <b>Show Sub-Indicies</b> buttons below to see the details.
         </p>
     
         <p style="font-size: 85%; opacity: 1; font-weight: bold; margin-left: 355px; margin-bottom: 0;">

@@ -2,12 +2,12 @@
 <div class="measure-info">
     <!-- SOC -->
     <div v-if="id == '11'">
-        Ration of Persons With More than a High School Degree to those with a High School Degree.
+        The ratio of persons with more than a High School degree to those with a High School degree.
         This index was calculated with Codes 391 (Bachelor’s Degree or More) devided by 397 (Less Than a High School Degree) from the ACS Common Items Extract.
     </div>
     <div v-if="id == '12'">
-        Proportion of the population below the age of 65.
-        This index was calculate with Codes 300 (Total Population) and 317 (Population over 65) from the ACS Common Items Extract. 
+        The proportion of the population below the age of 65.
+        This index was calculated with Codes 300 (Total Population) and 317 (Population over 65) from the ACS Common Items Extract. 
         Calculation: 1-([317] / [300])
     </div>
     <div v-if="id == '13'">
