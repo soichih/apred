@@ -26,7 +26,8 @@ let data = {
 async.series([
     load_fips,
     load_cutter_sources,
-    load_cutter_combined,
+    //load_cutter_combined, //deprecated by load_dr
+    load_dr,
 ], err=>{
     if(err) throw err;
 
@@ -70,6 +71,7 @@ function load_cutter_sources(cb) {
     });
 }
 
+/*
 function load_cutter_combined(cb) {
     //create dictionary of all sources 
     let sources = {};
@@ -103,7 +105,7 @@ function load_cutter_combined(cb) {
             count_missing++;
             return;
         }
-        data.cutter.counties[fips].push({source: rec.source, value: parseFloat(rec.value)/*, date: rec.date*/});
+        data.cutter.counties[fips].push({source: rec.source, value: parseFloat(rec.value)});
 
         //aggregate average 
         let source = sources[rec.source];
@@ -135,5 +137,67 @@ function load_cutter_combined(cb) {
 
         cb();
     });
+}
+*/
+
+function load_dr(cb) {
+    //create dictionary of all sources 
+    let sources = {};
+    for(let indicator in data.cutter.indicators) {
+        data.cutter.indicators[indicator].sources.forEach(source=>{
+            sources[source.id] = source;
+            source.total = 0;
+            source.count = 0;
+            source.states = {};
+        });
+    }
+
+    console.debug("loading dr_normalized");
+    let count_missing = 0;
+    let dr = require(__dirname+'/../../../raw/dr_normalized.json');
+
+    dr.forEach(rec=>{
+        if(rec.year != "2018") return; //let's use 2018 data for now
+        let fips = rec.statefips+"."+rec.countyfips;
+        if(!data.cutter.counties[fips]) {
+            console.log("failed to find:"+fips);
+            console.dir(rec);
+            count_missing++;
+            return;
+        }
+        data.cutter.counties[fips].push({
+            source: rec.measure, 
+            value: parseFloat(rec.measure_value_normalized),
+        }); 
+        //
+        //aggregate average 
+        let source = sources[rec.measure];
+        if(!source) console.log("missing"+rec.measure);
+        else {
+            source.total += parseFloat(rec.measure_value_normalized);
+            source.count++;
+            if(!source.states[rec.statefips]) source.states[rec.statefips] = { total: 0, count: 0 };
+            source.states[rec.statefips].total += parseFloat(rec.measure_value_normalized);
+            source.states[rec.statefips].count++;
+        }
+    });
+    console.log("missing", count_missing, "out of", dr.length);
+
+    //convert total/count to average
+    for(let indicator in data.cutter.indicators) {
+        data.cutter.indicators[indicator].sources.forEach(source=>{
+            source.us = +(source.total / source.count).toFixed(3);
+            delete source.total;
+            delete source.count;
+
+            for(let statefip in source.states) {
+                let total = source.states[statefip].total;
+                let count = source.states[statefip].count;
+                source.states[statefip] = +(total / count).toFixed(3);
+            }
+        });
+    }
+
+    cb();
 }
 
