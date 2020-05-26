@@ -140,7 +140,7 @@
     <div class="page" id="cutter">
         <h3>Disaster Resilience</h3>
         <p>
-            Disaster resilience measures the capacity of a community to recover from disaster events without losing their socioeconomic and infrastructural viability (Combaz, 2015; UNISDR, 2005). Using the framework provided by <a href="https://doi.org/10.2202/1547-7355.1732">Cutter et al. (2010)</a>, this section merges the resilient and vulnerable variables of a city into a unified set of indices - to produce aggregated information on disaster resilience levels. Click <b>Show Sub-Indicies</b> buttons below to see the details.
+            Disaster resilience measures the capacity of a community to recover from disaster events without losing their socioeconomic and infrastructural viability (Combaz, 2015; UNISDR, 2005). Using the framework provided by <a href="https://doi.org/10.2202/1547-7355.1732">Cutter et al. (2010)</a>, this section merges the resilient and vulnerable variables of a city into a unified set of indices - to produce aggregated information on disaster resilience levels. Expand each measures to show more detail
         </p>
     
         <p style="font-size: 85%; opacity: 1; font-weight: bold; margin-left: 355px; margin-bottom: 0;">
@@ -159,6 +159,7 @@
                     {{indicator.name}} <el-tag type="info" size="small">{{incode}}</el-tag>
                 </div>
                 <IndicatorInfo :id="incode" style="margin-right: 175px; opacity: 0.8; font-size: 90%; padding: 10px; margin-bottom: 10px;"/>
+                <!--
                 <div style="position: relative; margin-left: 355px; margin-right: 50px;">
                     <span style="position: absolute; left: -100px; font-size: 85%;">This County</span>
                     <BarGraph :value="indicator.aggregate.county" :min="0" :max="1" :height="15"/>
@@ -181,34 +182,35 @@
                         </span>
                     </el-button>
                 </p>
+                -->
             </div>
-            <slide-up-down class="indicator-detail" :active="shownIndicators.includes(incode)">
-                <el-collapse>
-                    <div v-for="source in detail.cutter[incode].sources" :key="source.id">
-                        <el-collapse-item v-if="source.us">
-                            <template slot="title">
-                                <i class="el-icon-caret-right" style="margin-right: 10px; opacity: 0.5;"/>
-                                <span style="float: left; min-width: 330px">{{source.name}}
-                                    <el-tag type="info" size="small">{{source.id}}</el-tag>
-                                </span>
-                                <BarGraph style="margin-right: 30px; width: 100%;" :value="source.county" :min="0" :max="1" />
-                            </template>
+            <!--<slide-up-down class="indicator-detail" :active="shownIndicators.includes(incode)">-->
+            <el-collapse>
+                <div v-for="source in detail.cutter[incode].sources" :key="source.id">
+                    <el-collapse-item v-if="source.us">
+                        <template slot="title">
+                            <i class="el-icon-caret-right" style="margin-right: 10px; opacity: 0.5;"/>
+                            <span style="float: left; min-width: 330px">{{source.name}}
+                                <el-tag type="info" size="small">{{source.id}}</el-tag>
+                            </span>
+                            <BarGraph style="margin-right: 30px; width: 100%;" :value="source.county" :min="0" :max="1" />
+                        </template>
 
-                            <div style="background-color: #eee; padding: 5px 20px;">
-                                <MeasureInfo :id="source.id" style="margin-right: 50px; margin-bottom: 10px;"/>
+                        <div style="background-color: #eee; padding: 5px 20px;">
+                            <MeasureInfo :id="source.id" style="margin-right: 50px; margin-bottom: 10px;"/>
 
-                                <div style="margin-bottom: 10px; padding-right: 30px;">
-                                    <span style="float: left; width: 255px; text-align: right;">State Average</span>
-                                    <BarGraph style="margin-left: 333px;" :value="source.states" :min="0" :max="1" color="#8e8e8e"/>
-                                    <br>
-                                    <span style="float: left; width: 255px; text-align: right;">US Average</span>
-                                    <BarGraph style="margin-left: 333px;" :value="source.us" :min="0" :max="1" color="#8e8e8e"/>
-                                </div>
+                            <div style="margin-bottom: 10px; padding-right: 30px;">
+                                <span style="float: left; width: 255px; text-align: right;">State Average</span>
+                                <BarGraph style="margin-left: 333px;" :value="source.states" :min="0" :max="1" color="#8e8e8e"/>
+                                <br>
+                                <span style="float: left; width: 255px; text-align: right;">US Average</span>
+                                <BarGraph style="margin-left: 333px;" :value="source.us" :min="0" :max="1" color="#8e8e8e"/>
                             </div>
-                        </el-collapse-item>
-                    </div>
-                </el-collapse>
-            </slide-up-down>
+                        </div>
+                    </el-collapse-item>
+                </div>
+            </el-collapse>
+            <!--</slide-up-down>-->
         </div>
     </div>
 
