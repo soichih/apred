@@ -28,9 +28,7 @@ for(let fain in eda2018) {
 
     //lookup county fips
     rec.counties.forEach(c=>{
-        //  { county: ' Lee', stateadd: 'TX' },
         c.county = c.county.trim();
-
         let fi = fips.find(f=>{
             let county = c.county;
             county = county.replace(".", "");

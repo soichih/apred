@@ -8,15 +8,6 @@ const csvParser = require('csv-parser');
 
 const counties = {}; //keyed by fips, then all information for that county
 
-/*
-console.log("load state names");
-const fips_map = {};
-fips.forEach(rec=>{
-    let fips = rec.statefips+rec.countyfips;
-    fips_map[rec.statefips+rec.countyfips] = rec;
-});
-*/
-
 console.log("initializing counties");
 geo.features.forEach(feature=>{
     let fips = feature.properties.statefips + feature.properties.countyfips;
@@ -170,17 +161,13 @@ for(let fain in eda2018) {
     eda2018[fain].counties.forEach(county=>{
         let fips = county.statefips+county.countyfips;
         if(!counties[fips]) {
-            //console.error("odd/missing fips in eda2018", county);
             return;
         }
         counties[fips].eda2018.push(eda2018[fain]);
     });
-    //console.log(JSON.stringify(counties["01003"], null, 4));
-    //process.exit(1);
 }
 
 function handle_disaster(rec) {
-    //if(rec.declaredCountyArea == "Statewide") {
     if(rec.designatedArea == "Statewide") {
         //add it to all county in the state
         for(let fip in counties) {
@@ -193,7 +180,8 @@ function handle_disaster(rec) {
         //county specific
         let fips = rec.fipsStateCode+rec.fipsCountyCode;
         if(!counties[fips]) {
-            //console.error("odd/missing fips in disaster rec", fips);
+            console.error("odd/missing fips in disaster:", fips);
+            console.dir(rec);
             return;
         }
         counties[fips].disasters.push(rec);
