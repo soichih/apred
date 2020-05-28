@@ -224,7 +224,6 @@ export default class Disaster extends Vue {
                 this.updatedDate = res.headers.get("last-modified")
                 return res.json()
             }).then(data=>{
-                console.log("loaded geojson");
                 this.geojson = data;
 
                 //if(this.selected) return;
@@ -497,7 +496,6 @@ export default class Disaster extends Vue {
         fetch("https://gpu1-pestillilab.psych.indiana.edu/apred/counties/county."+fips+".json").then(res=>res.json()).then(data=>{
             delete data.cutter.INST;
             delete data.cutter.FLOR;
-            console.log("loaded county detail");
             this.selected = data;
             loading.close();
         });
