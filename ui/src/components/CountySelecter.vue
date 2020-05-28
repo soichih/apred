@@ -38,6 +38,7 @@ export default {
 
         change(v) {
             this.$emit("selected", v);
+            this.county = null; //reset back to null
         }
     }
 }

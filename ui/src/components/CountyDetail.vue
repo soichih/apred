@@ -15,31 +15,19 @@
     <div id="info-header">
         <div class="page">
             <el-row>
-                <el-col :span="9">
+                <el-col :span="10">
                     <div id="statemap"/>
                 </el-col>
-                <el-col :span="6" class="border-left demo">
+                <el-col :span="8" class="border-left demo">
                     <p style="margin: 0">
                         <span class="sub-heading">Population</span><br>
                         <span class="primary" v-if="detail.demo"> {{detail.population | formatNumber}}</span>
                         <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
                     </p>
-
-                    <!--
-                    <vue-bar-graph v-if="detail.demo"
-                        :points="populationPoints(detail.demo)"
-                        :width="175"
-                        :height="100"
-                        :show-x-axis="true" 
-                        :show-values="true"
-                        bar-color="#999"
-                        text-color="#666"
-                        text-alt-color="white"/>
-                    -->
                     <Plotly :data="[demoGraphData]" :layout="demoGraphLayout" :display-mode-bar="false"/>
                     <br>
                 </el-col>
-                <el-col :span="5" class="border-left gdp">
+                <el-col :span="6" class="border-left gdp">
                     <p>
                         <span class="sub-heading">GDP</span> <small>(BEA 2018)</small><br>
                         <span class="primary" v-if="detail.gdp"> ${{detail.gdp | formatNumber}}</span>
@@ -50,7 +38,8 @@
                         <span class="primary" v-if="detail.medianincome"> ${{detail.medianincome | formatNumber}}</span>
                         <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
                     </p>
-               </el-col>
+                </el-col>
+                <!--
                 <el-col :span="4" class="border-left">
                     <p class="sub-heading">
                         Disaster Resilience
@@ -58,6 +47,7 @@
                     </p>
                     <Plotly :data="[drSpyderData]" :layout="drSpyderLayout" :display-mode-bar="false"/>
                 </el-col>
+                -->
             </el-row>
         </div>
     </div>
@@ -121,7 +111,7 @@
             that are believed to be <i>vulnerable</i> to various natural disasters.
         </p>
         <p>
-            To calculate the BVI, we isolated businesses by NAICS[1] code from the U.S. Census' most recent <a href="https://www.census.gov/econ/overview/mu0800.html">County Business Patterns</a>  based on their vulnerability to natural disaster (farmers, transportation companies, etc..)
+            To calculate the BVI, we isolated businesses by NAICS code from the U.S. Census' most recent <a href="https://www.census.gov/econ/overview/mu0800.html">County Business Patterns</a>  based on their vulnerability to natural disaster (farmers, transportation companies, etc..)
             Businesses that were identified to be especially vulnerable to a disaster are those which are dependent on supply chains,
             have a high reliance on public utilities like water and electricity, or have a large infrastructure footprint and low infrastructure mobility.
         </p>
@@ -140,7 +130,7 @@
     <div class="page" id="cutter">
         <h3>Disaster Resilience</h3>
         <p>
-            Disaster resilience measures the capacity of a community to recover from disaster events without losing their socioeconomic and infrastructural viability [Combaz, 2015] <a href="https://www.unisdr.org/2005/wcdr/intergover/official-doc/L-docs/Hyogo-framework-for-action-english.pdf">[UNISDR, 2005]</a>. Using the framework provided by <a href="https://doi.org/10.2202/1547-7355.1732">[Cutter et al. 2010]</a>, this section merges the resilient and vulnerable variables of a city into a unified set of indices - to produce aggregated information on disaster resilience levels. Expand each measures to show more detail.
+            Disaster resilience measures the capacity of a community to recover from disaster events without losing their socioeconomic and infrastructural viability <a href="https://gsdrc.org/topic-guides/disaster-resilience/concepts/what-is-disaster-resilience/">[Combaz, 2015]</a> <a href="https://www.unisdr.org/2005/wcdr/intergover/official-doc/L-docs/Hyogo-framework-for-action-english.pdf">[UNISDR, 2005]</a>. Using the framework provided by <a href="http://resiliencesystem.com/sites/default/files/Cutter_jhsem.2010.7.1.1732.pdf">[Cutter et al. 2010]</a>, this section merges the resilient and vulnerable variables of a city into a unified set of indices - to produce aggregated information on disaster resilience levels. Expand each measures to show more detail.
         </p>
         <p>
             Resilience values are normalized on a 0 to 1 scale, with 1 being the county with the highest resilience value and 0 being the county with the lowest resilience value. The top and bottom 5% of values are combined to control for outliers.
@@ -157,57 +147,58 @@
         </p>
 
         <div v-for="(indicator, incode) in detail.cutter" :key="incode" :title="indicator.name" style="margin-bottom: 15px; clear: both;">
-            <div class="indicator-head">
-                <div style="background-color: #f6f6f6; padding: 5px 10px; margin: 10px 0; margin-right: 50px;">
-                    {{indicator.name}} <el-tag type="info" size="small">{{incode}}</el-tag>
-                </div>
-                <IndicatorInfo :id="incode" style="margin-right: 175px; opacity: 0.8; font-size: 90%; padding: 10px; margin-bottom: 10px;"/>
-                <!--
-                <div style="position: relative; margin-left: 355px; margin-right: 50px;">
-                    <span style="position: absolute; left: -100px; font-size: 85%;">This County</span>
-                    <BarGraph :value="indicator.aggregate.county" :min="0" :max="1" :height="15"/>
-
-                    <span style="position: absolute; left: -100px; font-size: 85%;">This State</span>
-                    <BarGraph :value="indicator.aggregate.state" :min="0" :max="1" :height="15" style="opacity: 0.7"/>
-
-                    <span style="position: absolute; left: -100px; font-size: 85%;">US Average</span>
-                    <BarGraph :value="indicator.aggregate.us" :min="0" :max="1" :height="15" style="opacity: 0.4;"/>
-                </div>
-                <br> 
-
-                <p style="margin-right: 50px; border-top: 1px solid #eee; padding-top: 10px;">
-                    <el-button round @click="toggleIndicator(incode)" plain size="small" style="width: 150px">
-                        <span v-if="!shownIndicators.includes(incode)">
-                            <i class="el-icon-caret-right"/> Show Sub-Indices
-                        </span>
-                        <span v-else>
-                            <i class="el-icon-caret-bottom"/> Hide Sub-Indices
-                        </span>
-                    </el-button>
-                </p>
-                -->
+            <div class="indicator-header">
+                <span class="indicator-title">
+                    {{indicator.name}} <!--<el-tag type="info" size="small">{{incode}}</el-tag>-->
+                </span>
             </div>
+            <IndicatorInfo :id="incode" style="margin-right: 175px; opacity: 0.8; font-size: 90%; padding: 10px; margin-bottom: 10px;"/>
+            <!--
+            <div style="position: relative; margin-left: 355px; margin-right: 50px;">
+                <span style="position: absolute; left: -100px; font-size: 85%;">This County</span>
+                <BarGraph :value="indicator.aggregate.county" :min="0" :max="1" :height="15"/>
+
+                <span style="position: absolute; left: -100px; font-size: 85%;">This State</span>
+                <BarGraph :value="indicator.aggregate.state" :min="0" :max="1" :height="15" style="opacity: 0.7"/>
+
+                <span style="position: absolute; left: -100px; font-size: 85%;">US Average</span>
+                <BarGraph :value="indicator.aggregate.us" :min="0" :max="1" :height="15" style="opacity: 0.4;"/>
+            </div>
+            <br> 
+
+            <p style="margin-right: 50px; border-top: 1px solid #eee; padding-top: 10px;">
+                <el-button round @click="toggleIndicator(incode)" plain size="small" style="width: 150px">
+                    <span v-if="!shownIndicators.includes(incode)">
+                        <i class="el-icon-caret-right"/> Show Sub-Indices
+                    </span>
+                    <span v-else>
+                        <i class="el-icon-caret-bottom"/> Hide Sub-Indices
+                    </span>
+                </el-button>
+            </p>
+            -->
             <!--<slide-up-down class="indicator-detail" :active="shownIndicators.includes(incode)">-->
             <el-collapse>
                 <div v-for="source in detail.cutter[incode].sources" :key="source.id">
                     <el-collapse-item v-if="source.us">
                         <template slot="title">
                             <i class="el-icon-caret-right" style="margin-right: 10px; opacity: 0.5;"/>
-                            <span style="float: left; min-width: 330px">{{source.name}}
-                                <el-tag type="info" size="small">{{source.id}}</el-tag>
+                            <span style="float: left; min-width: 330px">
+                                <small>{{source.id}}.</small>
+                                {{source.name}}
                             </span>
                             <BarGraph style="margin-right: 30px; width: 100%;" :value="source.county" :min="0" :max="1" />
                         </template>
 
-                        <div style="background-color: #eee; padding: 5px 20px;">
+                        <div style="border-left: 5px solid #eee; padding: 0 20px; margin-left: 28px;">
                             <MeasureInfo :id="source.id" style="margin-right: 50px; margin-bottom: 10px;"/>
 
-                            <div style="margin-bottom: 10px; padding-right: 30px;">
+                            <div style="margin-bottom: 10px; padding-right: 30px; opacity: 0.6;">
                                 <span style="float: left; width: 255px; text-align: right;">State Average</span>
-                                <BarGraph style="margin-left: 333px;" :value="source.states" :min="0" :max="1" color="#8e8e8e"/>
+                                <BarGraph style="margin-left: 300px;" :value="source.states" :min="0" :max="1" color="#8e8e8e"/>
                                 <br>
                                 <span style="float: left; width: 255px; text-align: right;">US Average</span>
-                                <BarGraph style="margin-left: 333px;" :value="source.us" :min="0" :max="1" color="#8e8e8e"/>
+                                <BarGraph style="margin-left: 300px;" :value="source.us" :min="0" :max="1" color="#8e8e8e"/>
                             </div>
                         </div>
                     </el-collapse-item>
@@ -336,7 +327,7 @@ export default class CountyDetail extends Vue {
     demoGraphLayout = {
         'plot_bgcolor': '#0000',
         'paper_bgcolor': '#0000',
-        width: 200,
+        width: 270,
         height: 120,
         margin: {
             l: 0,
@@ -941,7 +932,7 @@ h4 {
     padding-left: 20px;
     padding-top: 10px;
 }
-@media only screen and (max-width: 850px) {
+@media only screen and (max-width: 500px) {
     .demo {
         display: none;
     }
@@ -980,8 +971,7 @@ h4 {
 }
 
 #info-header {
-/*border-top: 20px solid white;*/
-background-color: #eee;
+    background-color: #eee;
 }
 
 .header h3 {
@@ -1024,15 +1014,25 @@ top: 10px;
     position: relative;
     width: 100%;
     height: 200px;
-/* top: -20px;*/
 }
 canvas:focus {
     outline: none;
 }
 .indicator-detail {
-clear: both;
+    clear: both;
 }
 small {
-opacity: 0.5;
+    opacity: 0.5;
+}
+.indicator-header {
+    background-color: #f6f6f6; 
+    margin-right: 50px;
+
+    .indicator-title {
+        display: inline-block;
+        line-height: 100%;
+        padding: 10px;
+        font-weight: bold;
+    }
 }
 </style>
