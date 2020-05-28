@@ -6,7 +6,7 @@
             disaster mitigation, analysis, and recovery activities.
         </p>
         <h3>CTIL Crisis Technologies Innovation Lab</h3>
-        <a href="mailto:ctil@iu.edu">ctil@iu.edu</a>
+        <a href="mailto:ctil@iu.edu">ctil@iu.edu</a> | <a href="mailto:ctil@iu.edu">Contact Us</a>
     </div>
     <br>
     <br>

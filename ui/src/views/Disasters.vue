@@ -8,8 +8,12 @@
                     <span style="opacity: 0.8; font-size: 70%; font-weight: normal; text-transform: none;">between 2017 - <time v-if="updatedDate">{{new Date(updatedDate).toLocaleDateString()}}</time></span>
                 </h2>
                 <div class="legend">
+                    <div class="legend-item" style="border-bottom: 1px solid #0002; margin-bottom: 8px; padding-bottom: 3px;">
+                        <input type="checkbox" v-model="layersAll" @change="handleAll"/>
+                        All
+                    </div>
                     <div v-for="(info, layer) in layers" :key="layer" class="legend-item" :class="{hidden: hiddenLayers.includes(layer)}" @click.stop="toggleLayer(layer)" style="clear: both;" :title="info.title">
-                        <input type="checkbox" :checked="!hiddenLayers.includes(layer)" style="float: right;"/>
+                        <input type="checkbox" :checked="!hiddenLayers.includes(layer)"/>
                         <span class="legend-color" :style="{backgroundColor: info.color}">&nbsp;</span>&nbsp;{{layer}}
                     </div>
                     <!--
@@ -22,6 +26,7 @@
             </div>
 
             <div id="map"/>
+            <!--
             <footer>
                 <div class="page">
                     <p style="line-height: 200%; margin-top: 5px;">
@@ -31,6 +36,7 @@
                     </p>
                 </div>
             </footer>
+            -->
         </div>
 
         <CountyDetail v-if="selected && geojson" :detail="selected" :layers="layers" :geojson="geojson"/>
@@ -56,6 +62,9 @@
             </p>
         </div> 
     </div>
+    <div class="contextmenu" ref="contextmenu">
+        <p class="menu-item" @click="openContextMenuCounty">Open this county ({{contextMenuCounty}}) in a new tab</p>
+    </div>
 </div>
 </template>
 
@@ -66,6 +75,7 @@ import { Component, Vue, Watch } from 'vue-property-decorator'
 import CountySelecter from '@/components/CountySelecter.vue'
 import TopMenu from '@/components/TopMenu.vue'
 import CountyDetail from '@/components/CountyDetail.vue'
+import Footer from '@/components/Footer.vue'
 
 import mapboxgl from 'mapbox-gl';
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -73,7 +83,7 @@ import "mapbox-gl/dist/mapbox-gl.css";
 mapboxgl.accessToken = "pk.eyJ1Ijoic29pY2hpaCIsImEiOiJjazVqdnBsM2cwN242M2psdjAwZXhhaTFuIn0.o3koWlzx1Tup8CJ1B_KaEA";
 
 @Component({
-    components: { CountySelecter, TopMenu, CountyDetail },
+    components: { CountySelecter, TopMenu, CountyDetail, Footer },
 })
 export default class Disaster extends Vue {
 
@@ -83,9 +93,11 @@ export default class Disaster extends Vue {
 
     hiddenLayers = [];
     countyList = [];
+    layersAll = true;
+
+    contextMenuCounty = null;
 
     updatedDate = null;
-    //tutorial = false;
 
     layers = {
         "biological": {
@@ -177,6 +189,7 @@ export default class Disaster extends Vue {
         const h = window.localStorage.getItem("hiddenLayers");
         if(h) {
             this.hiddenLayers = JSON.parse(h);
+            this.layersAll = (this.hiddenLayers.length == 0);
         }
     }
 
@@ -205,12 +218,17 @@ export default class Disaster extends Vue {
         });
 
         this.map.on('load', ()=>{
+
             //fetch("https://ctil.iu.edu/projects/apred-data/counties_geo.json").then(res=>res.json()).then(data=>{
             fetch("https://gpu1-pestillilab.psych.indiana.edu/apred/counties_geo.json").then(res=>{ 
                 this.updatedDate = res.headers.get("last-modified")
                 return res.json()
             }).then(data=>{
+                console.log("loaded geojson");
                 this.geojson = data;
+
+                //if(this.selected) return;
+
                 data.features.forEach(feature=>{
                     const props = feature.properties;
                     if(props.countyfips) {
@@ -232,6 +250,7 @@ export default class Disaster extends Vue {
                         "fill-color": "rgba(0,0,0,0.1)"
                     }
                 });
+
 
                 for(const t in this.layers) {
                     const layer = this.layers[t];
@@ -364,6 +383,24 @@ export default class Disaster extends Vue {
                     this.countySelected(features[0].properties.statefips+features[0].properties.countyfips);
                 }
             });
+            this.map.on('contextmenu', e=>{
+                const features = this.map.queryRenderedFeatures(e.point, {
+                    layers: ['counties']
+                });
+                if(features.length > 0) {
+                    e.preventDefault();
+                    const mapel = document.getElementById("map");
+                    this.$refs["contextmenu"].style.display = "block";
+                    this.$refs["contextmenu"].style.left = (e.point.x-20)+"px";
+                    this.$refs["contextmenu"].style.top = (mapel.offsetTop + e.point.y - 10)+"px";
+                    this.contextMenuCounty = features[0].properties.statefips+features[0].properties.countyfips;
+                }
+            });
+
+            //close context menu as soon as user leaves it
+            this.$refs["contextmenu"].addEventListener("mouseleave", e=>{
+                this.$refs["contextmenu"].style.display = "none";
+            });
 
             this.map.on('mousemove', 'counties', (e)=> {
                 // Change the cursor style as a UI indicator.
@@ -460,6 +497,7 @@ export default class Disaster extends Vue {
         fetch("https://gpu1-pestillilab.psych.indiana.edu/apred/counties/county."+fips+".json").then(res=>res.json()).then(data=>{
             delete data.cutter.INST;
             delete data.cutter.FLOR;
+            console.log("loaded county detail");
             this.selected = data;
             loading.close();
         });
@@ -467,6 +505,9 @@ export default class Disaster extends Vue {
 
     countySelected(fips) {
         this.$router.push('/county/'+fips);
+    }
+    openContextMenuCounty() {
+        window.open("#/county/"+this.contextMenuCounty, "apred-"+this.contextMenuCounty);
     }
 
     toggleLayer(layer) {
@@ -476,7 +517,27 @@ export default class Disaster extends Vue {
         this.map.setLayoutProperty('county_disaster_'+layer, 'visibility', this.hiddenLayers.includes(layer)?'none':'visible');
         this.map.setLayoutProperty('state_disaster_'+layer, 'visibility', this.hiddenLayers.includes(layer)?'none':'visible');
 
+        this.layersAll = (this.hiddenLayers.length == 0);
+
         window.localStorage.setItem("hiddenLayers", JSON.stringify(this.hiddenLayers));
+    }
+
+    handleAll() {
+        if(this.layersAll) {
+            this.hiddenLayers = [];
+        } else {
+            this.hiddenLayers = [];
+            for(const key in this.layers) {
+                this.hiddenLayers.push(key);
+            }
+        }
+        window.localStorage.setItem("hiddenLayers", JSON.stringify(this.hiddenLayers));
+
+        //apply layer state
+        for(const layer in this.layers) {
+            this.map.setLayoutProperty('county_disaster_'+layer, 'visibility', this.hiddenLayers.includes(layer)?'none':'visible');
+            this.map.setLayoutProperty('state_disaster_'+layer, 'visibility', this.hiddenLayers.includes(layer)?'none':'visible');
+        }
     }
 }
 </script>
@@ -507,7 +568,7 @@ h4 {
     position: fixed;
     width: 100%;
     top: 110px;
-    bottom: 75px;
+    bottom: 0;
 }
 
 .map-overlay {
@@ -543,7 +604,7 @@ h4 {
     float: left; 
     z-index: 1; 
     position: relative; 
-    width: 230px;
+    width: 150px;
 
     .legend-color {
         display: inline-block;
@@ -560,26 +621,25 @@ h4 {
     }
 
     .legend-item {
-        width: 200px;
+        width: 150px;
         height: 20px;
         margin-right: 10px;
         cursor: pointer;
         &.hidden {
             color: #999;
         }
+        input[type='checkbox'] {
+            float: right;
+            position: relative;
+            height: 15px;
+            top: -5px;
+        }
     }
     
 }
-footer {
-position: fixed;
-bottom: 0;
-width: 100%;
-height: 75px;
-max-height: 75px;
-background-color: #333;
-}
 .county-selecter {
     margin-top: 10px; 
+    margin-right: 30px;
     float: right; 
     z-index: 1; 
     position: relative; 
@@ -627,6 +687,27 @@ background-color: #333;
     z-index: 3;
     transition: box-shadow 1s;
     box-shadow: 0 0 20px black;
+}
+.contextmenu {
+    z-index: 10;
+    position: fixed;
+    top: 50px;
+    left: 50px;
+    width: 300px;
+    background-color: white;
+    box-shadow: 2px 2px 5px #0003;
+    display: none;
+    padding: 10px 0;
+
+    .menu-item {
+        font-size: 90%;
+        padding: 5px 10px;
+        margin-bottom: 0px;
+    }
+    .menu-item:hover {
+        cursor: pointer;
+        background-color: #eee;
+    }
 }
 </style>
 
