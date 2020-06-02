@@ -2,12 +2,32 @@
 <div>
     <TopMenu/>
     <div>
-        <div style="position: relative;">
+        <div id="map"/>
+        <CountyDetail v-if="selected && geojson" :detail="selected" :layers="layers" :geojson="geojson"/>
+        <div v-else style="position: relative;">
             <div class="page">
+                <!--
                 <h2 style="margin-bottom: 0px">FEMA Disaster&nbsp;Declarations
                     <span style="opacity: 0.8; font-size: 70%; font-weight: normal; text-transform: none;">between 2017 - <time v-if="updatedDate">{{new Date(updatedDate).toLocaleDateString()}}</time></span>
                 </h2>
-                <div class="legend">
+                -->
+                <p style="padding-top: 10px;">
+                    <el-radio-group v-model="mode">
+                        <el-radio-button label="dr">FEMA Disaster Declarations</el-radio-button>
+                        <el-radio-button label="resilience">Disaster Resilience</el-radio-button>
+                        <el-radio-button label="eda2018">EDA 2018 Supplemental Awards</el-radio-button>
+                    </el-radio-group>
+                </p>
+                <div class="legend" v-if="mode == 'dr'">
+                    <p>
+                        <b>Date Range</b>
+                        <el-select v-model="drRange" placeholder="Select" size="mini">
+                            <el-option v-for="item in [{value: 'recent', label:'2017 - Now'}]" :key="item.value" :label="item.label" :value="item.value"> </el-option>
+                        </el-select>
+                    </p>
+                    <p>
+                        <b>Disaster Types</b>
+                    </p>
                     <div class="legend-item" style="border-bottom: 1px solid #0002; margin-bottom: 8px; padding-bottom: 3px;">
                         <input type="checkbox" v-model="layersAll" @change="handleAll"/>
                         All
@@ -20,12 +40,34 @@
                     <span class="legend-eda"/> EDA Award ($)
                     -->
                 </div>
+                <div class="legend" v-if="mode == 'resilience'">
+                    <p>
+                        <b>Resiliences</b>
+                    </p>
+                    <div v-for="(info, cid) in cutterIndicators" :key="cid" class="legend-item" :class="{hidden: hiddenDRLayers.includes(cid)}" @click.stop="toggleDRLayer(cid)" style="clear: both;">
+                        <input type="checkbox" :checked="!hiddenDRLayers.includes(cid)"/>
+                        <span class="legend-color" :style="{'background-color': info.color}">&nbsp;</span>&nbsp;{{info.name}}
+                    </div>
+                </div>
+                <div class="legend" v-if="mode == 'eda2018'">
+                    <!--
+                    <p>
+                        <b>EDA2018 Awards</b>
+                    </p>
+                    -->
+                    <div class="legend-item">
+                        <span class="legend-color" style="background-color: #00ff00">&nbsp;</span>&nbsp;Statewide Awards
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background-color: #0066ff">&nbsp;</span>&nbsp;County Awards
+                    </div>
+                </div>
+
                 <div class="county-selecter" style="width: 230px">
                     <CountySelecter style="width: 230px" @selected="countySelected" :options="countyList"/>
                 </div>
             </div>
 
-            <div id="map"/>
             <!--
             <footer>
                 <div class="page">
@@ -38,8 +80,6 @@
             </footer>
             -->
         </div>
-
-        <CountyDetail v-if="selected && geojson" :detail="selected" :layers="layers" :geojson="geojson"/>
     </div>
     <div class="tutorial">
         <div class="tutorial-text tutorial-text-legend" @click="showTutorial('selecter')">
@@ -91,13 +131,74 @@ export default class Disaster extends Vue {
     selected = null;
     geojson = null;
 
+    cutters = null;
+
     hiddenLayers = [];
+    hiddenDRLayers = [];
     countyList = [];
     layersAll = true;
 
     contextMenuCounty = null;
 
     updatedDate = null;
+
+    mode = null;
+    drRange = "recent";
+
+    /*
+    cutterIndicators: [
+        {
+            name: "Social Resilience",
+            measures: [
+                {id: "11", name: "Education Equity"},
+                {id: "12", name: "Age"}
+                {id: "13", name: "Transportation Access"}
+                {id: "14", name: "Communicatino Capacity"}
+                {id: "15", name: "Language Capacity"}
+                {id: "16", name: "Special Needs"}
+                {id: "17", name: "Health Coverage"}
+            ]
+        },
+
+        {
+            name: "Economic Resilience",
+            measures: [
+            ]
+        },
+
+        {
+            name: "Institutional Resilience",
+            measures: [
+            ]
+        },
+
+        {
+            name: "Community Capital",
+            measures: [
+            ]
+        },
+    ];
+    */
+
+    cutterIndicators = {
+        "SOC": {
+            name: "Social",
+            color: "#c00",
+        },
+        "ECON": {
+            name: "Economical",
+            color: "#0c0",
+        },
+        "IHFR": {
+            name: "Infrastructure",
+            color: "#00c",
+        },
+        "COMM": {
+            name: "Community Capital",
+            color: "#000",
+        },
+    }
+     
 
     layers = {
         "biological": {
@@ -181,16 +282,116 @@ export default class Disaster extends Vue {
     };
 
     @Watch('$route')
-    onRouteChange(to, from) {
+    onRouteChange() {
         this.loadCounty(this.$route.params.fips);
     }
     
     created() {
-        const h = window.localStorage.getItem("hiddenLayers");
+        let h = window.localStorage.getItem("hiddenLayers");
         if(h) {
             this.hiddenLayers = JSON.parse(h);
             this.layersAll = (this.hiddenLayers.length == 0);
         }
+
+        h = window.localStorage.getItem("hiddenDRLayers");
+        if(h) {
+            this.hiddenDRLayers = JSON.parse(h);
+            //this.layersAll = (this.hiddenDRLayers.length == 0);
+        }
+    }
+
+    @Watch('mode')
+    onModeChange() {
+        //console.log(this.mode);
+
+        this.hideDDLayers();
+        this.hideDRLayers();
+        this.hideEDA2018Layers();
+
+        //show layers that belongs to mode
+        switch(this.mode) {
+        case "dr":
+            this.showDDLayers();
+            break;
+        case "resilience":
+            this.showDRLayers();
+            break;
+        case "eda2018":
+            this.showEDA2018Layers();
+            break;
+        }
+    }
+
+    hideDDLayers() {
+        for(const t in this.layers) {
+            this.map.setLayoutProperty('county_disaster_'+t, 'visibility', 'none');
+            this.map.setLayoutProperty('state_disaster_'+t, 'visibility', 'none');
+        }
+    }
+
+    showDDLayers() {
+        for(const t in this.layers) {
+            this.map.setLayoutProperty('county_disaster_'+t, 'visibility', this.hiddenLayers.includes(t)?'none':'visible');
+            this.map.setLayoutProperty('state_disaster_'+t, 'visibility', this.hiddenLayers.includes(t)?'none':'visible');
+        }
+    }
+
+    hideDRLayers() {
+        if(!this.cutters) return; //DR not yet loaded
+        for(const t in this.cutterIndicators) {
+            this.map.setLayoutProperty('dr'+t, 'visibility', 'none');
+        }
+    }
+
+    showDRLayers() {
+        console.log("showing dr layers");
+        for(const t in this.cutterIndicators) {
+            this.map.setLayoutProperty('dr'+t, 'visibility', this.hiddenDRLayers.includes(t)?'none':'visible');
+        }
+    }
+    hideEDA2018Layers() {
+        this.map.setLayoutProperty('eda-labels', 'visibility', 'none');
+        this.map.setLayoutProperty('eda2018', 'visibility', 'none');
+    }
+
+    showEDA2018Layers() {
+        this.map.setLayoutProperty('eda-labels', 'visibility', 'visible');
+        this.map.setLayoutProperty('eda2018', 'visibility', 'visible');
+    }
+
+    loadCutters(year, measure) {
+        console.log("loading..", year, measure);
+
+        //load specified year / cutter measure
+        const values = {};
+        for(const fip in this.cutters) {
+            const cutter = this.cutters[fip];
+            if(cutter[measure]) values[fip] = cutter[measure][year-2012];
+        }   
+
+        //apply to geojson 
+        this.geojson.features.forEach(feature=>{
+            const fips = feature.properties["statefips"]+"."+feature.properties["countyfips"];
+            feature.properties["resilience"] = values[fips]||0;
+        });
+
+        //create source / layer
+        console.log("adding source", measure);
+        this.map.addSource('dr'+measure, { type: "geojson", data: this.geojson });
+
+        console.log("adding layer", measure);
+        this.map.addLayer({
+            "id": "dr"+measure,
+            "type": "fill",
+            "source": "dr"+measure,
+            "paint": {
+                "fill-opacity": ['get', 'resilience'],
+                "fill-color": this.cutterIndicators[measure].color,
+            },
+            layout: {
+                visibility: 'none',
+            }
+        });
     }
 
     mounted() {
@@ -219,14 +420,19 @@ export default class Disaster extends Vue {
 
         this.map.on('load', ()=>{
 
-            //fetch("https://ctil.iu.edu/projects/apred-data/counties_geo.json").then(res=>res.json()).then(data=>{
+            //TODO - allow user to specify this year to show for dr
+
+            //I can try..
+            //this.map.getSource('counties').setData(new_geojson); 
+            //or maybe better to somehow update the prop values on the fly? can I do that?
+
+            //TODO - I should separate DR information from counties_geo.. so we can load data for each year ranges
+            //counties_geo should just contain counties_geo
             fetch("https://gpu1-pestillilab.psych.indiana.edu/apred/counties_geo.json").then(res=>{ 
                 this.updatedDate = res.headers.get("last-modified")
                 return res.json()
             }).then(data=>{
                 this.geojson = data;
-
-                //if(this.selected) return;
 
                 data.features.forEach(feature=>{
                     const props = feature.properties;
@@ -234,9 +440,6 @@ export default class Disaster extends Vue {
                         this.countyList.push({value: props.statefips+props.countyfips, label: props.county+", "+props.state});
                     }
 
-                    if(props.award) {
-                        props.awardStr = "$"+this.$options.filters.formatNumber(props.award/1000)+"k";
-                    }
                 });
 
                 this.map.addSource('counties', { type: "geojson", data });
@@ -249,7 +452,6 @@ export default class Disaster extends Vue {
                         "fill-color": "rgba(0,0,0,0.1)"
                     }
                 });
-
 
                 for(const t in this.layers) {
                     const layer = this.layers[t];
@@ -264,7 +466,7 @@ export default class Disaster extends Vue {
                         },
                         filter: layer.filter,
                         layout: {
-                            visibility: this.hiddenLayers.includes(t)?'none':'visible',
+                            visibility: 'none',
                         }
                     });
 
@@ -278,85 +480,95 @@ export default class Disaster extends Vue {
                         },
                         'filter': layer.statefilter,
                         layout: {
-                            visibility: this.hiddenLayers.includes(t)?'none':'visible',
+                            visibility: 'none',
                         }
                     });
                 }
 
-                /*
-                this.map.addLayer({
-                    'id': 'eda-circles-state',
-                    'type': 'circle',
-                    "source": "counties",
-                    filter: ['==', 'eda2018', 'state'],    
-                    'paint': {
-                        'circle-stroke-color': 'rgba(0,0,0,0)',
-                        'circle-stroke-width': 2,
-                        //'circle-color': 'rgba(103,194,58,0.8)',
-                        'circle-color': 'rgba(200,255,100,0.9)',
-                        'circle-opacity': 0.75,
-                        'circle-radius': {
-                            base: 1.75,
-                            property: 'award', 
-                            stops:[
-                                [{zoom: 4, value: 0}, 2],
-                                [{zoom: 4, value: 10000000}, 20],
-                                [{zoom: 8, value: 0}, 4],
-                                [{zoom: 8, value: 10000000}, 40],
-                                [{zoom: 12, value: 0}, 8],
-                                [{zoom: 12, value: 10000000}, 60]
-                
+                this.mode = "dr";
+
+                fetch("https://gpu1-pestillilab.psych.indiana.edu/apred/cutter_long.json").then(res=>{ 
+                    return res.json()
+                }).then(data=>{
+                    this.cutters = data;
+                    for(const cid in this.cutterIndicators) {
+                        this.loadCutters(2018, cid);
+                    }
+                });
+            });
+
+            fetch("https://gpu1-pestillilab.psych.indiana.edu/apred/eda2018.json").then(res=>{ 
+                return res.json()
+            }).then(data=>{
+                const geojson = {type: "FeatureCollection", features: []};
+
+                for(const recid in data) {
+                    const rec = data[recid];
+                    const ep = 0.15;
+                    geojson.features.push({
+                        type: "Feature",
+                        geometry: {
+                            type: "Polygon",
+                            coordinates: [ 
+                            [    [ rec.lon-ep, rec.lat-ep ],
+                                [ rec.lon-ep, rec.lat+ep ],
+                                [ rec.lon+ep, rec.lat+ep ],
+                                [ rec.lon+ep, rec.lat-ep ],
+                                [ rec.lon-ep, rec.lat-ep ], ]
                             ]
-                        },              
+                        },
+                        properties: {
+                            height: rec.award_amount/50,
+                            //awardStr: "$"+this.$options.filters.formatNumber(rec.award_amount/1000)+"k",
+                            color: rec.statewide?'#00ff00':'#0066ff',
+                        }
+                    });
+                }
+                this.map.addSource('eda2018', { type: "geojson", data: geojson });
+                this.map.addLayer({
+                    'id': 'eda2018',
+                    'type': 'fill-extrusion',
+                    "source": "eda2018",
+                    "paint": {
+                        "fill-extrusion-color": ['get', 'color'],
+                        "fill-extrusion-height": ['get', 'height'],
+                    },
+                    layout: {
+                        visibility: 'none', 
                     }
                 });
 
-                this.map.addLayer({
-                    'id': 'eda-circles-county',
-                    'type': 'circle',
-                    "source": "counties",
-                    filter: ['==', 'eda2018', 'county'],    
-                    'paint': {
-                        //'circle-stroke-color': 'rgba(103,194,58,0.8)',
-                        'circle-stroke-color': 'rgba(200,255,100,0.9)',
-                        'circle-stroke-width': 2,
-                        'circle-color': 'rgba(0,0,0,0)',
-                        'circle-opacity': 0.75,
-                        'circle-radius': {
-                            base: 1.75,
-                            property: 'award', 
-                            stops:[
-                                [{zoom: 4, value: 0}, 2],
-                                [{zoom: 4, value: 10000000}, 20],
-                                [{zoom: 8, value: 0}, 4],
-                                [{zoom: 8, value: 10000000}, 40],
-                                [{zoom: 12, value: 0}, 8],
-                                [{zoom: 12, value: 10000000}, 60]
-                
-                            ]
-                        },              
-                    }
-                });
-                */
+                const geojsonPoint = {type: "FeatureCollection", features: []};
+                for(const recid in data) {
+                    const rec = data[recid];
+                    geojsonPoint.features.push({
+                        type: "Feature",
+                        geometry: {
+                            type: "Point",
+                            coordinates: [ rec.lon, rec.lat ],
+                        },
+                        properties: {
+                            //award: rec.award_amount,
+                            awardStr: "$"+this.$options.filters.formatNumber(rec.award_amount/1000)+"k",
+                            type: rec.statewide?'state':'county',
+                        }
+                    });
+                }
+                this.map.addSource('eda2018-point', { type: "geojson", data: geojsonPoint });
 
                 this.map.addLayer({
                     'id': 'eda-labels',
                     'type': 'symbol',
-                    "source": "counties",
-                    'minzoom': 4,
+                    "source": "eda2018-point",
+                    /*
                     filter: ['any', 
                         ['==', 'eda2018', 'county'],    
                         ['==', 'eda2018', 'state'],    
                     ],
-                    'layout': {
-                        'text-field': 
-                            ['get', 'awardStr'],
-                        /*
-                        'text-font': [
-                            'Open Sans',
-                            'Arial Unicode MS Bold'
-                        ],
-                        */
+                    */
+                    layout: {
+                        visibility: 'none', 
+                        'text-field': ['get', 'awardStr'],
                         'text-size': [
                             "interpolate", 
                             [ "linear" ],
@@ -372,6 +584,7 @@ export default class Disaster extends Vue {
                         //'text-color': 'rgba(255,255,255,1)'
                     }
                 });
+
             });
 
             this.map.on('click', e=>{
@@ -397,7 +610,7 @@ export default class Disaster extends Vue {
             });
 
             //close context menu as soon as user leaves it
-            this.$refs["contextmenu"].addEventListener("mouseleave", e=>{
+            this.$refs["contextmenu"].addEventListener("mouseleave", ()=>{
                 this.$refs["contextmenu"].style.display = "none";
             });
 
@@ -494,8 +707,10 @@ export default class Disaster extends Vue {
             background: 'rgba(255, 255, 255, 0.3)'
         });
         fetch("https://gpu1-pestillilab.psych.indiana.edu/apred/counties/county."+fips+".json").then(res=>res.json()).then(data=>{
-            delete data.cutter.INST;
-            delete data.cutter.FLOR;
+            if(data.cutter) {
+                delete data.cutter.INST;
+                delete data.cutter.FLOR;
+            }
             this.selected = data;
             loading.close();
         });
@@ -514,10 +729,20 @@ export default class Disaster extends Vue {
         else this.hiddenLayers.push(layer);
         this.map.setLayoutProperty('county_disaster_'+layer, 'visibility', this.hiddenLayers.includes(layer)?'none':'visible');
         this.map.setLayoutProperty('state_disaster_'+layer, 'visibility', this.hiddenLayers.includes(layer)?'none':'visible');
-
         this.layersAll = (this.hiddenLayers.length == 0);
 
         window.localStorage.setItem("hiddenLayers", JSON.stringify(this.hiddenLayers));
+    }
+
+    toggleDRLayer(layer) {
+        const pos = this.hiddenDRLayers.indexOf(layer);
+        if(~pos) this.hiddenDRLayers.splice(pos, 1);
+        else this.hiddenDRLayers.push(layer);
+        this.map.setLayoutProperty('dr'+layer, 'visibility', this.hiddenDRLayers.includes(layer)?'none':'visible');
+        this.map.setLayoutProperty('dr'+layer, 'visibility', this.hiddenDRLayers.includes(layer)?'none':'visible');
+        //this.layersAll = (this.hiddenDRLayers.length == 0);
+
+        window.localStorage.setItem("hiddenDRLayers", JSON.stringify(this.hiddenDRLayers));
     }
 
     handleAll() {
@@ -602,7 +827,7 @@ h4 {
     float: left; 
     z-index: 1; 
     position: relative; 
-    width: 150px;
+    width: 170px;
 
     .legend-color {
         display: inline-block;
@@ -619,7 +844,7 @@ h4 {
     }
 
     .legend-item {
-        width: 150px;
+        width: 170px;
         height: 20px;
         margin-right: 10px;
         cursor: pointer;
