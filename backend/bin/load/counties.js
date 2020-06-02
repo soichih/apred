@@ -322,8 +322,8 @@ disasterNumber,declarationDate,incidentType,pwNumber,applicationTitle,applicantI
         */
         let fips = rec.county.toString()
         if(!counties[fips]) {
-            //console.error("odd fips in bvi (rec.county)", fips);
-            //console.dir(rec);
+            console.error("odd fips in bvi (rec.county)", fips);
+            console.dir(rec);
             return;
         }
         if(!counties[fips].bvis) counties[fips].bvis = [];
