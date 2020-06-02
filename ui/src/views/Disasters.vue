@@ -302,7 +302,6 @@ export default class Disaster extends Vue {
 
     @Watch('mode')
     onModeChange() {
-        //console.log(this.mode);
 
         this.hideDDLayers();
         this.hideDRLayers();
@@ -344,7 +343,6 @@ export default class Disaster extends Vue {
     }
 
     showDRLayers() {
-        console.log("showing dr layers");
         for(const t in this.cutterIndicators) {
             this.map.setLayoutProperty('dr'+t, 'visibility', this.hiddenDRLayers.includes(t)?'none':'visible');
         }
@@ -360,7 +358,6 @@ export default class Disaster extends Vue {
     }
 
     loadCutters(year, measure) {
-        console.log("loading..", year, measure);
 
         //load specified year / cutter measure
         const values = {};
@@ -376,10 +373,8 @@ export default class Disaster extends Vue {
         });
 
         //create source / layer
-        console.log("adding source", measure);
         this.map.addSource('dr'+measure, { type: "geojson", data: this.geojson });
 
-        console.log("adding layer", measure);
         this.map.addLayer({
             "id": "dr"+measure,
             "type": "fill",
