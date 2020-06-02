@@ -689,8 +689,10 @@ export default class Disaster extends Vue {
     loadCounty(fips) {
         if(!fips) {
             this.selected = null;
+            this.$ga.page('/map')
             return;
         }
+        this.$ga.page('/county/'+fips)
 
         this.showTutorial(); //hiding tutorial
 
