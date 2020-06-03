@@ -42,6 +42,12 @@
                 </div>
                 <div class="legend" v-if="mode == 'resilience'">
                     <p>
+                        <b>Year</b>
+                        <el-select v-model="drRange" placeholder="Select" size="mini">
+                            <el-option v-for="item in [{value: 'recent', label:'2018'}]" :key="item.value" :label="item.label" :value="item.value"> </el-option>
+                        </el-select>
+                    </p>
+                    <p>
                         <b>Resiliences</b>
                     </p>
                     <div v-for="(info, cid) in cutterIndicators" :key="cid" class="legend-item" :class="{hidden: hiddenDRLayers.includes(cid)}" @click.stop="toggleDRLayer(cid)" style="clear: both;">
@@ -195,7 +201,7 @@ export default class Disaster extends Vue {
         },
         "COMM": {
             name: "Community Capital",
-            color: "#000",
+            color: "#666",
         },
     }
      
