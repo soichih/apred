@@ -13,6 +13,7 @@
             <a href="https://ctil.iu.edu/" style="color: inherit;">CTIL</a>
         </span>
         <p class="title">
+            <el-tag effect="dark" type="info" class="beta" size="mini"><b>BETA</b></el-tag>
             <b style="color: #900;">APRED</b>
             <i class="sub-title">Analysis Platform for Risk, Resilience and Expenditure in Disasters</i>
         </p>
@@ -44,6 +45,7 @@ export default class TopMenu extends Vue {
     color:#999;
     margin: 13px 0;
     font-size: 16pt;
+    position: relative;
 }
 .sub-title {
     font-size: 12pt;
@@ -75,5 +77,14 @@ margin-right: 10px;
 position: relative; 
 float: right;
 top: -13px;
+}
+.beta {
+margin-left: 10px;
+position: absolute;
+top: -3px;
+left: -45px;
+transform: rotate(-25deg);
+opacity: 0.5;
+z-index: -1;
 }
 </style>

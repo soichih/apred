@@ -204,7 +204,7 @@ for(let fips in storm_counts) {
     let storms = storm_counts[fips];
     fips = fips.replace(".", "");
     if(!counties[fips]) {
-        //console.error("odd fips in storm counts?", fips);
+        console.error("odd fips in storm counts?", fips);
         continue;
     }
     //console.log(fips, storms);
