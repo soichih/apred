@@ -16,7 +16,8 @@
                     <el-tag size="small" effect="light" type="info">Disaster # {{event.disasterNumber}}</el-tag>&nbsp;
                 </a>
             </span>
-            <el-tag type="info" style="position: relative; top: -2px;" v-if="event.designatedArea== 'Statewide'">STATEWIDE</el-tag> &nbsp;
+            <el-tag type="info" style="position: relative; top: -2px;" v-if="event.statewide">STATEWIDE</el-tag> &nbsp;
+            <el-tag type="info" style="position: relative; top: -2px;" v-if="event.tribe">{{event.designatedArea}}</el-tag> &nbsp;
             <b>{{event.incidentType}}</b> &nbsp;
             <br>
         </h3>
@@ -175,7 +176,8 @@ export default class Event extends Vue {
     get eventClass() {
         const c = [];
         if(this.event.type == "dr") {
-            if(this.event.designatedArea == 'Statewide') c.push('dr-state');
+            if(this.event.statewide) c.push('dr-state');
+            if(this.event.tribe) c.push('dr-tribe');
             else c.push('dr-county');
         }
 
@@ -233,7 +235,7 @@ padding-top: 8px;
 }
 .event-body {
     padding-bottom: 10px;
-    border-left: 3px solid #eee;
+    border-left: 3px solid #0001;
     margin-left: 17px;
     padding-left: 30px;
 }
@@ -245,6 +247,13 @@ color: gray;
 }
 .dr-state {
 background-color: #eee;
+padding: 5px 10px;
+margin: -5px -10px;
+border-radius: 5px;
+margin-bottom: 10px;
+}
+.dr-tribe {
+background-color: #edc;
 padding: 5px 10px;
 margin: -5px -10px;
 border-radius: 5px;
