@@ -26,8 +26,10 @@ let data = {
 async.series([
     load_fips,
     load_cutter_sources,
-    //load_cutter_combined, //deprecated by load_dr
+
+    //main disaster resilience
     load_dr,
+
 ], err=>{
     if(err) throw err;
 

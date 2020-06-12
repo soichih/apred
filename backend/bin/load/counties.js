@@ -4,6 +4,7 @@ console.log("counties----------------------------");
 
 const fs = require('fs');
 const geo = require(__dirname+'/../../../data/counties_geo.json');
+const tribes = require(__dirname+'/../../../data/tribes.json');
 const csvParser = require('csv-parser');
 
 const counties = {}; //keyed by fips, then all information for that county
@@ -167,9 +168,36 @@ for(let fain in eda2018) {
     });
 }
 
+//see if the record is actually tribe record and information exist in tribes.json
+//1278 without this..
+//507 with this matching (I think rest are islands?)
+function checkTribes(rec) {
+    console.log("looking for", rec.designatedArea);
+    let longestMatch = null;
+    let longestMatchCount = null;
+    tribes.forEach(tribe=>{
+        if(rec.designatedArea.includes(tribe.NAME)) {
+            console.log("maybe..", tribe.NAME);
+            if(longestMatchCount == null || longestMatchCount < tribe.NAME.length) {
+                longestMatchCount = tribe.NAME.length;
+                longestMatch = tribe.nearest_county;
+            }
+        }
+    });
+    if(longestMatch) {
+        console.log("longest match is");
+        console.dir(longestMatch);
+        return longestMatch.STATE+longestMatch.COUNTY;
+    }
+
+    return null;
+}
+
+let odd_dr_count = 0;
 function handle_disaster(rec) {
     if(rec.designatedArea == "Statewide") {
         //add it to all county in the state
+        rec.statewide = true;
         for(let fip in counties) {
             let county = counties[fip];
             if(fip.startsWith(rec.fipsStateCode)) {
@@ -180,9 +208,23 @@ function handle_disaster(rec) {
         //county specific
         let fips = rec.fipsStateCode+rec.fipsCountyCode;
         if(!counties[fips]) {
-            console.error("odd/missing fips in disaster:", fips);
+            console.error("odd/missing fips in disaster declarations:", fips);
             console.dir(rec);
-            return;
+
+            console.log("trying tribes fip");
+            fips = checkTribes(rec);
+            if(!fips) {
+                console.log("no match..");
+                odd_dr_count++;
+                return;
+            }
+            console.log("found a match!", fips);
+            rec.tribe = true;
+            /*
+            if(!counties[fips]) {
+                console.log("but I can't find a county to put it");
+            }
+            */
         }
         counties[fips].disasters.push(rec);
     }
@@ -200,6 +242,9 @@ console.log("loading storm counts");
 const storm_counts = require(__dirname+"/../../../data/storm_counts.json");
 disasters_past.forEach(handle_disaster);
 
+console.log("number of odd dr", odd_dr_count);
+//process.exit(1);
+
 for(let fips in storm_counts) {
     let storms = storm_counts[fips];
     fips = fips.replace(".", "");
@@ -214,55 +259,15 @@ for(let fips in storm_counts) {
 console.log("loading PublicAssistanceFundedProjectsDetails");
 fs.createReadStream(__dirname+'/../../../raw/PublicAssistanceFundedProjectsDetails.csv').pipe(csvParser({
     mapValues({header, index, value}) {
-        /*
-disasterNumber,declarationDate,incidentType,pwNumber,applicationTitle,applicantId,damageCategoryCode,dcc,damageCategory,projectSize,county,countyCode,state,stateCode,stateNumberCode,projectAmount,federalShareObligated,totalObligated,obligatedDate,hash,lastRefresh,id
-1239,1998-08-26T19:50:08.000Z,Severe Storm(s),35,Not Provided,463-99463-00,C - Roads and Bridges,C,Roads and Bridges,Small,Uvalde,463,Texas,TX,48,5322.68,3992.01,4193.21,1998-10-23T11:29:35.000Z,43e2970d712f048bafa5b0ee8850baf2,2020-01-10T02:34:41.169Z,5e17e2c1c3cdaf7453a4eda7
-        */
-        /*
-        if(header.match("_date")) return new Date(value);
-        let i = parseInt(value);
-        let f = parseFloat(value);
-        if(i == value) return i;
-        if(f == value) return f;
-        */
         if(header.match("declarationDate")) return new Date(value);
         if(header.match("projectAmount")) return Number(value);
         if(header.match("federalShareObligated")) return Number(value);
         if(header.match("totalObligated")) return Number(value);
         return value;
     },
-    /*
-    mapHeaders({header, index}) {
-        return header.toLowerCase();
-    },
-    */
 })).on('data', async rec=>{
     let fips = rec.stateNumberCode.padStart(2, '0')+rec.countyCode.padStart(3, '0');
-    /*
-{ disasterNumber: '1239',
-  declarationDate: 1998-08-26T19:50:08.000Z,
-  incidentType: 'Severe Storm(s)',
-  pwNumber: '35',
-  applicationTitle: 'Not Provided',
-  applicantId: '463-99463-00',
-  damageCategoryCode: 'C - Roads and Bridges',
-  dcc: 'C',
-  damageCategory: 'Roads and Bridges',
-  projectSize: 'Small',
-  county: 'Uvalde',
-  countyCode: '463',
-  state: 'Texas',
-  stateCode: 'TX',
-  stateNumberCode: '48',
-  projectAmount: '5322.68',
-  federalShareObligated: '3992.01',
-  totalObligated: '4193.21',
-  obligatedDate: '1998-10-23T11:29:35.000Z',
-  hash: '43e2970d712f048bafa5b0ee8850baf2',
-  lastRefresh: '2020-01-10T02:34:41.169Z',
-  id: '5e17e2c1c3cdaf7453a4eda7' }
-    */
-
+ 
     //look for county
     let county = counties[fips];
     if(!county) {
@@ -287,12 +292,6 @@ disasterNumber,declarationDate,incidentType,pwNumber,applicationTitle,applicantI
         obligatedDate: rec.obligatedDate,
     });
     
-    //console.dir(disaster.pa);
-    /*
-    let indicator = Object.values(data.cutter.indicators).find(i=>i.id == rec.indicator);
-    if(!indicator.sources) indicator.sources = [];
-    indicator.sources.push({id: rec.id, name: rec.name});
-    */
 }).on('end', ()=>{
     //console.log(JSON.stringify(data.cutter.indicators, null, 4));
 
@@ -303,6 +302,7 @@ disasterNumber,declarationDate,incidentType,pwNumber,applicationTitle,applicantI
         ],
         mapValues({header, index, value}) {
             if(header.match("_date")) return new Date(value);
+            if(header.match("county")) return value;
             let i = parseInt(value);
             let f = parseFloat(value);
             if(i == value) return i;
@@ -328,8 +328,16 @@ disasterNumber,declarationDate,incidentType,pwNumber,applicationTitle,applicantI
         }
         if(!counties[fips].bvis) counties[fips].bvis = [];
         counties[fips].bvis.push(rec);
-    }).on('end', ()=>{
 
+        /*
+        console.log(fips);
+        if(fips == "04025") {
+            console.log(".....test");
+            process.exit(1);
+        }
+        */
+
+    }).on('end', ()=>{
         //finalize!
         for(let fips in counties) {
             if(counties[fips].bvis) counties[fips].bvis.sort((a,b)=>a.year - b.year);
