@@ -191,6 +191,10 @@ These came directly from Logan. Loaded directly to raw/cutters
 
 This came from Logan also. Loaded directly to raw.
 
+### cb_2018_us_aiannh_500k-export.geojson
+
+Got from Lorgan containing geojson data for tribal info
+
 ### BEA/GDP
 
 `./backend/bin/extract/statsamerica_bea_gdp.js`
