@@ -84,7 +84,7 @@ position: absolute;
 top: -3px;
 left: -45px;
 transform: rotate(-25deg);
-opacity: 0.5;
+opacity: 0.3;
 z-index: -1;
 }
 </style>
