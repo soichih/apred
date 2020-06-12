@@ -6,7 +6,7 @@ console.log("geojson ...........................");
 const geojson = require(__dirname+"/../../../raw/counties_geo.json");
 const disasters = require(__dirname+"/../../../raw/statsamerica.disasters.2015-now.json");
 const fips = require(__dirname+'/../../../data/fips.json');
-const eda2018 = require(__dirname+'/../../../data/eda2018.json');
+//const eda2018 = require(__dirname+'/../../../data/eda2018.json');
 
 const output = __dirname+"/../../../data/counties_geo.json";
 
@@ -171,6 +171,7 @@ geojson.features.forEach(feature=>{
     delete feature.properties.LSAD;
 });
 
+/*
 //add eda2018 award
 let eda2018_map = {};
 for(let fain in eda2018) {
@@ -203,7 +204,7 @@ for(let fain in eda2018) {
         });
     }
 }
+*/
 
-//console.dir(max);
 fs.writeFileSync(output, JSON.stringify(geojson));
 console.log("all done");
