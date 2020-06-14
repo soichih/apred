@@ -6,23 +6,18 @@
         <CountyDetail v-if="selected && geojson" :detail="selected" :layers="layers" :geojson="geojson"/>
         <div v-else style="position: relative;">
             <div class="page">
-                <!--
-                <h2 style="margin-bottom: 0px">FEMA Disaster&nbsp;Declarations
-                    <span style="opacity: 0.8; font-size: 70%; font-weight: normal; text-transform: none;">between 2017 - <time v-if="updatedDate">{{new Date(updatedDate).toLocaleDateString()}}</time></span>
-                </h2>
-                -->
                 <p style="padding-top: 10px;">
-                    <el-radio-group v-model="mode">
-                        <el-radio-button label="dr">FEMA Disaster Declarations</el-radio-button>
-                        <el-radio-button label="resilience">Disaster Resilience</el-radio-button>
-                        <el-radio-button label="eda2018">EDA 2018 Supplemental Awards</el-radio-button>
-                    </el-radio-group>
+                    <el-tabs v-model="mode">
+                        <el-tab-pane name="dr" label="FEMA Disaster Declarations"></el-tab-pane>
+                        <el-tab-pane name="resilience" label="Disaster Resilience"></el-tab-pane>
+                        <el-tab-pane name="eda2018" label="EDA Supplemental Awards"></el-tab-pane>
+                    </el-tabs>
                 </p>
                 <div class="legend" v-if="mode == 'dr'">
                     <p>
                         <b>Date Range</b>
                         <el-select v-model="drRange" placeholder="Select" size="mini">
-                            <el-option v-for="item in [{value: 'recent', label:'2017 - Now'}]" :key="item.value" :label="item.label" :value="item.value"> </el-option>
+                            <el-option v-for="item in drRanges" :key="item.value" :label="item.label" :value="item.value"/>
                         </el-select>
                     </p>
                     <p>
@@ -32,7 +27,7 @@
                         <input type="checkbox" v-model="layersAll" @change="handleAll"/>
                         All
                     </div>
-                    <div v-for="(info, layer) in layers" :key="layer" class="legend-item" :class="{hidden: hiddenLayers.includes(layer)}" @click.stop="toggleLayer(layer)" style="clear: both;" :title="info.title">
+                    <div v-for="(info, layer) in layers" :key="layer" class="legend-item" :class="{hidden: hiddenLayers.includes(layer)}" @click.stop="toggleLayer(layer)" style="clear: both;" :title="info.types.join(', ')">
                         <input type="checkbox" :checked="!hiddenLayers.includes(layer)"/>
                         <span class="legend-color" :style="{backgroundColor: info.color}">&nbsp;</span>&nbsp;{{layer}}
                     </div>
@@ -149,42 +144,11 @@ export default class Disaster extends Vue {
     updatedDate = null;
 
     mode = null;
-    drRange = "recent";
-
-    /*
-    cutterIndicators: [
-        {
-            name: "Social Resilience",
-            measures: [
-                {id: "11", name: "Education Equity"},
-                {id: "12", name: "Age"}
-                {id: "13", name: "Transportation Access"}
-                {id: "14", name: "Communicatino Capacity"}
-                {id: "15", name: "Language Capacity"}
-                {id: "16", name: "Special Needs"}
-                {id: "17", name: "Health Coverage"}
-            ]
-        },
-
-        {
-            name: "Economic Resilience",
-            measures: [
-            ]
-        },
-
-        {
-            name: "Institutional Resilience",
-            measures: [
-            ]
-        },
-
-        {
-            name: "Community Capital",
-            measures: [
-            ]
-        },
+    drRange = null;
+    drRanges = [
+        {value: 'recent', label: '2017 - Now'},
     ];
-    */
+    yearsDR = null;
 
     cutterIndicators = {
         "SOC": {
@@ -210,86 +174,68 @@ export default class Disaster extends Vue {
         "biological": {
             color: "#396",
             opacity: 0.5,
-            filter: ["any", 
-                ["==", "isBiological", true],
-            ],
-            statefilter: ["any", 
-                ["==", "isStateBiological", true],
-            ]
+            types: ["Biological"],
         },
         "other": {
-            title: "EarthQuake, Coastal Storm, Snow, Mud/Landslide, Volcane, Dam/Levee Break, Severe Ice Storm",
             color: "#999",
-            filter: ["any", 
-                ["==", "isEarthquake", true],
-                ["==", "isCoastalStorm", true],
-                ["==", "isSnow", true],
-                ["==", "isMudLandslide", true],
-                ["==", "isVolcano", true],
-                ["==", "isDamLeveeBreak", true],
-                ["==", "isSevereIceStorm", true],
-            ],
-            statefilter: ["any", 
-                ["==", "isStateEarthquake", true],
-                ["==", "isStateCoastalStorm", true],
-                ["==", "isStateSnow", true],
-                ["==", "isStateMudLandslide", true],
-                ["==", "isStateVolcano", true],
-                ["==", "isStateDamLeveeBreak", true],
-                ["==", "isStateSevereIceStorm", true],
-            ]
+            types: ["EarthQuake", "Coastal Storm", "Snow", "Mud/Landslide", "Volcano", "Dam/Levee Break", "Severe Ice Storm"],
         }, 
-
         "hurricane": {
             color: "#0af", 
-            filter: ["any", 
-                ["==", "isHurricane", true],
-            ],
-            statefilter: ["any", 
-                ["==", "isStateHurricane", true],
-            ]
+            types: ["Hurricane"],
         },
         "tornado": {
             color: "#f6f", 
-            filter: ["any", 
-                ["==", "isTornado", true],
-            ],
-            statefilter: ["any", 
-                ["==", "isStateTornado", true],
-            ]
+            types: ["Tornado"],
         },
         "severe storm": { 
             color: "#fa0", 
-            filter: ["any", 
-                ["==", "isSevereStorm", true],
-            ],
-            statefilter: ["any", 
-                ["==", "isStateSevereStorm", true],
-            ]
+            types: ["Severe Storm(s)"],
         },
         "flood": {
             color: "#06f",
-            filter: ["any", 
-                ["==", "isFlood", true],
-            ],
-            statefilter: ["any", 
-                ["==", "isStateFlood", true],
-            ]
+            types: ["Flood"],
         },
         "fire": {
             color: "#f00", 
-            filter: ["any", 
-                ["==", "isFire", true],
-            ],
-            statefilter: ["any", 
-                ["==", "isStateFire", true],
-            ]
+            types: ["Fire"],
         },
     };
 
     @Watch('$route')
     onRouteChange() {
         this.loadCounty(this.$route.params.fips);
+    }
+
+    @Watch('drRange')
+    onRangeChange() {
+        //apply to each layers
+        for(const key in this.layers) {
+            //works
+            //this.map.setFilter('county_disaster_'+key, ['in', 'fips', '18093', '18101']);
+            const types = this.layers[key].types;
+            if(!types) continue;
+            let filter = ['in', 'fips'];
+            let stateFilter = ['in', 'statefips'];
+            const years = [];
+            if(this.drRange == "recent") {
+                const now = new Date();
+                for(let y = 2017; y < now.getFullYear(); ++y) years.push(y);
+            } else years.push(this.drRange);
+            console.dir(years);
+
+            years.forEach(year=>{ 
+                types.forEach(type=>{
+                    if(this.yearsDR[year][type]) {
+                        filter = filter.concat(this.yearsDR[year][type].filter(fip=>fip.length == 5));
+                        stateFilter = stateFilter.concat(this.yearsDR[year][type].filter(fip=>fip.length == 2));
+                    }
+                }); 
+            });
+            this.map.setFilter('county_disaster_'+key, filter);
+            //console.dir(stateFilter);
+            this.map.setFilter('state_disaster_'+key, stateFilter);
+        }
     }
     
     created() {
@@ -303,6 +249,12 @@ export default class Disaster extends Vue {
         if(h) {
             this.hiddenDRLayers = JSON.parse(h);
             //this.layersAll = (this.hiddenDRLayers.length == 0);
+        }
+
+        for(let year = 2020; year > 1960; --year) {
+            this.drRanges.push(
+                {value: year.toString(), label: year.toString()},
+            );
         }
     }
 
@@ -443,7 +395,9 @@ export default class Disaster extends Vue {
 
                 });
 
+                //all counties
                 this.map.addSource('counties', { type: "geojson", data });
+                console.log(data);
                 this.map.addLayer({
                     "id": "counties",
                     "type": "fill",
@@ -465,7 +419,8 @@ export default class Disaster extends Vue {
                             'fill-color': layer.color,
                             'fill-opacity': (layer.opacity||1)*0.75
                         },
-                        filter: layer.filter,
+                        //filter: layer.filter,
+                        filter: ['in', 'fips', ''],
                         layout: {
                             visibility: 'none',
                         }
@@ -479,14 +434,25 @@ export default class Disaster extends Vue {
                             'fill-color': layer.color,
                             'fill-opacity': (layer.opacity||1)*0.2,
                         },
-                        'filter': layer.statefilter,
+                        //'filter': layer.statefilter,
+                        filter: ['in', 'statefips', ''],
                         layout: {
                             visibility: 'none',
                         }
                     });
                 }
 
-                this.mode = "dr";
+                fetch("https://gpu1-pestillilab.psych.indiana.edu/apred/years.json").then(res=>{ 
+                    //this.drYearsUpdated = res.headers.get("last-modified")
+                    return res.json()
+                }).then(data=>{
+                    this.yearsDR = data;
+                    this.drRange = "recent";
+
+                    //ready to show DR map now
+                    this.mode = "dr";
+                });
+
 
                 fetch("https://gpu1-pestillilab.psych.indiana.edu/apred/cutter_long.json").then(res=>{ 
                     return res.json()
@@ -561,12 +527,6 @@ export default class Disaster extends Vue {
                     'id': 'eda-labels',
                     'type': 'symbol',
                     "source": "eda2018-point",
-                    /*
-                    filter: ['any', 
-                        ['==', 'eda2018', 'county'],    
-                        ['==', 'eda2018', 'state'],    
-                    ],
-                    */
                     layout: {
                         visibility: 'none', 
                         'text-field': ['get', 'awardStr'],
