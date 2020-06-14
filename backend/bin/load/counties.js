@@ -256,44 +256,51 @@ for(let fips in storm_counts) {
     counties[fips].storms = storms;
 }
 
-console.log("loading PublicAssistanceFundedProjectsDetails");
-fs.createReadStream(__dirname+'/../../../raw/PublicAssistanceFundedProjectsDetails.csv').pipe(csvParser({
-    mapValues({header, index, value}) {
-        if(header.match("declarationDate")) return new Date(value);
-        if(header.match("projectAmount")) return Number(value);
-        if(header.match("federalShareObligated")) return Number(value);
-        if(header.match("totalObligated")) return Number(value);
-        return value;
-    },
-})).on('data', async rec=>{
-    let fips = rec.stateNumberCode.padStart(2, '0')+rec.countyCode.padStart(3, '0');
- 
-    //look for county
-    let county = counties[fips];
-    if(!county) {
-        return;
-    }
+function handlePublicAssistances(cb) {
+    console.log("loading PublicAssistanceFundedProjectsDetails");
+    fs.createReadStream(__dirname+'/../../../raw/PublicAssistanceFundedProjectsDetails.csv').pipe(csvParser({
+        mapValues({header, index, value}) {
+            if(header.match("declarationDate")) return new Date(value);
+            if(header.match("projectAmount")) return Number(value);
+            if(header.match("federalShareObligated")) return Number(value);
+            if(header.match("totalObligated")) return Number(value);
+            return value;
+        },
+    })).on('data', async rec=>{
+        let fips = rec.stateNumberCode.padStart(2, '0')+rec.countyCode.padStart(3, '0');
+     
+        //look for county
+        let county = counties[fips];
+        if(!county) {
+            return;
+        }
 
-    //look for disaster
-    let disaster = county.disasters.find(disaster=>disaster.disasterNumber == rec.disasterNumber);
-    if(!disaster) {
-        return;
-    }
-    if(!disaster.pa) disaster.pa = [];
-    disaster.pa.push({
-        pwNumber: rec.pwNumber, 
-        //damageCategoryCode: rec.damageCategoryCode,
-        dcc: rec.dcc,
-        damageCategory: rec.damageCategory,
-        projectSize: rec.projectSize,
-        projectAmount: rec.projectAmount,
-        totalObligated: rec.totalObligated,
-        federalShareObligated: rec.federalShareObligated,
-        obligatedDate: rec.obligatedDate,
+        //look for disaster
+        let disaster = county.disasters.find(disaster=>disaster.disasterNumber == rec.disasterNumber);
+        if(!disaster) {
+            return;
+        }
+        if(!disaster.pa) disaster.pa = [];
+        disaster.pa.push({
+            pwNumber: rec.pwNumber, 
+            //damageCategoryCode: rec.damageCategoryCode,
+            dcc: rec.dcc,
+            damageCategory: rec.damageCategory,
+            projectSize: rec.projectSize,
+            projectAmount: rec.projectAmount,
+            totalObligated: rec.totalObligated,
+            federalShareObligated: rec.federalShareObligated,
+            obligatedDate: rec.obligatedDate,
+        });
+        
+    }).on('end', ()=>{
+        //console.log(JSON.stringify(data.cutter.indicators, null, 4));
+        cb();
     });
-    
-}).on('end', ()=>{
-    //console.log(JSON.stringify(data.cutter.indicators, null, 4));
+}
+
+handlePublicAssistances(err=>{
+    if(err) throw err;
 
     console.log("loading bvi.csv");
     fs.createReadStream(__dirname+'/../../../raw/bvi.csv').pipe(csvParser({
@@ -338,16 +345,76 @@ fs.createReadStream(__dirname+'/../../../raw/PublicAssistanceFundedProjectsDetai
         */
 
     }).on('end', ()=>{
-        //finalize!
+        //sort some arrays
         for(let fips in counties) {
             if(counties[fips].bvis) counties[fips].bvis.sort((a,b)=>a.year - b.year);
             if(counties[fips].disasters) counties[fips].disasters.sort((a,b)=>new Date(a.declarationDate) - new Date(b.declarationDate));
         }
 
-        console.log("saving jsons");
+        //create county/state summary json for each year
+/*
+ statefips: '10',
+  countyfips: '001',
+  county: 'Kent',
+  state: 'Delaware',
+  area: 586.179,
+  _dd: undefined,
+  eda2018: [],
+  disasters: [
+    {
+      femaDeclarationString: 'DR-126-DE',
+      disasterNumber: '126',
+      state: 'DE',
+      declarationType: 'DR',
+      declarationDate: '1962-03-09T05:00:00.000Z',
+      fyDeclared: '1962',
+      incidentType: 'Flood',
+      declarationTitle: 'SEVERE STORMS, HIGH TIDES & FLOODING',
+      ihProgramDeclared: '0',
+      iaProgramDeclared: '1',
+      paProgramDeclared: '1',
+      hmProgramDeclared: '1',
+      incidentBeginDate: '1962-03-09T05:00:00.000Z',
+      incidentEndDate: '1962-03-09T05:00:00.000Z',
+      disasterCloseoutDate: null,
+      fipsStateCode: '10',
+      fipsCountyCode: '000',
+      placeCode: '0',
+      designatedArea: 'Statewide',
+      declarationRequestNumber: '62011',
+      hash: '00ba0f29d46437cbe75fcfdb67925ce3',
+      lastRefresh: '2019-07-26T18:49:32.222Z',
+      id: '5d1bceafd5b39c032f260362',
+      statewide: true
+    },
+*/
+
+        let years = {
+            //keyed by year, then by disaster type, and array of county fips and state fips
+        }; 
+        for(let fips in counties) {
+            //console.dir(counties[fips]);
+            counties[fips].disasters.forEach(dr=>{
+                let _fips = fips;
+                if(dr.statewide) {
+                    _fips = dr.fipsStateCode;
+                }
+                let date = new Date(dr.incidentBeginDate);
+                let year = date.getFullYear();
+                if(!years[year]) years[year] = {};
+                if(!years[year][dr.incidentType]) years[year][dr.incidentType] = [];
+                if(!years[year][dr.incidentType].includes(_fips)) years[year][dr.incidentType].push(_fips); 
+            });
+        }
+        console.log("saving years.json");
+        fs.writeFileSync(__dirname+"/../../../data/years.json", JSON.stringify(years));
+
+        console.log("saving counties jsons");
         for(let fips in counties) {
             fs.writeFileSync(__dirname+"/../../../data/counties/county."+fips+".json", JSON.stringify(counties[fips]));
         }
         console.log("all done");
     });
 });
+
+
