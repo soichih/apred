@@ -222,7 +222,6 @@ export default class Disaster extends Vue {
                 const now = new Date();
                 for(let y = 2017; y < now.getFullYear(); ++y) years.push(y);
             } else years.push(this.drRange);
-            console.dir(years);
 
             years.forEach(year=>{ 
                 types.forEach(type=>{
@@ -397,7 +396,6 @@ export default class Disaster extends Vue {
 
                 //all counties
                 this.map.addSource('counties', { type: "geojson", data });
-                console.log(data);
                 this.map.addLayer({
                     "id": "counties",
                     "type": "fill",
