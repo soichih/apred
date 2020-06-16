@@ -220,7 +220,7 @@ export default class Disaster extends Vue {
             const years = [];
             if(this.drRange == "recent") {
                 const now = new Date();
-                for(let y = 2017; y < now.getFullYear(); ++y) years.push(y);
+                for(let y = 2017; y <= now.getFullYear(); ++y) years.push(y);
             } else years.push(this.drRange);
 
             years.forEach(year=>{ 
