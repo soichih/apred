@@ -42,6 +42,7 @@ geo.features.forEach(feature=>{
 });
 
 
+//deprecaetd.. use demo2
 console.log("loading demographics");
 const demo = require(__dirname+'/../../../raw/statsamerica.demo.json');
 for(let fips in demo) {
@@ -50,8 +51,37 @@ for(let fips in demo) {
         continue;
     }
     counties[fips].demo = demo[fips];
-    counties[fips].population = demo[fips].reduce((t,v)=>{ return t+v.value }, 0);
+    //counties[fips].population = demo[fips].reduce((t,v)=>{ return t+v.value }, 0);
 }
+
+console.log("loading demographics2");
+const demo2 = require(__dirname+'/../../../raw/statsamerica.demo2.json');
+for(let fips in demo2) {
+    if(!counties[fips]) {
+        continue;
+    }
+    //get total population by summing all 2018 records
+    let total = 0;
+    for(code in demo2[fips]) {
+        let recs = demo2[fips][code];
+        total += recs.filter(rec=>rec.year == 2018).reduce((t,rec)=>{ return t + rec.population }, 0);
+    }
+    counties[fips].population = total;
+
+    for(code in demo2[fips]) {
+        let years = [];
+        let populations = [];
+        demo2[fips][code].forEach(rec=>{
+            years.push(rec.year);
+            populations.push(rec.population);
+        });
+        demo2[fips][code] = {years, populations}; //override..
+    }
+    counties[fips].demo2 = demo2[fips];
+
+
+}
+
 
 //report counties with missing demo
 for(let fips in counties) {
