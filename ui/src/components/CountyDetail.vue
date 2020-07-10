@@ -18,16 +18,15 @@
                 <el-col :span="10">
                     <div id="statemap"/>
                 </el-col>
-                <el-col :span="8" class="border-left demo">
+                <el-col :span="9" class="border-left demo">
                     <p style="margin: 0">
                         <span class="sub-heading">Population</span><br>
                         <span class="primary" v-if="detail.demo"> {{detail.population | formatNumber}}</span>
                         <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
                     </p>
-                    <Plotly :data="[demoGraphData]" :layout="demoGraphLayout" :display-mode-bar="false"/>
-                    <br>
+                    <Plotly :data="demo2GraphData" :layout="demo2GraphLayout" :display-mode-bar="false"/>
                 </el-col>
-                <el-col :span="6" class="border-left gdp">
+                <el-col :span="5" class="border-left gdp">
                     <p>
                         <span class="sub-heading">GDP</span> <small>(BEA 2018)</small><br>
                         <span class="primary" v-if="detail.gdp"> ${{detail.gdp | formatNumber}}</span>
@@ -206,6 +205,7 @@
         <div class="page">
             <h3>Storm History</h3>
             <p>This graph shows the counts of storm event published by NOAA since 1950s.</p>
+            <p>Storm Data has gone through many changes and versions over the years. The source data ingested into the database are widely varied and leads to many questions about the precision and accuracy of the location data. Please see <a href="https://www.ncdc.noaa.gov/stormevents/details.jsp" target="noaa">https://www.ncdc.noaa.gov/stormevents/faq.jsp</a> for more detail</p>
             <Plotly :data="stormData" :layout="stormLayout" :display-mode-bar="false"></Plotly>
             <br>
             <br>
@@ -289,6 +289,7 @@ export default class CountyDetail extends Vue {
     showPastHistory = false;
     shownIndicators = [];
 
+    /*
     drSpyderData = {
       type: 'scatterpolar',
       r: [],
@@ -316,35 +317,28 @@ export default class CountyDetail extends Vue {
             t: 20,
         },
     }
+    */
 
-    demoGraphData = {};
-    demoGraphLayout = {
-        'plot_bgcolor': '#0000',
-        'paper_bgcolor': '#0000',
-        width: 270,
-        height: 120,
+    demo2GraphData = [];
+    demo2GraphLayout = {
+        width: 290,
+        height: 140,
         margin: {
             l: 0,
             r: 0,
             t: 0,
-            b: 30,
+            b: 15,
         },
-        xaxis: {
-            //tickangle:45,
-            //automargin: true,
-            tickfont: {
-                size: 10,
-            },
-            title: {
-                text: "Age Groups",
-                //standoff: 10,
-            },
-            titlefont: {
-                //family: 'Arial, sans-serif',
-                size: 10,
-                //color: 'lightgrey'
-            },
-        },
+        barmode: 'stack',
+        'plot_bgcolor': '#0000',
+        'paper_bgcolor': '#0000',
+        /*
+        legend: {
+            font: {
+                size: 8,
+            }
+        }    
+        */
     }
 
     @Watch('detail')
@@ -360,12 +354,12 @@ export default class CountyDetail extends Vue {
     }  
 
     update() {
-        this.processSpyder();
+        //this.processSpyder();
         this.processHistory();
         this.processBVI();
         this.processStorms();
         this.processMap();
-        this.processDemo();
+        this.processDemo2();
     }
 
     goto(id) {
@@ -373,6 +367,7 @@ export default class CountyDetail extends Vue {
         e.scrollIntoView();
     }
 
+    /*
     processSpyder() {
         //console.log("processing detail");
 
@@ -390,6 +385,7 @@ export default class CountyDetail extends Vue {
         this.drSpyderData.r.push(this.drSpyderData.r[0]);
         this.drSpyderData.theta.push(this.drSpyderData.theta[0]);
     }
+    */
 
     processHistory() {
         this.history = [];
@@ -582,29 +578,31 @@ export default class CountyDetail extends Vue {
         }
     }
 
-    processDemo() {
-        const y = [
-            this.detail.demo[0].value,
-            this.detail.demo[1].value,
-            this.detail.demo[2].value,
-            this.detail.demo[3].value,
-            this.detail.demo[4].value,
-            this.detail.demo[5].value,
-        ];
-        this.demoGraphData = {
-            x: [ '0-4', '5-17', '18-24', '25-44', '45-64', '>65'],
-            y,
-            text: y.map(String),
-            textposition: 'auto',
-            textfont: {
-                size: 9,
-            },
-            hoverinfo: 'none',
-            type: 'bar',
-            marker: {
-                color: 'rgb(0,0,0)',
-                opacity: 0.4,
+    processDemo2() {
+        this.demo2GraphData = [];
+        for(const code in this.detail.demo2) {
+            let name = code;
+            switch(code) {
+            case "312": name = "0-4"; break;
+            case "313": name = "5-17"; break;
+            case "314": name = "18-24"; break;
+            case "315": name = "25-44"; break;
+            case "316": name = "45-64"; break;
+            case "317": name = "~65"; break;
             }
+            this.demo2GraphData.push({
+                x: this.detail.demo2[code].years,
+                y: this.detail.demo2[code].populations,
+                name,
+                stackgroup: 'one',
+                line: {
+                    width: 0,
+                    shape: 'spline',
+                    smoothing: 0.8,
+                },
+                mode: 'lines',
+                //type: 'bar',
+            });
         }
     }
 
@@ -742,6 +740,7 @@ export default class CountyDetail extends Vue {
         });
     }
 
+    /*
     populationPoints(demo) { 
         return [
             {label: '0-4', value: demo[0].value},
@@ -752,6 +751,7 @@ export default class CountyDetail extends Vue {
             {label: '>65', value: demo[5].value},
         ];
     }
+    */
 
     get recentHistory() {
         return this.history.filter(h=>(h.date >= new Date("2017-01-01")));
@@ -882,7 +882,7 @@ h4 {
 }
 .primary {
     font-weight: bold;
-    font-size: 175%;
+    font-size: 150%;
 }
 
 .important, 
@@ -966,6 +966,7 @@ h4 {
 
 #info-header {
     background-color: #eee;
+    height: 220px;
 }
 
 .header h3 {
@@ -1007,7 +1008,7 @@ top: 10px;
 #statemap {
     position: relative;
     width: 100%;
-    height: 200px;
+    height: 220px;
 }
 canvas:focus {
     outline: none;
