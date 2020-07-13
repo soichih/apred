@@ -253,7 +253,7 @@ border-radius: 5px;
 margin-bottom: 10px;
 }
 .dr-tribe {
-background-color: #edc;
+background-color: #cdd;
 padding: 5px 10px;
 margin: -5px -10px;
 border-radius: 5px;
