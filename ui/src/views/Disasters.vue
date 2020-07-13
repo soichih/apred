@@ -6,19 +6,29 @@
         <CountyDetail v-if="selected && geojson" :detail="selected" :layers="layers" :geojson="geojson"/>
         <div v-else style="position: relative;">
             <div class="page">
-                <p style="padding-top: 10px;">
+                <div style="padding-top: 10px;">
                     <el-tabs v-model="mode">
                         <el-tab-pane name="dr" label="FEMA Disaster Declarations"></el-tab-pane>
                         <el-tab-pane name="resilience" label="Disaster Resilience"></el-tab-pane>
                         <el-tab-pane name="eda2018" label="EDA Supplemental Awards"></el-tab-pane>
                     </el-tabs>
-                </p>
+                </div>
                 <div class="legend" v-if="mode == 'dr'">
                     <p>
                         <b>Date Range</b>
-                        <el-select v-model="drRange" placeholder="Select" size="mini">
-                            <el-option v-for="item in drRanges" :key="item.value" :label="item.label" :value="item.value"/>
-                        </el-select>
+                        <el-row :gutter="5">
+                            <el-col :span="4">
+                                 <el-button icon="el-icon-back" size="mini" @click="drPrevious" :disabled="drRange == '1961'"></el-button>
+                            </el-col>
+                            <el-col :span="16">
+                                <el-select v-model="drRange" placeholder="Select" size="mini">
+                                    <el-option v-for="item in drRanges" :key="item.value" :label="item.label" :value="item.value"/>
+                                </el-select>
+                            </el-col>
+                            <el-col :span="4">
+                                 <el-button icon="el-icon-right" size="mini" @click="drNext" :disabled="drRange == 'recent'"></el-button>
+                            </el-col>
+                        </el-row>
                     </p>
                     <p>
                         <b>Disaster Types</b>
@@ -38,9 +48,19 @@
                 <div class="legend" v-if="mode == 'resilience'">
                     <p>
                         <b>Year</b>
-                        <el-select v-model="drRange" placeholder="Select" size="mini">
-                            <el-option v-for="item in [{value: 'recent', label:'2018'}]" :key="item.value" :label="item.label" :value="item.value"> </el-option>
-                        </el-select>
+                        <el-row :gutter="5">
+                            <el-col :span="4">
+                                 <el-button icon="el-icon-back" size="mini" @click="resPrevious" :disabled="resYear == '2012'"></el-button>
+                            </el-col>
+                            <el-col :span="16">
+                                <el-select v-model="resYear" placeholder="Select" size="mini">
+                                    <el-option v-for="item in resYears" :key="item.value" :label="item.label" :value="item.value"> </el-option>
+                                </el-select>
+                            </el-col>
+                            <el-col :span="4">
+                                 <el-button icon="el-icon-right" size="mini" @click="resNext" :disabled="resYear == '2018'"></el-button>
+                            </el-col>
+                        </el-row>
                     </p>
                     <p>
                         <b>Resiliences</b>
@@ -56,6 +76,12 @@
                         <b>EDA2018 Awards</b>
                     </p>
                     -->
+                    <p>
+                        <b>Year</b>
+                        <el-select v-model="edaRange" placeholder="Select" size="mini">
+                            <el-option v-for="item in [{value: 'recent', label:'2018'}]" :key="item.value" :label="item.label" :value="item.value"> </el-option>
+                        </el-select>
+                    </p>
                     <div class="legend-item">
                         <span class="legend-color" style="background-color: #00ff00">&nbsp;</span>&nbsp;Statewide Awards
                     </div>
@@ -143,12 +169,18 @@ export default class Disaster extends Vue {
 
     updatedDate = null;
 
-    mode = null;
+    mode = null; //will be init to "dr" once we are ready to show dr map
+
     drRange = null;
     drRanges = [
         {value: 'recent', label: '2017 - Now'},
     ];
     yearsDR = null;
+
+    resYear = null; //will be set to "2018" once cutter info is loaded
+    resYears = [];
+
+    edaRange = '2018';
 
     cutterIndicators = {
         "SOC": {
@@ -211,8 +243,6 @@ export default class Disaster extends Vue {
     onRangeChange() {
         //apply to each layers
         for(const key in this.layers) {
-            //works
-            //this.map.setFilter('county_disaster_'+key, ['in', 'fips', '18093', '18101']);
             const types = this.layers[key].types;
             if(!types) continue;
             let filter = ['in', 'fips'];
@@ -232,11 +262,33 @@ export default class Disaster extends Vue {
                 }); 
             });
             this.map.setFilter('county_disaster_'+key, filter);
-            //console.dir(stateFilter);
             this.map.setFilter('state_disaster_'+key, stateFilter);
         }
     }
+
+    @Watch('resYear')
+    onResChange(v) {
+        if(!v) return;
+        const year = parseInt(this.resYear);
+        for(const cid in this.cutterIndicators) {
+            //load specified year / cutter measure
+            const values = {};
+            for(const fip in this.cutters) {
+                const cutter = this.cutters[fip];
+                if(cutter[cid]) values[fip] = cutter[cid][year-2012];
+            }   
+
+            //apply to geojson 
+            this.geojson.features.forEach(feature=>{
+                const fips = feature.properties["statefips"]+"."+feature.properties["countyfips"];
+                feature.properties["resilience"] = values[fips]||0;
+            });
+
+            this.map.getSource('dr'+cid).setData(this.geojson);
+        }
+    }
     
+ 
     created() {
         let h = window.localStorage.getItem("hiddenLayers");
         if(h) {
@@ -255,10 +307,17 @@ export default class Disaster extends Vue {
                 {value: year.toString(), label: year.toString()},
             );
         }
+        for(let year = 2018; year >= 2012; --year) {
+            this.resYears.push(
+                {value: year.toString(), label: year.toString()},
+            );
+        }
     }
 
     @Watch('mode')
-    onModeChange() {
+    onModeChange(v) {
+        if(!v) return;
+        if(v == 0) return; //where does this come from?
 
         this.hideDDLayers();
         this.hideDRLayers();
@@ -315,20 +374,6 @@ export default class Disaster extends Vue {
     }
 
     loadCutters(year, measure) {
-
-        //load specified year / cutter measure
-        const values = {};
-        for(const fip in this.cutters) {
-            const cutter = this.cutters[fip];
-            if(cutter[measure]) values[fip] = cutter[measure][year-2012];
-        }   
-
-        //apply to geojson 
-        this.geojson.features.forEach(feature=>{
-            const fips = feature.properties["statefips"]+"."+feature.properties["countyfips"];
-            feature.properties["resilience"] = values[fips]||0;
-        });
-
         //create source / layer
         this.map.addSource('dr'+measure, { type: "geojson", data: this.geojson });
 
@@ -344,6 +389,8 @@ export default class Disaster extends Vue {
                 visibility: 'none',
             }
         });
+
+        this.resYear = '2018';
     }
 
     mounted() {
@@ -723,6 +770,32 @@ export default class Disaster extends Vue {
             this.map.setLayoutProperty('state_disaster_'+layer, 'visibility', this.hiddenLayers.includes(layer)?'none':'visible');
         }
     }
+
+    resPrevious() {
+        this.resYear = (this.resYear-1).toString();
+    }
+
+    resNext() {
+        this.resYear = (this.resYear+1).toString();
+    }
+
+    drPrevious() {
+        const idx = this.findIndexDrRange(this.drRange);
+        this.drRange = this.drRanges[idx+1].value;
+    }
+
+    findIndexDrRange(range) {
+        let idx = null;
+        this.drRanges.forEach((i, _idx)=>{
+            if(i.value == range) idx = _idx;
+        });
+        return idx;
+    }
+
+    drNext() {
+        const idx = this.findIndexDrRange(this.drRange);
+        this.drRange = this.drRanges[idx-1].value;
+    }
 }
 </script>
 <style lang="scss" scoped> 
@@ -751,7 +824,7 @@ h4 {
 #map {
     position: fixed;
     width: 100%;
-    top: 110px;
+    top: 100px;
     bottom: 0;
 }
 
@@ -784,11 +857,10 @@ h4 {
     font-size: 80%;
     border-radius: 5px;
     
-    margin-top: 10px; 
     float: left; 
     z-index: 1; 
     position: relative; 
-    width: 170px;
+    width: 190px;
 
     .legend-color {
         display: inline-block;
@@ -805,7 +877,7 @@ h4 {
     }
 
     .legend-item {
-        width: 170px;
+        width: 190px;
         height: 20px;
         margin-right: 10px;
         cursor: pointer;
@@ -822,7 +894,6 @@ h4 {
     
 }
 .county-selecter {
-    margin-top: 10px; 
     margin-right: 30px;
     float: right; 
     z-index: 1; 
@@ -893,6 +964,7 @@ h4 {
         background-color: #eee;
     }
 }
+.el-button--mini {
+padding: 7px;
+}
 </style>
-
-
