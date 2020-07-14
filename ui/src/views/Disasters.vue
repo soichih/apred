@@ -772,16 +772,11 @@ export default class Disaster extends Vue {
     }
 
     resPrevious() {
-        this.resYear = (this.resYear-1).toString();
+        this.resYear = (parseInt(this.resYear)-1).toString();
     }
 
     resNext() {
-        this.resYear = (this.resYear+1).toString();
-    }
-
-    drPrevious() {
-        const idx = this.findIndexDrRange(this.drRange);
-        this.drRange = this.drRanges[idx+1].value;
+        this.resYear = (parseInt(this.resYear)+1).toString();
     }
 
     findIndexDrRange(range) {
@@ -790,6 +785,11 @@ export default class Disaster extends Vue {
             if(i.value == range) idx = _idx;
         });
         return idx;
+    }
+
+    drPrevious() {
+        const idx = this.findIndexDrRange(this.drRange);
+        this.drRange = this.drRanges[idx+1].value;
     }
 
     drNext() {
