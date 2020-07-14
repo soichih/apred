@@ -14,7 +14,7 @@
         </span>
         <p class="title">
             <el-tag effect="dark" type="info" class="beta" size="mini"><b>BETA</b></el-tag>
-            <b style="color: #900;">APRED</b>
+            <a href="https://ctil.iu.edu/projects/apred-landing"><b style="color: #900;">APRED</b></a>
             <i class="sub-title">Analysis Platform for Risk, Resilience and Expenditure in Disasters</i>
         </p>
     </div>
