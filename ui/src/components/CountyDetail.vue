@@ -29,7 +29,7 @@
                 <el-col :span="5" class="border-left gdp">
                     <p>
                         <span class="sub-heading">GDP</span> <small>(BEA 2018)</small><br>
-                        <span class="primary" v-if="detail.gdp"> ${{detail.gdp | formatNumber}}</span>
+                        <span class="primary" v-if="detail.gdp"> ${{(detail.gdp/1000) | formatNumber}} M</span>
                         <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
                     </p>
                     <p>
@@ -38,15 +38,6 @@
                         <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
                     </p>
                 </el-col>
-                <!--
-                <el-col :span="4" class="border-left">
-                    <p class="sub-heading">
-                        Disaster Resilience
-                        <i style="color: #409EFF; font-weight: bold;" @click="goto('cutter')" class="el-icon-warning-outline"/>
-                    </p>
-                    <Plotly :data="[drSpyderData]" :layout="drSpyderLayout" :display-mode-bar="false"/>
-                </el-col>
-                -->
             </el-row>
         </div>
     </div>
@@ -64,6 +55,7 @@
     </div>
 
     <div class="page" id="disaster">
+
         <h3>Disaster Declarations / EDA Awards</h3>
         <p>
         This section provides information on Major Disaster Declarations declared under the Robert T. Stafford Disaster Relief and Emergency Assistance Act that may support eligibility for investment assistance from <a href="https://www.eda.gov/">EDA</a> (the U.S. Economic Development Administration) under the agency’s Public Works and Economic Adjustment Assistance Programs.
@@ -95,7 +87,7 @@
         <br>
     </div>
 
-    <div style="background-color: #f9f9f9" v-if="detail.bvis" id="bvi">
+    <div style="background-color: #f0f0f0" v-if="detail.bvis" id="bvi">
     <div class="page">
         <br>
         <h3>Business Vulnerability</h3>
@@ -123,12 +115,12 @@
     <div class="page" id="cutter">
         <h3>Disaster Resilience</h3>
         <p>
-            Disaster resilience measures the capacity of a community to recover from disaster events without losing their socioeconomic and infrastructural viability <a href="https://gsdrc.org/topic-guides/disaster-resilience/concepts/what-is-disaster-resilience/">[Combaz, 2015]</a> <a href="https://www.unisdr.org/2005/wcdr/intergover/official-doc/L-docs/Hyogo-framework-for-action-english.pdf">[UNISDR, 2005]</a>. Using the framework provided by <a href="http://resiliencesystem.com/sites/default/files/Cutter_jhsem.2010.7.1.1732.pdf">[Cutter et al. 2010]</a>, this section merges the resilient and vulnerable variables of a city into a unified set of indices - to produce aggregated information on disaster resilience levels. Expand each measures to show more detail.
+            Disaster resilience measures the capacity of a community to recover from disaster events without losing their socioeconomic and infrastructural viability <a href="https://gsdrc.org/topic-guides/disaster-resilience/concepts/what-is-disaster-resilience/">[Combaz, 2015]</a> <a href="https://www.unisdr.org/2005/wcdr/intergover/official-doc/L-docs/Hyogo-framework-for-action-english.pdf">[UNISDR, 2005]</a>. Using the framework provided by <a href="http://resiliencesystem.com/sites/default/files/Cutter_jhsem.2010.7.1.1732.pdf">[Cutter et al. 2010]</a>, this section merges the resilient and vulnerable variables of a city into a unified set of indices - to produce aggregated information on disaster resilience levels. Expand each measure to show more detail.
         </p>
         <p>
             Resilience values are normalized on a 0 to 1 scale, with 1 being the county with the highest resilience value and 0 being the county with the lowest resilience value. The top and bottom 5% of values are combined to control for outliers.
         </p>
-    
+
         <p style="font-size: 85%; opacity: 1; font-weight: bold; margin-left: 355px; margin-bottom: 0;">
             <span style="color: crimson">
                 <i class="el-icon-arrow-left"/> Low Resilience
@@ -139,69 +131,50 @@
             </span>
         </p>
 
-        <div v-for="(indicator, incode) in detail.cutter" :key="incode" :title="indicator.name" style="margin-bottom: 15px; clear: both;">
+        <div v-for="(indicator, incode) in detail.cutter2" :key="incode" :title="indicator.name" style="margin-bottom: 15px; clear: both;">
             <div class="indicator-header">
                 <span class="indicator-title">
                     {{indicator.name}} <!--<el-tag type="info" size="small">{{incode}}</el-tag>-->
                 </span>
             </div>
             <IndicatorInfo :id="incode" style="margin-right: 175px; opacity: 0.8; font-size: 90%; padding: 10px; margin-bottom: 10px;"/>
-            <!--
-            <div style="position: relative; margin-left: 355px; margin-right: 50px;">
-                <span style="position: absolute; left: -100px; font-size: 85%;">This County</span>
-                <BarGraph :value="indicator.aggregate.county" :min="0" :max="1" :height="15"/>
+            <div v-for="source in detail.cutter2[incode].sources.filter(s=>s.stats)" :key="source.id">
+                <p>
+                    <small>{{source.id}}.</small>
+                    {{source.name}}
+                </p>
+                <MeasureInfo :id="source.id"/>
+                <CompositePlot v-if="detail" :cutters="source.stats" :edaAwards="detail.eda2018"/>
+                <!--
+                <el-collapse-item v-if="source.us">
+                    <template slot="title">
+                        <i class="el-icon-caret-right" style="margin-right: 10px; opacity: 0.5;"/>
+                        <span style="float: left; min-width: 330px">
+                            <small>{{source.id}}.</small>
+                            {{source.name}}
+                        </span>
+                        <BarGraph style="margin-right: 30px; width: 100%;" :value="source.county" :min="0" :max="1" />
+                    </template>
 
-                <span style="position: absolute; left: -100px; font-size: 85%;">This State</span>
-                <BarGraph :value="indicator.aggregate.state" :min="0" :max="1" :height="15" style="opacity: 0.7"/>
+                    <div style="border-left: 5px solid #eee; padding: 0 20px; margin-left: 28px;">
+                        <MeasureInfo :id="source.id" style="margin-right: 50px; margin-bottom: 10px;"/>
 
-                <span style="position: absolute; left: -100px; font-size: 85%;">US Average</span>
-                <BarGraph :value="indicator.aggregate.us" :min="0" :max="1" :height="15" style="opacity: 0.4;"/>
-            </div>
-            <br> 
-
-            <p style="margin-right: 50px; border-top: 1px solid #eee; padding-top: 10px;">
-                <el-button round @click="toggleIndicator(incode)" plain size="small" style="width: 150px">
-                    <span v-if="!shownIndicators.includes(incode)">
-                        <i class="el-icon-caret-right"/> Show Sub-Indices
-                    </span>
-                    <span v-else>
-                        <i class="el-icon-caret-bottom"/> Hide Sub-Indices
-                    </span>
-                </el-button>
-            </p>
-            -->
-            <!--<slide-up-down class="indicator-detail" :active="shownIndicators.includes(incode)">-->
-            <el-collapse>
-                <div v-for="source in detail.cutter[incode].sources" :key="source.id">
-                    <el-collapse-item v-if="source.us">
-                        <template slot="title">
-                            <i class="el-icon-caret-right" style="margin-right: 10px; opacity: 0.5;"/>
-                            <span style="float: left; min-width: 330px">
-                                <small>{{source.id}}.</small>
-                                {{source.name}}
-                            </span>
-                            <BarGraph style="margin-right: 30px; width: 100%;" :value="source.county" :min="0" :max="1" />
-                        </template>
-
-                        <div style="border-left: 5px solid #eee; padding: 0 20px; margin-left: 28px;">
-                            <MeasureInfo :id="source.id" style="margin-right: 50px; margin-bottom: 10px;"/>
-
-                            <div style="margin-bottom: 10px; padding-right: 30px; opacity: 0.6;">
-                                <span style="float: left; width: 255px; text-align: right;">State Average</span>
-                                <BarGraph style="margin-left: 300px;" :value="source.states" :min="0" :max="1" color="#8e8e8e"/>
-                                <br>
-                                <span style="float: left; width: 255px; text-align: right;">US Average</span>
-                                <BarGraph style="margin-left: 300px;" :value="source.us" :min="0" :max="1" color="#8e8e8e"/>
-                            </div>
+                        <div style="margin-bottom: 10px; padding-right: 30px; opacity: 0.6;">
+                            <span style="float: left; width: 255px; text-align: right;">State Average</span>
+                            <BarGraph style="margin-left: 300px;" :value="source.states" :min="0" :max="1" color="#8e8e8e"/>
+                            <br>
+                            <span style="float: left; width: 255px; text-align: right;">US Average</span>
+                            <BarGraph style="margin-left: 300px;" :value="source.us" :min="0" :max="1" color="#8e8e8e"/>
                         </div>
-                    </el-collapse-item>
-                </div>
-            </el-collapse>
+                    </div>
+                </el-collapse-item>
+                -->
+            </div>
             <!--</slide-up-down>-->
         </div>
     </div>
 
-    <div id="storms" style="background-color: #f9f9f9;">
+    <div id="storms" style="background-color: #f0f0f0;">
         <div class="page">
             <h3>Storm History</h3>
             <p>This graph shows the counts of storm event published by NOAA since 1950s.</p>
@@ -212,8 +185,10 @@
             <br>
         </div>
     </div>
-    
     <Footer/>
+    <div class="contextmenu" ref="contextmenu">
+        <p class="menu-item" @click="openContextMenuCounty">Open this county ({{contextMenuCounty}}) in a new tab</p>
+    </div>
 </div>
 </template>
 
@@ -227,6 +202,7 @@ import Event from '@/components/Event.vue'
 import IndicatorInfo from '@/components/IndicatorInfo.vue'
 import MeasureInfo from '@/components/MeasureInfo.vue'
 import Footer from '@/components/Footer.vue'
+import CompositePlot from '@/components/CompositePlot.vue'
 
 import Eligibility2018 from '@/components/Eligibility2018.vue'
 import Eligibility2019 from '@/components/Eligibility2019.vue'
@@ -237,7 +213,6 @@ import mapboxgl from 'mapbox-gl';
 import "mapbox-gl/dist/mapbox-gl.css";
 
 import { Plotly } from 'vue-plotly'
-//import VueBarGraph from 'vue-bar-graph'
 
 Vue.directive('scroll', {
   inserted: function (el, binding) {
@@ -263,6 +238,7 @@ Vue.directive('scroll', {
         MeasureInfo,
         Footer,
         SlideUpDown,
+        CompositePlot,
     },
 })
 
@@ -289,36 +265,6 @@ export default class CountyDetail extends Vue {
     showPastHistory = false;
     shownIndicators = [];
 
-    /*
-    drSpyderData = {
-      type: 'scatterpolar',
-      r: [],
-      theta: [],
-      fill: 'toself'
-    }
-
-    drSpyderLayout = {
-      polar: {
-        radialaxis: {
-          visible: false,
-          range: [0, 1]
-        },
-        bgcolor: '#fff9'
-      },
-        //showlegend: false,
-        'paper_bgcolor': '#0000',
-        //'plot_bgcolor': '#ffffff99',
-        width: 160,
-        height: 110,
-        margin: {
-            l: 10,
-            r: 10,
-            b: 20,
-            t: 20,
-        },
-    }
-    */
-
     demo2GraphData = [];
     demo2GraphLayout = {
         width: 290,
@@ -332,14 +278,9 @@ export default class CountyDetail extends Vue {
         barmode: 'stack',
         'plot_bgcolor': '#0000',
         'paper_bgcolor': '#0000',
-        /*
-        legend: {
-            font: {
-                size: 8,
-            }
-        }    
-        */
     }
+
+    cuttersData = {}; //group by incode then {states: {avg, sdev}, us: {avg, sdev}, county} 
 
     @Watch('detail')
     onDetailChange() {
@@ -354,7 +295,6 @@ export default class CountyDetail extends Vue {
     }  
 
     update() {
-        //this.processSpyder();
         this.processHistory();
         this.processBVI();
         this.processStorms();
@@ -366,26 +306,6 @@ export default class CountyDetail extends Vue {
         const e = document.getElementById(id);
         e.scrollIntoView();
     }
-
-    /*
-    processSpyder() {
-        //console.log("processing detail");
-
-        this.drSpyderData.r = [];
-        this.drSpyderData.theta = [];
-
-        for(const incode in this.detail.cutter) {
-            if(!this.detail.cutter[incode]) return; //we have some indices that we ignore
-            const value = this.detail.cutter[incode].aggregate.county;
-            this.drSpyderData.r.push(value);
-            this.drSpyderData.theta.push(incode);
-        }
-
-        //I need to add the first incode to *close* the loop
-        this.drSpyderData.r.push(this.drSpyderData.r[0]);
-        this.drSpyderData.theta.push(this.drSpyderData.theta[0]);
-    }
-    */
 
     processHistory() {
         this.history = [];
@@ -580,30 +500,56 @@ export default class CountyDetail extends Vue {
 
     processDemo2() {
         this.demo2GraphData = [];
-        for(const code in this.detail.demo2) {
-            let name = code;
-            switch(code) {
-            case "312": name = "0-4"; break;
-            case "313": name = "5-17"; break;
-            case "314": name = "18-24"; break;
-            case "315": name = "25-44"; break;
-            case "316": name = "45-64"; break;
-            case "317": name = "~65"; break;
-            }
-            this.demo2GraphData.push({
-                x: this.detail.demo2[code].years,
-                y: this.detail.demo2[code].populations,
-                name,
-                stackgroup: 'one',
-                line: {
-                    width: 0,
-                    shape: 'spline',
-                    smoothing: 0.8,
-                },
-                mode: 'lines',
-                //type: 'bar',
-            });
+
+        const years = [];
+        for(let year = 2009; year <= 2018; ++year) {
+            years.push(year);
         }
+
+        function merge(codes) {
+            const populations = [];
+            codes.forEach(code=>{
+                years.forEach((year, idx)=>{
+                    let v = 0;
+                    const group = this.detail.demo2[code];
+                    if(group) {
+                        const p = group.populations[idx];
+                        if(p) v = p;
+                    }
+                    if(!populations[idx]) populations[idx] = v;
+                    else populations[idx] += v;
+                });
+            });
+            return populations;
+        }        
+
+        const template = {
+            x: years,
+            stackgroup: 'one',
+            line: {
+                width: 0,
+                shape: 'spline',
+                smoothing: 0.8,
+            },
+            mode: 'lines',
+        }
+
+        this.demo2GraphData.push(Object.assign({ 
+            y: merge.call(this, [312, 313]), 
+            name: "0-17"
+        }, template));
+        this.demo2GraphData.push(Object.assign({ 
+            y: merge.call(this, [314]), 
+            name: "18-24"
+        }, template));
+        this.demo2GraphData.push(Object.assign({ 
+            y: merge.call(this, [315, 316]), 
+            name: "25-44"
+        }, template));
+        this.demo2GraphData.push(Object.assign({ 
+            y: merge.call(this, [317]), 
+            name: "65+"
+        }, template));
     }
 
     initStateMap() {
@@ -648,22 +594,6 @@ export default class CountyDetail extends Vue {
             filter: ['==', 'statefips', this.detail.statefips], 
         });
 
-        /* slow--?
-        for(const t in this.layers) {
-            const layer = this.layers[t];
-            this.map.addLayer({
-                id: 'county_disaster_'+t,
-                type: 'fill',
-                source: 'counties',
-                paint: {
-                    'fill-color': layer.color,
-                    'fill-opacity': (layer.opacity||1)*0.75
-                },
-                filter: ['==', 'statefips', this.detail.statefips], 
-            });
-        }
-        */
-
         this.map.addLayer({
             "id": "selected-county",
             "type": "fill",
@@ -704,6 +634,24 @@ export default class CountyDetail extends Vue {
 
         this.map.on('mouseleave', 'counties', ()=>{
             this.popup.remove();
+        });
+        this.map.on('contextmenu', e=>{
+            const features = this.map.queryRenderedFeatures(e.point, {
+                layers: ['counties']
+            });
+            if(features.length > 0) {
+                e.preventDefault();
+                const mapel = document.getElementById("map");
+                this.$refs["contextmenu"].style.display = "block";
+                this.$refs["contextmenu"].style.left = (e.point.x-20)+"px";
+                this.$refs["contextmenu"].style.top = (mapel.offsetTop + e.point.y - 10)+"px";
+                this.contextMenuCounty = features[0].properties.statefips+features[0].properties.countyfips;
+            }
+        });
+
+        //close context menu as soon as user leaves it
+        this.$refs["contextmenu"].addEventListener("mouseleave", ()=>{
+            this.$refs["contextmenu"].style.display = "none";
         });
     }
 
@@ -844,6 +792,11 @@ export default class CountyDetail extends Vue {
             !(end >= eligBegin && end < eligEnd) ) return false;
 
         return true;
+    }
+
+    contextMenuCounty = null;
+    openContextMenuCounty() {
+        window.open("#/county/"+this.contextMenuCounty, "apred-"+this.contextMenuCounty);
     }
 }
 

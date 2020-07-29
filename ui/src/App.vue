@@ -82,5 +82,30 @@ margin: auto;
         margin: auto;
     }
 }
+.el-tabs__header {
+    background-color: white;
+    margin: 0;
+}
+.contextmenu {
+    z-index: 10;
+    position: fixed;
+    top: 50px;
+    left: 50px;
+    width: 300px;
+    background-color: white;
+    box-shadow: 2px 2px 5px #0003;
+    display: none;
+    padding: 10px 0;
+
+    .menu-item {
+        font-size: 90%;
+        padding: 5px 10px;
+        margin-bottom: 0px;
+    }
+    .menu-item:hover {
+        cursor: pointer;
+        background-color: #eee;
+    }
+}
 
 </style>

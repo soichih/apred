@@ -6,11 +6,11 @@
         <CountyDetail v-if="selected && geojson" :detail="selected" :layers="layers" :geojson="geojson"/>
         <div v-else style="position: relative;">
             <div class="page">
-                <div style="padding-top: 10px;">
-                    <el-tabs v-model="mode">
+                <div style="padding-top: 10px; margin-bottom: 10px;">
+                    <el-tabs v-model="mode" class="tabs">
                         <el-tab-pane name="dr" label="FEMA Disaster Declarations"></el-tab-pane>
-                        <el-tab-pane name="resilience" label="Disaster Resilience"></el-tab-pane>
                         <el-tab-pane name="eda2018" label="EDA Supplemental Awards"></el-tab-pane>
+                        <el-tab-pane name="resilience" label="Disaster Resilience"></el-tab-pane>
                     </el-tabs>
                 </div>
                 <div class="legend" v-if="mode == 'dr'">
@@ -65,10 +65,13 @@
                     <p>
                         <b>Resiliences</b>
                     </p>
-                    <div v-for="(info, cid) in cutterIndicators" :key="cid" class="legend-item" :class="{hidden: hiddenDRLayers.includes(cid)}" @click.stop="toggleDRLayer(cid)" style="clear: both;">
-                        <input type="checkbox" :checked="!hiddenDRLayers.includes(cid)"/>
-                        <span class="legend-color" :style="{'background-color': info.color}">&nbsp;</span>&nbsp;{{info.name}}
+                    <div v-for="(info, cid) in cutterIndicators" :key="cid" class="legend-item">
+                        <el-radio v-model="drLayer" :label="cid" @change="showDRLayers" :style="{color: info.color}">{{info.name}}</el-radio>
                     </div>
+                    <br>
+                    <div :style="'background-image: linear-gradient(to right, white, '+cutterIndicators[drLayer].color+'); width: 100%; height: 5px;'">&nbsp;</div>
+                    <span style="float: left;">Low</span>
+                    <span style="float: right">High</span>
                 </div>
                 <div class="legend" v-if="mode == 'eda2018'">
                     <!--
@@ -119,10 +122,19 @@
                 <el-button type="primary" size="small">Next</el-button>
             </p>
         </div> 
-        <div class="tutorial-text tutorial-text-selecter" @click="showTutorial()">
+        <div class="tutorial-text tutorial-text-selecter" @click="showTutorial('tab')">
             <i class="el-icon-top-right" style="float: right; font-size: 150%;"></i>
             <p style="margin: 0 40px 0 0 0;">
                 Search and select a county here, or you can click a county on the map to show details.
+                <br>
+                <br>
+                <el-button type="primary" size="small">Next</el-button>
+            </p>
+        </div> 
+        <div class="tutorial-text tutorial-text-tab" @click="showTutorial()">
+            <i class="el-icon-top" style="font-size: 150%; font-weight: bold;"/>
+            <p style="margin: 0 40px 0 0 0;">
+                Switch tabs to show different information layers.
                 <br>
                 <br>
                 <el-button type="primary" size="small">Start!</el-button>
@@ -161,7 +173,8 @@ export default class Disaster extends Vue {
     cutters = null;
 
     hiddenLayers = [];
-    hiddenDRLayers = [];
+    drLayer = "SOC";
+    //hiddenDRLayers = [];
     countyList = [];
     layersAll = true;
 
@@ -200,7 +213,6 @@ export default class Disaster extends Vue {
             color: "#666",
         },
     }
-     
 
     layers = {
         "biological": {
@@ -290,17 +302,14 @@ export default class Disaster extends Vue {
     
  
     created() {
-        let h = window.localStorage.getItem("hiddenLayers");
+        const h = window.localStorage.getItem("hiddenLayers");
         if(h) {
             this.hiddenLayers = JSON.parse(h);
             this.layersAll = (this.hiddenLayers.length == 0);
         }
 
-        h = window.localStorage.getItem("hiddenDRLayers");
-        if(h) {
-            this.hiddenDRLayers = JSON.parse(h);
-            //this.layersAll = (this.hiddenDRLayers.length == 0);
-        }
+        const drLayer = window.localStorage.getItem("drLayer");
+        if(drLayer) this.drLayer = drLayer;
 
         for(let year = 2020; year > 1960; --year) {
             this.drRanges.push(
@@ -360,7 +369,7 @@ export default class Disaster extends Vue {
 
     showDRLayers() {
         for(const t in this.cutterIndicators) {
-            this.map.setLayoutProperty('dr'+t, 'visibility', this.hiddenDRLayers.includes(t)?'none':'visible');
+            this.map.setLayoutProperty('dr'+t, 'visibility', this.drLayer==t?'visible':'none');
         }
     }
     hideEDA2018Layers() {
@@ -682,6 +691,12 @@ export default class Disaster extends Vue {
             text.style["top"] = (item.offsetTop + 100)+"px";
             text.style["left"] = (item.offsetLeft - 500)+"px";
             break;
+        case "tab":
+            item = document.getElementsByClassName("tabs")[0];
+            text = document.getElementsByClassName("tutorial-text-tab")[0];
+            text.style["top"] = (item.offsetTop + 120)+"px";
+            text.style["left"] = (item.offsetLeft + 250)+"px";
+            break;
         default:
             tutorial.classList.remove("tutorial-active");
             tutorial.style.opacity = "0";
@@ -742,16 +757,16 @@ export default class Disaster extends Vue {
         window.localStorage.setItem("hiddenLayers", JSON.stringify(this.hiddenLayers));
     }
 
+    /*
     toggleDRLayer(layer) {
         const pos = this.hiddenDRLayers.indexOf(layer);
         if(~pos) this.hiddenDRLayers.splice(pos, 1);
         else this.hiddenDRLayers.push(layer);
         this.map.setLayoutProperty('dr'+layer, 'visibility', this.hiddenDRLayers.includes(layer)?'none':'visible');
         this.map.setLayoutProperty('dr'+layer, 'visibility', this.hiddenDRLayers.includes(layer)?'none':'visible');
-        //this.layersAll = (this.hiddenDRLayers.length == 0);
-
         window.localStorage.setItem("hiddenDRLayers", JSON.stringify(this.hiddenDRLayers));
     }
+    */
 
     handleAll() {
         if(this.layersAll) {
@@ -943,28 +958,13 @@ h4 {
     transition: box-shadow 1s;
     box-shadow: 0 0 20px black;
 }
-.contextmenu {
-    z-index: 10;
-    position: fixed;
-    top: 50px;
-    left: 50px;
-    width: 300px;
-    background-color: white;
-    box-shadow: 2px 2px 5px #0003;
-    display: none;
-    padding: 10px 0;
-
-    .menu-item {
-        font-size: 90%;
-        padding: 5px 10px;
-        margin-bottom: 0px;
-    }
-    .menu-item:hover {
-        cursor: pointer;
-        background-color: #eee;
-    }
-}
 .el-button--mini {
-padding: 7px;
+    padding: 7px;
+}
+.legend-colorbox {
+    height: 10px;
+    width: 10px;
+    background-color: gray;
+    display: inline-block;
 }
 </style>
