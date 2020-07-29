@@ -1,11 +1,6 @@
 <template>
   <div id="topmenu">
     <div class="page">
-        <!--
-        <span class="user">
-            <i class="el-icon-user-solid"/>
-        </span>
-        -->
         <a href="https://iu.edu">
             <img src="../assets/trident-large.png" height="50px" class="trident"/>
         </a>
@@ -26,6 +21,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 
 @Component
 export default class TopMenu extends Vue {
+    //nothing much going on here..
 }
 </script>
 
@@ -46,6 +42,7 @@ export default class TopMenu extends Vue {
     margin: 13px 0;
     font-size: 16pt;
     position: relative;
+    display: inline-block;
 }
 .sub-title {
     font-size: 12pt;
@@ -68,23 +65,22 @@ export default class TopMenu extends Vue {
     float: right;
     font-weight: bold;
     position: relative;
-    top: 4px;
+    top: 15px;
     margin-right: 20px;
     opacity: 0.7;
 }
 .trident {
-margin-right: 10px; 
-position: relative; 
-float: right;
-top: -13px;
+    margin-right: 10px; 
+    position: relative; 
+    float: right;
 }
 .beta {
-margin-left: 10px;
-position: absolute;
-top: -3px;
-left: -45px;
-transform: rotate(-25deg);
-opacity: 0.3;
-z-index: -1;
+    margin-left: 10px;
+    position: absolute;
+    top: -3px;
+    left: -45px;
+    transform: rotate(-25deg);
+    opacity: 0.3;
+    z-index: -1;
 }
 </style>

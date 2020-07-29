@@ -73,75 +73,6 @@ function load_cutter_sources(cb) {
     });
 }
 
-/*
-function load_cutter_combined(cb) {
-    //create dictionary of all sources 
-    let sources = {};
-    for(let indicator in data.cutter.indicators) {
-        data.cutter.indicators[indicator].sources.forEach(source=>{
-            sources[source.id] = source;
-            source.total = 0;
-            source.count = 0;
-            source.states = {};
-        });
-    }
-    console.dir(sources);
-
-    console.debug("loading cutter combined");
-    let count_missing = 0;
-    let count_recs = 0;
-    fs.createReadStream(__dirname+'/../../../raw/cutters/measure_export.csv').pipe(csvParser({
-        mapHeaders({header, index}) {
-            return header.toLowerCase();
-        },
-    })).on('data', rec=>{
-        count_recs++;
-        let input_fip = rec.fips; //6029 > 06.029
-        if(input_fip.length == 4) input_fip = "0"+input_fip;
-        let state_fips = input_fip.substring(0,2);
-        let county_fips = input_fip.substring(2,5);
-        let fips = state_fips+"."+county_fips;
-        if(!data.cutter.counties[fips]) {
-            console.log("failed to find:"+fips);
-            console.dir(rec);
-            count_missing++;
-            return;
-        }
-        data.cutter.counties[fips].push({source: rec.source, value: parseFloat(rec.value)});
-
-        //aggregate average 
-        let source = sources[rec.source];
-	if(!source) console.log("missing"+rec.source);
-        source.total += parseFloat(rec.value);
-        source.count++;
-        if(!source.states[state_fips]) source.states[state_fips] = { total: 0, count: 0 };
-        source.states[state_fips].total += parseFloat(rec.value);
-        source.states[state_fips].count++;
-
-    }).on('end', ()=>{
-
-        console.log("missing", count_missing, "out of", count_recs);
-
-        //convert total/count to average
-        for(let indicator in data.cutter.indicators) {
-            data.cutter.indicators[indicator].sources.forEach(source=>{
-                source.us = +(source.total / source.count).toFixed(3);
-                delete source.total;
-                delete source.count;
-
-                for(let statefip in source.states) {
-                    let total = source.states[statefip].total;
-                    let count = source.states[statefip].count;
-                    source.states[statefip] = +(total / count).toFixed(3);
-                }
-            });
-        }
-
-        cb();
-    });
-}
-*/
-
 function load_dr(cb) {
     //create dictionary of all sources 
     let sources = {};
@@ -199,7 +130,6 @@ function load_dr(cb) {
             }
         });
     }
-
     cb();
 }
 
