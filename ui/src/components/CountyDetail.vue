@@ -125,6 +125,15 @@
                     <IndicatorInfo :id="incode"/>
                 </p>
             </div>
+
+            <div class="resilience-legend">
+                <div class="color-box" style="height: 4px; background-color: #409eff"/> This County
+                <div class="color-box" style="background-color: #09f5"/> State Average(+standard deviation) 
+
+                <div class="color-box" style="background-color: #0003"/> US Average(+standard deviation) 
+            </div>
+            <br clear="both">
+
             <div class="measure-info" v-for="source in detail.cutter2[incode].sources.filter(s=>s.stats)" :key="source.id">
                 <p style="margin: 0">
                     <!--
@@ -142,6 +151,7 @@
 
     <div id="storms" style="background-color: #f0f0f0;">
         <div class="page">
+            <br>
             <h3>Storm History</h3>
             <p>This graph shows the counts of storm event published by NOAA since 1950s.</p>
             <p>Storm Data has gone through many changes and versions over the years. The source data ingested into the database are widely varied and leads to many questions about the precision and accuracy of the location data. Please see <a href="https://www.ncdc.noaa.gov/stormevents/details.jsp" target="noaa">https://www.ncdc.noaa.gov/stormevents/faq.jsp</a> for more detail</p>
@@ -962,5 +972,15 @@ margin-bottom: 10px;
 }
 .measure-info:nth-child(even) {
 clear: both;
+}
+.resilience-legend {
+    text-align: center;
+    font-size: 85%;
+    .color-box {
+        margin-left: 20px;
+        display: inline-block; 
+        width: 16px; 
+        height: 16px; 
+    }
 }
 </style>
