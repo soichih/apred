@@ -117,10 +117,13 @@
         <p>
             Disaster resilience measures the capacity of a community to recover from disaster events without losing their socioeconomic and infrastructural viability <a href="https://gsdrc.org/topic-guides/disaster-resilience/concepts/what-is-disaster-resilience/">[Combaz, 2015]</a> <a href="https://www.unisdr.org/2005/wcdr/intergover/official-doc/L-docs/Hyogo-framework-for-action-english.pdf">[UNISDR, 2005]</a>. Using the framework provided by <a href="http://resiliencesystem.com/sites/default/files/Cutter_jhsem.2010.7.1.1732.pdf">[Cutter et al. 2010]</a>, this section merges the resilient and vulnerable variables of a city into a unified set of indices - to produce aggregated information on disaster resilience levels. Expand each measure to show more detail.
         </p>
+        <!--
         <p>
             Resilience values are normalized on a 0 to 1 scale, with 1 being the county with the highest resilience value and 0 being the county with the lowest resilience value. The top and bottom 5% of values are combined to control for outliers.
         </p>
+        -->
 
+        <!--
         <p style="font-size: 85%; opacity: 1; font-weight: bold; margin-left: 355px; margin-bottom: 0;">
             <span style="color: crimson">
                 <i class="el-icon-arrow-left"/> Low Resilience
@@ -130,6 +133,7 @@
                 <i class="el-icon-arrow-right"/>
             </span>
         </p>
+        -->
 
         <div v-for="(indicator, incode) in detail.cutter2" :key="incode" :title="indicator.name" style="margin-bottom: 15px; clear: both;">
             <div class="indicator-header">
@@ -139,12 +143,13 @@
             </div>
             <IndicatorInfo :id="incode" style="margin-right: 175px; opacity: 0.8; font-size: 90%; padding: 10px; margin-bottom: 10px;"/>
             <div v-for="source in detail.cutter2[incode].sources.filter(s=>s.stats)" :key="source.id">
-                <p>
+                <p style="margin-left: 10px;">
                     <small>{{source.id}}.</small>
                     {{source.name}}
                 </p>
-                <MeasureInfo :id="source.id"/>
                 <CompositePlot v-if="detail" :cutters="source.stats" :edaAwards="detail.eda2018"/>
+                <MeasureInfo :id="source.id" style="margin-left: 50px;"/>
+                <br>
                 <!--
                 <el-collapse-item v-if="source.us">
                     <template slot="title">
@@ -975,7 +980,6 @@ small {
 .indicator-header {
     background-color: #f6f6f6; 
     margin-right: 50px;
-
     .indicator-title {
         display: inline-block;
         line-height: 100%;
