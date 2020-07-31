@@ -1,14 +1,15 @@
 <template>
 <div>
-    <svg :viewBox="'0 0 1000 '+height" :height="height">
+    <svg viewBox="0 0 1000 270" height="150px" width="450px">
         <!--grid lines-->
         <g>
             <line v-for="(year, idx) in years" :key="year" :x1="itox(idx)" y1="20" :x2="itox(idx)" :y2="ptoy(ymin)" style="stroke:rgb(200,200,200);stroke-width:0.5" /> 
-            <line v-for="(y, idx) in yticks" :key="idx" :x1="70" :y1="ptoy(y)" :x2="1000" :y2="ptoy(y)" style="stroke:rgb(200, 200, 200);stroke-width: 0.5"/>
+            <line v-for="(y, idx) in yticks" :key="idx" :x1="120" :y1="ptoy(y)" :x2="1000" :y2="ptoy(y)" style="stroke:rgb(200, 200, 200);stroke-width: 0.5"/>
         </g>
 
         <!--legend-->
         <g>
+            <!--
             <rect x="900" y="5" width="25" height="5" fill="#409EFF"/>
             <text x="930" y="12" class="legend">This County</text>
 
@@ -17,6 +18,7 @@
 
             <rect x="600" y="0" width="25" height="15" fill="#0003"/>
             <text x="630" y="12" class="legend">US Avg/std</text>
+            -->
 
             <!--
             <rect x="450" y="0" width="25" height="15" fill="green"/>
@@ -26,14 +28,14 @@
 
         <!--x axis / ticks-->
         <g>
-            <line :x1="70" :y1="ptoy(ymin)" :x2="1000" :y2="ptoy(ymin)" style="stroke:rgb(100,100,100);stroke-width:0.5" /> 
+            <line :x1="120" :y1="ptoy(ymin)" :x2="1000" :y2="ptoy(ymin)" style="stroke:rgb(100,100,100);" /> 
             <text v-for="(year, idx) in years" :key="year" :x="itox(idx)-15" :y="height" class="ticks">{{year}}</text>
         </g>
 
         <!--y axix / ticks-->
         <g>
-            <line x1="70" :y1="ptoy(ymin)" x2="70" :y2="ptoy(ymax)" style="stroke:rgb(100,100,100);stroke-width:0.5" /> 
-            <text v-for="(y, idx) in yticks" :key="idx" :x="60" :y="ptoy(y)+3" text-anchor="end" class="ticks">{{(y*100).toFixed(2)}}%</text>
+            <line x1="120" :y1="ptoy(ymin)" x2="120" :y2="ptoy(ymax)" style="stroke:rgb(100,100,100);" /> 
+            <text v-for="(y, idx) in yticks" :key="idx" :x="100" :y="ptoy(y)+3" text-anchor="end" class="ticks">{{(y*100).toFixed(fixed)}} %</text>
         </g>
 
         <!-- us avg/sdev-->
@@ -57,7 +59,7 @@
         <!-- county-->
         <g>
             <path :d="svgPath(cutters.county, lineCommand)" fill="none" stroke="#409EFF" stroke-width="3"/>
-            <circle v-for="(p, idx) in cutters.county" :key="idx" :cx="itox(idx)" :cy="ptoy(p)" r="5" stroke="#409EFF" stroke-width="2" fill="white" />
+            <circle v-for="(p, idx) in cutters.county" :key="idx" :cx="itox(idx)" :cy="ptoy(p)" r="10" stroke="#409EFF" stroke-width="4" fill="white" />
         </g>
 
         <!--eda awards-->
@@ -89,6 +91,7 @@ export default class CompositePlot extends Vue {
     height = 300;
     ymax: (number|null) = null;
     ymin: (number|null) = null;
+    fixed = 0;
 
     years: number[] = [];
 
@@ -128,9 +131,6 @@ export default class CompositePlot extends Vue {
         const r = this.ymax - this.ymin;
         this.ymax += r/5;
         this.ymin -= r/5;
-
-        //console.dir(this.cutters);
-        //console.log(this.ymin, this.ymax);
     }
 
     lineCommand = (point: number, i: number) => `L ${this.itox(i)} ${this.ptoy(point)}`
@@ -144,7 +144,7 @@ export default class CompositePlot extends Vue {
     }
 
     itox(y: number) {
-        return ((1000-150)/(this.years.length-1))*y+100;
+        return ((1000-200)/(this.years.length-1))*y+150;
     }
 
     t2x(date: string) {
@@ -189,9 +189,29 @@ export default class CompositePlot extends Vue {
         if(this.ymax == null) return [];
 
         const ticks: number[] = [];
-        for(let y = this.ymin;y <= this.ymax;y+=(this.ymax-this.ymin)/4) {
+
+        //compute optimal min/max step
+        const range = this.ymax - this.ymin;
+
+        //TODO - is there more algebriac way of doing this?
+        let step = range/4;
+        if(range > 5) step = 5;
+        else if(range > 0.5) step = 0.5;
+        else if(range > 0.05) step = 0.1;
+        else if(range > 0.005) step = 0.05;
+        else {
+            step = 0.0005;
+            this.fixed = 2;
+        } 
+
+        const min = Math.round(this.ymin/step)*step;
+        const max = this.ymax;
+        console.log(min, step);
+        for(let y = min;y <= max;y+=step) {
+            //if(y < 0) continue;
             ticks.push(y);
         }
+        console.dir(ticks);
         return ticks;
     }
 }
@@ -199,14 +219,12 @@ export default class CompositePlot extends Vue {
 
 <style scoped lang="scss">
 svg {
-    /*
-    background-color: #f0f0f0;
-    */
+    /* background-color: #f0f0f0; */
 }
 .legend,
 .ticks {
     color: gray;
-    font-size: 13px;
+    font-size: 25px;
     text-align: right;
 }
 </style>
