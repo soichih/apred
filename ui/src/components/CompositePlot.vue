@@ -193,25 +193,27 @@ export default class CompositePlot extends Vue {
         //compute optimal min/max step
         const range = this.ymax - this.ymin;
 
-        //TODO - is there more algebriac way of doing this?
-        let step = range/4;
-        if(range > 5) step = 5;
-        else if(range > 0.5) step = 0.5;
+        const step = range/4;
+        /* //can't quite get this right..
+        if(range > 0.5) step = 2;
+        else if(range > 0.25) step = 0.25;
         else if(range > 0.05) step = 0.1;
-        else if(range > 0.005) step = 0.05;
+        else if(range > 0.025) step = 0.05;
         else {
             step = 0.0005;
             this.fixed = 2;
         } 
+        */
+        if(range < 0.025) {
+            this.fixed = 2;
+        }
 
         const min = Math.round(this.ymin/step)*step;
         const max = this.ymax;
-        console.log(min, step);
         for(let y = min;y <= max;y+=step) {
             //if(y < 0) continue;
             ticks.push(y);
         }
-        console.dir(ticks);
         return ticks;
     }
 }
