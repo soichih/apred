@@ -87,8 +87,8 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 export default class CompositePlot extends Vue {
 
     height = 300;
-    ymax = null;
-    ymin = null;
+    ymax: (number|null) = null;
+    ymin: (number|null) = null;
 
     years: number[] = [];
 
@@ -103,7 +103,7 @@ export default class CompositePlot extends Vue {
         }
 
         //find ymin/max
-        function findMinMax(vs, sdevs) {
+        const findMinMax = (vs: number[], sdevs?: number[])=>{
             vs.forEach((v, index)=>{
                 if(v == null) return;
                 let vmin = v;
@@ -117,13 +117,13 @@ export default class CompositePlot extends Vue {
             });
         }
 
-        findMinMax.call(this, this.cutters.county);
-        findMinMax.call(this, this.cutters.states.avg, this.cutters.states.sdev);
-        findMinMax.call(this, this.cutters.us.avg, this.cutters.us.sdev);
+        findMinMax(this.cutters.county);
+        findMinMax(this.cutters.states.avg, this.cutters.states.sdev);
+        findMinMax(this.cutters.us.avg, this.cutters.us.sdev);
 
-        //if(this.ymin === null) this.ymin = 0;
-        //if(this.ymax === null) this.ymax = 1;
-        
+        if(this.ymin == null) return;
+        if(this.ymax == null) return;
+
         //add a bit of space top/bottom
         const r = this.ymax - this.ymin;
         this.ymax += r/5;
@@ -136,6 +136,9 @@ export default class CompositePlot extends Vue {
     lineCommand = (point: number, i: number) => `L ${this.itox(i)} ${this.ptoy(point)}`
 
     ptoy(p: number) {
+        if(this.ymin == null) return;
+        if(this.ymax == null) return;
+
         const per = (p - this.ymin)/(this.ymax - this.ymin);
         return (this.height-30) - (this.height - 40)*per;
     }
@@ -182,12 +185,13 @@ export default class CompositePlot extends Vue {
     }
 
     get yticks() {
+        if(this.ymin == null) return [];
+        if(this.ymax == null) return [];
+
         const ticks: number[] = [];
         for(let y = this.ymin;y <= this.ymax;y+=(this.ymax-this.ymin)/4) {
             ticks.push(y);
         }
-        //console.log(this.ymin, this.ymax);
-        //console.log(ticks, ticks.map(this.ptoy));
         return ticks;
     }
 }
