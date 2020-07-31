@@ -4,7 +4,7 @@
         <!--grid lines-->
         <g>
             <line v-for="(year, idx) in years" :key="year" :x1="itox(idx)" y1="20" :x2="itox(idx)" :y2="ptoy(ymin)" style="stroke:rgb(200,200,200);stroke-width:0.5" /> 
-            <line v-for="(y, idx) in yticks" :key="idx" :x1="50" :y1="ptoy(y)" :x2="1000" :y2="ptoy(y)" style="stroke:rgb(200, 200, 200);stroke-width: 0.5"/>
+            <line v-for="(y, idx) in yticks" :key="idx" :x1="70" :y1="ptoy(y)" :x2="1000" :y2="ptoy(y)" style="stroke:rgb(200, 200, 200);stroke-width: 0.5"/>
         </g>
 
         <!--legend-->
@@ -26,14 +26,14 @@
 
         <!--x axis / ticks-->
         <g>
-            <line :x1="50" :y1="ptoy(ymin)" :x2="1000" :y2="ptoy(ymin)" style="stroke:rgb(100,100,100);stroke-width:0.5" /> 
+            <line :x1="70" :y1="ptoy(ymin)" :x2="1000" :y2="ptoy(ymin)" style="stroke:rgb(100,100,100);stroke-width:0.5" /> 
             <text v-for="(year, idx) in years" :key="year" :x="itox(idx)-15" :y="height" class="ticks">{{year}}</text>
         </g>
 
         <!--y axix / ticks-->
         <g>
-            <line x1="50" :y1="ptoy(ymin)" x2="50" :y2="ptoy(ymax)" style="stroke:rgb(100,100,100);stroke-width:0.5" /> 
-            <text v-for="(y, idx) in yticks" :key="idx" :x="45" :y="ptoy(y)+3" text-anchor="end" class="ticks">{{y.toFixed(4)}}</text>
+            <line x1="70" :y1="ptoy(ymin)" x2="70" :y2="ptoy(ymax)" style="stroke:rgb(100,100,100);stroke-width:0.5" /> 
+            <text v-for="(y, idx) in yticks" :key="idx" :x="60" :y="ptoy(y)+3" text-anchor="end" class="ticks">{{(y*100).toFixed(2)}}%</text>
         </g>
 
         <!-- us avg/sdev-->
@@ -123,6 +123,11 @@ export default class CompositePlot extends Vue {
 
         //if(this.ymin === null) this.ymin = 0;
         //if(this.ymax === null) this.ymax = 1;
+        
+        //add a bit of space top/bottom
+        const r = this.ymax - this.ymin;
+        this.ymax += r/5;
+        this.ymin -= r/5;
 
         //console.dir(this.cutters);
         //console.log(this.ymin, this.ymax);
