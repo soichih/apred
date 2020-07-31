@@ -3,7 +3,7 @@
     <svg :viewBox="'0 0 1000 '+height" :height="height">
         <!--grid lines-->
         <g>
-            <line v-for="(year, idx) in years" :key="year" :x1="itox(idx)" y1="20" :x2="itox(idx)" :y2="ptoy(0)" style="stroke:rgb(200,200,200);stroke-width:0.5" /> 
+            <line v-for="(year, idx) in years" :key="year" :x1="itox(idx)" y1="20" :x2="itox(idx)" :y2="ptoy(ymin)" style="stroke:rgb(200,200,200);stroke-width:0.5" /> 
             <line v-for="(y, idx) in yticks" :key="idx" :x1="50" :y1="ptoy(y)" :x2="1000" :y2="ptoy(y)" style="stroke:rgb(200, 200, 200);stroke-width: 0.5"/>
         </g>
 
@@ -12,10 +12,10 @@
             <rect x="900" y="5" width="25" height="5" fill="#409EFF"/>
             <text x="930" y="12" class="legend">This County</text>
 
-            <rect x="750" y="0" width="25" height="15" fill="#0043"/>
+            <rect x="750" y="0" width="25" height="15" fill="#09f5"/>
             <text x="780" y="12" class="legend">State Avg/std</text>
 
-            <rect x="600" y="0" width="25" height="15" fill="#0506"/>
+            <rect x="600" y="0" width="25" height="15" fill="#0003"/>
             <text x="630" y="12" class="legend">US Avg/std</text>
 
             <!--
@@ -26,28 +26,32 @@
 
         <!--x axis / ticks-->
         <g>
-            <line :x1="50" :y1="ptoy(0)" :x2="1000" :y2="ptoy(0)" style="stroke:rgb(100,100,100);stroke-width:0.5" /> 
+            <line :x1="50" :y1="ptoy(ymin)" :x2="1000" :y2="ptoy(ymin)" style="stroke:rgb(100,100,100);stroke-width:0.5" /> 
             <text v-for="(year, idx) in years" :key="year" :x="itox(idx)-15" :y="height" class="ticks">{{year}}</text>
         </g>
 
         <!--y axix / ticks-->
         <g>
-            <line x1="50" :y1="ptoy(0)" x2="50" :y2="ptoy(ymax)" style="stroke:rgb(100,100,100);stroke-width:0.5" /> 
-            <text v-for="(y, idx) in yticks" :key="idx" :x="40" :y="ptoy(y)+3" text-anchor="end" class="ticks">{{y}}</text>
+            <line x1="50" :y1="ptoy(ymin)" x2="50" :y2="ptoy(ymax)" style="stroke:rgb(100,100,100);stroke-width:0.5" /> 
+            <text v-for="(y, idx) in yticks" :key="idx" :x="45" :y="ptoy(y)+3" text-anchor="end" class="ticks">{{y.toFixed(4)}}</text>
         </g>
 
         <!-- us avg/sdev-->
         <g>
-            <path :d="sdevPath(cutters.us.avg, cutters.us.sdev, lineCommand)" fill="#0502" stroke="none"/>
-            <path :d="svgPath(cutters.us.avg, lineCommand)" fill="none" stroke="#0505"/>
+            <path :d="sdevPath(cutters.us.avg, cutters.us.sdev, lineCommand)" fill="#0002" stroke="none"/>
+            <path :d="svgPath(cutters.us.avg, lineCommand)" fill="none" stroke="#0005"/>
+            <!--
             <circle v-for="(p, idx) in cutters.us.avg" :key="idx" :cx="itox(idx)" :cy="ptoy(p)" r="4" stroke="#0505" stroke-width="1" fill="white" />
+            -->
         </g>
 
         <!-- state avg/sdev-->
         <g>
-            <path :d="sdevPath(cutters.states.avg, cutters.states.sdev, lineCommand)" fill="#0042" stroke="none"/>
-            <path :d="svgPath(cutters.states.avg, lineCommand)" fill="none" stroke="#0045"/>
+            <path :d="sdevPath(cutters.states.avg, cutters.states.sdev, lineCommand)" fill="#09f4" stroke="none"/>
+            <path :d="svgPath(cutters.states.avg, lineCommand)" fill="none" stroke="#09f8"/>
+            <!--
             <circle v-for="(p, idx) in cutters.states.avg" :key="idx" :cx="itox(idx)" :cy="ptoy(p)" r="4" stroke="#0045" stroke-width="1" fill="white" />
+            -->
         </g>
 
         <!-- county-->
@@ -81,64 +85,54 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 
 @Component
 export default class CompositePlot extends Vue {
-    /*
-    @Prop() readonly histogram!: number[];
-    @Prop() readonly value!: number;
-    @Prop() readonly ylabel: string|undefined;
-    @Prop() readonly xlabel: string|undefined;
-    */
 
-    //width = 500;
     height = 300;
-    ymax = 1;
-    ymin = 0;
+    ymax = null;
+    ymin = null;
 
     years: number[] = [];
-
-    /*
-    us_avg = [12.4, 13.2, 14.5, 15.3, 14.4, 14.2, 15.1];
-    us_sdev= [1.9, 1.5, 1.7, 2.2, 2.4, 2.2, 2.1];
-
-    state_avg = [15.2, 17.3, 16.5, 15.1, 16.2, 17.4, 19.1];
-    state_sdev= [1.2, 1.5, 2.2, 1.4, 1.2, 1.1, 1.8];
-
-    county = [10.4, 16.2, 15.5, 15.0, 15.4, 15.2, 16.1];
-    */
 
     @Prop() readonly edaAwards: any;
     @Prop() readonly cutters: any;
 
     constructor() {
         super();
-        //console.log("histogram mounted", this.ylabel);
+
         for(let year = 2012; year <= 2020; ++year) {
             this.years.push(year);
         }
-    }
 
-    /*
-    mounted() {
-    }
-    */
-
-    /*
-    // Properties of a line 
-    // I:  - pointA (array) [x,y]: coordinates
-    //     - pointB (array) [x,y]: coordinates
-    // O:  - (object) { length: l, angle: a }: properties of the line
-    const line = (pointA, pointB) => {
-        const lengthX = pointB[0] - pointA[0];
-        const lengthY = pointB[1] - pointA[1];
-        return {
-            length: Math.sqrt(Math.pow(lengthX, 2) + Math.pow(lengthY, 2)),
-            angle: Math.atan2(lengthY, lengthX)
+        //find ymin/max
+        function findMinMax(vs, sdevs) {
+            vs.forEach((v, index)=>{
+                if(v == null) return;
+                let vmin = v;
+                let vmax = v;
+                if(sdevs) {
+                    vmin -= sdevs[index];
+                    vmax += sdevs[index];
+                }
+                if(this.ymin === null || this.ymin > vmin) this.ymin = vmin;
+                if(this.ymax === null || this.ymax < vmax) this.ymax = vmax;
+            });
         }
+
+        findMinMax.call(this, this.cutters.county);
+        findMinMax.call(this, this.cutters.states.avg, this.cutters.states.sdev);
+        findMinMax.call(this, this.cutters.us.avg, this.cutters.us.sdev);
+
+        //if(this.ymin === null) this.ymin = 0;
+        //if(this.ymax === null) this.ymax = 1;
+
+        //console.dir(this.cutters);
+        //console.log(this.ymin, this.ymax);
     }
-    */
+
     lineCommand = (point: number, i: number) => `L ${this.itox(i)} ${this.ptoy(point)}`
 
     ptoy(p: number) {
-        return (this.height-20) - (this.height-40)/(this.ymax - this.ymin)*p;
+        const per = (p - this.ymin)/(this.ymax - this.ymin);
+        return (this.height-30) - (this.height - 40)*per;
     }
 
     itox(y: number) {
@@ -158,7 +152,6 @@ export default class CompositePlot extends Vue {
         return amount/100000+1;
     }
 
-
     sdevPath(points: number[], sdev: number[], command: any) {
         let d = "";
 
@@ -175,9 +168,7 @@ export default class CompositePlot extends Vue {
     }
 
     svgPath(points: number[], command: any) {
-        //console.log("running svgpath", points, command);
         const d = points.reduce((acc: string, point: number, i: number)=>{
-            //console.log(i, this.years[i]);
             if(i === 0) return `M ${this.itox(i)},${this.ptoy(point)}`
             else return `${acc} ${command(point, i)}`
         }, '')
@@ -185,29 +176,13 @@ export default class CompositePlot extends Vue {
         return d;
     }
 
-    /*
-    get ticks() {
-        const ts = [];
-        for(let i = 0;i < 200; i+=10) {
-            ts.push(i);
-        }
-        return ts;
-    }
-
-    get histMax() {
-        let max = 1;
-        this.histogram.forEach(v=>{
-            if(max < v) max = v;
-        });
-        return max;
-    }
-    */
-
     get yticks() {
         const ticks: number[] = [];
-        for(let y = 0;y <= this.ymax;y+=0.25) {
+        for(let y = this.ymin;y <= this.ymax;y+=(this.ymax-this.ymin)/4) {
             ticks.push(y);
         }
+        //console.log(this.ymin, this.ymax);
+        //console.log(ticks, ticks.map(this.ptoy));
         return ticks;
     }
 }
@@ -218,7 +193,6 @@ svg {
     /*
     background-color: #f0f0f0;
     */
-    margin: 10px;
 }
 .legend,
 .ticks {

@@ -37,6 +37,6 @@ export default class IndicatorInfo extends Vue {
 </script>
 <style scoped>
 p {
-margin: 0px;
+    margin: 0px;
 }
 </style>
