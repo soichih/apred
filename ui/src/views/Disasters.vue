@@ -172,7 +172,7 @@ export default class Disaster extends Vue {
 
     cutters = null;
 
-    hiddenLayers = [];
+    hiddenLayers = ["biological"];
     drLayer = "SOC";
     //hiddenDRLayers = [];
     countyList = [];
@@ -198,19 +198,19 @@ export default class Disaster extends Vue {
     cutterIndicators = {
         "SOC": {
             name: "Social",
-            color: "#c00",
+            color: "#a00",
         },
         "ECON": {
             name: "Economical",
-            color: "#0c0",
+            color: "#0a0",
         },
         "IHFR": {
             name: "Infrastructure",
-            color: "#00c",
+            color: "#00a",
         },
         "COMM": {
             name: "Community Capital",
-            color: "#666",
+            color: "#444",
         },
     }
 
@@ -866,7 +866,7 @@ h4 {
     color: #409EFF;
 }
 .legend {
-    background-color: #fff9;
+    background-color: #fffc;
     padding: 10px;
     text-transform: uppercase;
     font-size: 80%;
