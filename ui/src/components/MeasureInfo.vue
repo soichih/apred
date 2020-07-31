@@ -251,7 +251,9 @@ export default class MeasureInfo extends Vue {
 
 <style scoped>
 .measure-info {
-    color: #666;
+    opacity: 0.7;
+    line-height: 150%;
+    font-size: 85%;
 }
 h4 {
     opacity: 0.8;
