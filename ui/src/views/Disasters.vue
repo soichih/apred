@@ -9,7 +9,7 @@
                 <div style="padding-top: 10px; margin-bottom: 10px;">
                     <el-tabs v-model="mode" class="tabs">
                         <el-tab-pane name="dr" label="FEMA Disaster Declarations"></el-tab-pane>
-                        <el-tab-pane name="eda2018" label="EDA Supplemental Awards"></el-tab-pane>
+                        <el-tab-pane name="eda" label="EDA Supplemental Awards"></el-tab-pane>
                         <el-tab-pane name="resilience" label="Disaster Resilience"></el-tab-pane>
                     </el-tabs>
                 </div>
@@ -73,7 +73,7 @@
                     <span style="float: left;">Low</span>
                     <span style="float: right">High</span>
                 </div>
-                <div class="legend" v-if="mode == 'eda2018'">
+                <div class="legend" v-if="mode == 'eda'">
                     <!--
                     <p>
                         <b>EDA2018 Awards</b>
@@ -81,9 +81,24 @@
                     -->
                     <p>
                         <b>Year</b>
-                        <el-select v-model="edaRange" placeholder="Select" size="mini">
-                            <el-option v-for="item in [{value: 'recent', label:'2018'}]" :key="item.value" :label="item.label" :value="item.value"> </el-option>
+                        <!--
+                        <el-select v-model="edaYear" placeholder="Select" size="mini">
+                            <el-option v-for="item in edaYears" :key="item.value" :label="item.label" :value="item.value"> </el-option>
                         </el-select>
+                        -->
+                        <el-row :gutter="5">
+                            <el-col :span="4">
+                                 <el-button icon="el-icon-back" size="mini" @click="edaPrevious" :disabled="edaYear == '2012'"></el-button>
+                            </el-col>
+                            <el-col :span="16">
+                                <el-select v-model="edaYear" placeholder="Select" size="mini">
+                                    <el-option v-for="item in edaYears" :key="item.value" :label="item.label" :value="item.value"> </el-option>
+                                </el-select>
+                            </el-col>
+                            <el-col :span="4">
+                                 <el-button icon="el-icon-right" size="mini" @click="edaNext" :disabled="edaYear == '2020'"></el-button>
+                            </el-col>
+                        </el-row>
                     </p>
                     <div class="legend-item">
                         <span class="legend-color" style="background-color: #00ff00">&nbsp;</span>&nbsp;Statewide Awards
@@ -193,7 +208,8 @@ export default class Disaster extends Vue {
     resYear = null; //will be set to "2018" once cutter info is loaded
     resYears = [];
 
-    edaRange = '2018';
+    edaYear = 'all';
+    edaYears = [];
 
     cutterIndicators = {
         "SOC": {
@@ -300,6 +316,21 @@ export default class Disaster extends Vue {
         }
     }
     
+    @Watch('edaYear')
+    onEdaYearChange(v) {
+        if(!v) return;
+        if(this.edaYear == "all") {
+            this.map.setFilter('eda', null); //reset filter
+            return;
+        }
+        const startDate = new Date(this.edaYear+"-01-01").getTime();
+        const endDate = new Date(this.edaYear+"-12-31").getTime();
+        this.map.setFilter('eda', [
+            "all",     
+            [">=", ['get', 'date'], startDate],
+            ["<=", ['get', 'date'], endDate]
+        ]);
+    }
  
     created() {
         const h = window.localStorage.getItem("hiddenLayers");
@@ -321,6 +352,10 @@ export default class Disaster extends Vue {
                 {value: year.toString(), label: year.toString()},
             );
         }
+        this.edaYears.push({value: 'all', label: 'All'});
+        for(let year = 2020; year >= 2012; --year) {
+            this.edaYears.push({value: year.toString(), label: year.toString()});
+        }
     }
 
     @Watch('mode')
@@ -340,7 +375,7 @@ export default class Disaster extends Vue {
         case "resilience":
             this.showDRLayers();
             break;
-        case "eda2018":
+        case "eda":
             this.showEDA2018Layers();
             break;
         }
@@ -374,12 +409,12 @@ export default class Disaster extends Vue {
     }
     hideEDA2018Layers() {
         this.map.setLayoutProperty('eda-labels', 'visibility', 'none');
-        this.map.setLayoutProperty('eda2018', 'visibility', 'none');
+        this.map.setLayoutProperty('eda', 'visibility', 'none');
     }
 
     showEDA2018Layers() {
         this.map.setLayoutProperty('eda-labels', 'visibility', 'visible');
-        this.map.setLayoutProperty('eda2018', 'visibility', 'visible');
+        this.map.setLayoutProperty('eda', 'visibility', 'visible');
     }
 
     loadCutters(year, measure) {
@@ -521,7 +556,6 @@ export default class Disaster extends Vue {
                 return res.json()
             }).then(data=>{
                 const geojson = {type: "FeatureCollection", features: []};
-
                 for(const recid in data) {
                     const rec = data[recid];
                     const ep = 0.15;
@@ -538,21 +572,33 @@ export default class Disaster extends Vue {
                             ]
                         },
                         properties: {
-                            height: rec.award_amount/50,
+                            height: rec.award_amount/20,
                             //awardStr: "$"+this.$options.filters.formatNumber(rec.award_amount/1000)+"k",
+                            date: new Date(rec.grant_award_date).getTime(),
                             color: rec.statewide?'#00ff00':'#0066ff',
                         }
                     });
                 }
-                this.map.addSource('eda2018', { type: "geojson", data: geojson });
+                /*
+                const startDate = new Date("2019-01-01").getTime();
+                const endDate = new Date("2020-01-01").getTime();
+                */
+                this.map.addSource('eda', { type: "geojson", data: geojson });
                 this.map.addLayer({
-                    'id': 'eda2018',
+                    'id': 'eda',
                     'type': 'fill-extrusion',
-                    "source": "eda2018",
+                    "source": "eda",
                     "paint": {
                         "fill-extrusion-color": ['get', 'color'],
                         "fill-extrusion-height": ['get', 'height'],
                     },
+                    /*
+                    filter: [
+                         "all",     
+                        [">=", ['get', 'date'], startDate],
+                        ["<=", ['get', 'date'], endDate]
+                    ],
+                    */
                     layout: {
                         visibility: 'none', 
                     }
@@ -574,12 +620,12 @@ export default class Disaster extends Vue {
                         }
                     });
                 }
-                this.map.addSource('eda2018-point', { type: "geojson", data: geojsonPoint });
+                this.map.addSource('eda-point', { type: "geojson", data: geojsonPoint });
 
                 this.map.addLayer({
                     'id': 'eda-labels',
                     'type': 'symbol',
-                    "source": "eda2018-point",
+                    "source": "eda-point",
                     layout: {
                         visibility: 'none', 
                         'text-field': ['get', 'awardStr'],
@@ -790,6 +836,18 @@ export default class Disaster extends Vue {
 
     resNext() {
         this.resYear = (parseInt(this.resYear)+1).toString();
+    }
+
+    edaPrevious() {
+        if(this.edaYear == "all") {
+            this.edaYear = "2020";
+            return;
+        }
+        this.edaYear = (parseInt(this.edaYear)-1).toString();
+    }
+
+    edaNext() {
+        this.edaYear = (parseInt(this.edaYear)+1).toString();
     }
 
     findIndexDrRange(range) {
