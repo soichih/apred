@@ -174,7 +174,6 @@ function load_dr(cb) {
             source.stats = sources[source.id];
         })
     }
-
     cb();
 }
 
