@@ -15,6 +15,7 @@ Vue.filter("formatNumber", (value)=>{
     return numeral(value).format("0,0"); // displaying other groupings/separators is possible, look at the docs
 });
 
+/*
 import Vuex from 'vuex'
 Vue.use(Vuex)
 const store = new Vuex.Store({
@@ -27,15 +28,18 @@ const store = new Vuex.Store({
         },
     }
 })
+*/
 
 export default {
     name: 'App',
-    store,
-    //components: { Counter },
+    //store,
+    //data() { },
+
     mounted() {
         this.active = this.$route.meta.menu;
         //store.commit('increment');
         //console.log("App mounted", store.state.count);
+
     },
     watch: {
         '$route'() {

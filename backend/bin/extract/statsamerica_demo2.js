@@ -64,7 +64,6 @@ function load_gemographics(pool) {
                     if(!demo[geo_id]) demo[geo_id] = {};
                     if(!demo[geo_id][rec.code_id]) demo[geo_id][rec.code_id] = [];
                     demo[geo_id][rec.code_id].push({year, population: rec.data});
-                    //if(geo_id.startsWith("72")) console.dir(rec);
                 });
                 next_year();
             });
@@ -74,7 +73,6 @@ function load_gemographics(pool) {
         });
     }, err=>{
         if(err) throw err;
-        //console.log(JSON.stringify(demo, null, 4));
         fs.writeFileSync(__dirname+"/../../../raw/statsamerica.demo2.json", JSON.stringify(demo));
         pool.close();
     });
