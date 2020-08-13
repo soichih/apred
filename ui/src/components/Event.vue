@@ -12,8 +12,17 @@
 
         <h3 v-if="event.type == 'dr'" :style="eventIconStyle">
             <span style="float: right;">
+                <el-tag class="program-tag" size="small" type="warning" v-if="event.hmProgramDeclared" title="Hazard Mitigation Program">
+                    <a href="https://www.fema.gov/media-library/assets/documents/107704" target="fema">⚠️ </a>
+                </el-tag>&nbsp;
+                <el-tag class="program-tag" size="small" type="danger" v-if="event.ihProgramDeclared" title="Individuals and Households Program">
+                    <a href="https://www.fema.gov/media-library/assets/documents/24945" target="fema"><i class="el-icon-house"/></a>
+                </el-tag>&nbsp;
+                <el-tag class="program-tag" size="small" v-if="event.iaProgramDeclared" title="Individual Assistance Progra">
+                    <a href="https://www.fema.gov/media-library/assets/documents/133744" target="fema"><i class="el-icon-user"/></a>
+                </el-tag>&nbsp;
                 <a :href="'https://www.fema.gov/disaster/'+event.disasterNumber" target="fema">
-                    <el-tag size="small" effect="light" type="info">Disaster # {{event.disasterNumber}}</el-tag>&nbsp;
+                    <el-tag size="small" effect="plain" type="info">Disaster # {{event.disasterNumber}}</el-tag>&nbsp;
                 </a>
             </span>
             <el-tag type="info" style="position: relative; top: -2px;" v-if="event.statewide">STATEWIDE</el-tag> &nbsp;
@@ -59,29 +68,8 @@
                     Public Assistance Program 
                     <span v-if="event.pa">({{event.pa.length}} projects | ${{totalPA(event.pa)|formatNumber}})</span>
                 </el-tag>&nbsp;
-
-                <el-tag class="program-tag" size="small" effect="plain" type="info" v-if="event.hmProgramDeclared">
-                    <a href="https://www.fema.gov/media-library/assets/documents/107704" target="fema">Hazard Mitigation Program</a>
-                </el-tag>&nbsp;
-                <el-tag class="program-tag" size="small" effect="plain" type="info" v-if="event.ihProgramDeclared">
-                    <a href="https://www.fema.gov/media-library/assets/documents/24945" target="fema">Individuals and Households Program</a>
-                </el-tag>&nbsp;
-                <el-tag class="program-tag" size="small" effect="plain" type="info" v-if="event.iaProgramDeclared">
-                    <a href="https://www.fema.gov/media-library/assets/documents/133744" target="fema">Individual Assistance Program</a>
-                </el-tag>&nbsp;
             </p>
 
-            <!--
-            <br>
-            <div style="margin-bottom: 5px">
-                <el-button type="success" size="mini" @click="show_pa = true" v-if="!show_pa">
-                    <i class="el-icon-caret-right"/> Show Funded Projects
-                </el-button>
-                <el-button type="success" size="mini" @click="show_pa = false" v-if="show_pa">
-                    <i class="el-icon-caret-bottom"/> Hide Funded Projects
-                </el-button>
-            </div>
-            -->
             <slide-up-down :active="show_pa" style="background-color: #eee; padding: 10px;">
                 <div v-if="!event.pa">
                     <p>
@@ -137,9 +125,6 @@
             <br>
 
             <b>For:</b> {{event.grant_purpose}} 
-            <!--
-            <span>&gt; Project Funding: ${{event.total_project_funding | formatNumber}}</span>
-            -->
             <br>
             <br>
             <b>Regional Office:</b> {{event.eda_regional_office}}
