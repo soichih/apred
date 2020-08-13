@@ -412,7 +412,7 @@ export default class Disaster extends Vue {
             minZoom: 2,
             pitch: 30, // pitch in degrees
             //bearing: 10, // bearing in degrees
-            zoom: 3,
+            zoom: 1,
         });
 
         // disable map zoom when using scroll
@@ -436,7 +436,7 @@ export default class Disaster extends Vue {
 
             //TODO - I should separate DR information from counties_geo.. so we can load data for each year ranges
             //counties_geo should just contain counties_geo
-            fetch("https://gpu1-pestillilab.psych.indiana.edu/apred/counties_geo.json").then(res=>{ 
+            fetch(this.$root.dataUrl+"/counties_geo.json").then(res=>{ 
                 this.updatedDate = res.headers.get("last-modified")
                 return res.json()
             }).then(data=>{
@@ -496,7 +496,7 @@ export default class Disaster extends Vue {
                     });
                 }
 
-                fetch("https://gpu1-pestillilab.psych.indiana.edu/apred/years.json").then(res=>{ 
+                fetch(this.$root.dataUrl+"/years.json").then(res=>{ 
                     //this.drYearsUpdated = res.headers.get("last-modified")
                     return res.json()
                 }).then(data=>{
@@ -507,8 +507,7 @@ export default class Disaster extends Vue {
                     this.mode = "dr";
                 });
 
-
-                fetch("https://gpu1-pestillilab.psych.indiana.edu/apred/cutter_long.json").then(res=>{ 
+                fetch(this.$root.dataUrl+"/cutter_long.json").then(res=>{ 
                     return res.json()
                 }).then(data=>{
                     this.cutters = data;
@@ -518,7 +517,7 @@ export default class Disaster extends Vue {
                 });
             });
 
-            fetch("https://gpu1-pestillilab.psych.indiana.edu/apred/eda2018.json").then(res=>{ 
+            fetch(this.$root.dataUrl+"/eda2018.json").then(res=>{ 
                 return res.json()
             }).then(data=>{
                 const geojson = {type: "FeatureCollection", features: []};
@@ -722,14 +721,13 @@ export default class Disaster extends Vue {
 
         this.showTutorial(); //hiding tutorial
 
-        //fetch("https://ctil.iu.edu/projects/apred-data/counties/county."+fips+".json").then(res=>res.json()).then(data=>{
         const loading = this.$loading({
             lock: true,
             text: 'Loading',
             spinner: 'el-icon-loading',
             background: 'rgba(255, 255, 255, 0.3)'
         });
-        fetch("https://gpu1-pestillilab.psych.indiana.edu/apred/counties/county."+fips+".json").then(res=>res.json()).then(data=>{
+        fetch(this.$root.dataUrl+"/counties/county."+fips+".json").then(res=>res.json()).then(data=>{
             if(data.cutter) {
                 delete data.cutter.INST;
                 delete data.cutter.FLOR;

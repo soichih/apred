@@ -19,12 +19,20 @@
                     <div id="statemap"/>
                 </el-col>
                 <el-col :span="9" class="border-left demo">
-                    <p style="margin: 0">
+                    <p style="margin: 0; float: left;">
                         <span class="sub-heading">Population</span><br>
-                        <span class="primary" v-if="detail.demo"> {{detail.population | formatNumber}}</span>
+                        <span class="primary" v-if="detail.population"> {{detail.population | formatNumber}}</span>
                         <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
                     </p>
+                    <p style="margin: 0; float: right; padding-right: 20px;">
+                        <span class="sub-heading">Density</span><br>
+                        <span class="primary" v-if="detail.popdensity"> {{detail.popdensity | formatNumber}}/sq mile</span>
+                        <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
+                    </p>
+                    <Plotly :data="demoGraphData" :layout="demoGraphLayout" :display-mode-bar="false"/>
+                    <!--
                     <Plotly :data="demo2GraphData" :layout="demo2GraphLayout" :display-mode-bar="false"/>
+                    -->
                 </el-col>
                 <el-col :span="5" class="border-left gdp">
                     <p>
@@ -101,6 +109,7 @@
             have a high reliance on public utilities like water and electricity, or have a large infrastructure footprint and low infrastructure mobility.
         </p>
 
+        <!--
         <el-row>
             <el-col :span="12">
                 <Plotly :data="bviEstData" :layout="bviEstLayout" :display-mode-bar="false"></Plotly>
@@ -109,6 +118,26 @@
                 <Plotly :data="bviEmpData" :layout="bviEmpLayout" :display-mode-bar="false"></Plotly>
             </el-col>
         </el-row>
+        -->
+        <br>
+        <br>
+        <div v-for="(data, naics) in bvi2" :key="naics">
+            <p>
+                <small style="float: right;">{{naics}}</small>
+                <b><NaicsInfo :id="naics"/></b>
+            </p>
+            <el-row>
+                <el-col :span="12">
+                    <h4 style="margin: 0"><small>Establishments</small></h4>
+                    <Plotly :data="data.est" :layout="bvi2Layout" :display-mode-bar="false"></Plotly>
+                </el-col>
+                <el-col :span="12">
+                    <h4 style="margin: 0"><small>Employment</small></h4>
+                    <Plotly :data="data.emp" :layout="bvi2Layout" :display-mode-bar="false"></Plotly>
+                </el-col>
+            </el-row>
+        </div>
+        <br clear="both">
     </div>
     </div>
 
@@ -136,14 +165,28 @@
 
             <div class="measure-info" v-for="source in detail.cutter2[incode].sources.filter(s=>s.stats)" :key="source.id">
                 <p style="margin: 0">
-                    <!--
-                    <small style="float: right">Cutter ID:{{source.id}}</small>
-                    -->
                     <b>{{source.name}}</b>
+                    <small style="float: right">{{source.id}}</small>
                 </p>
-                <MeasureInfo :id="source.id">
-                    <CompositePlot v-if="detail" :cutters="source.stats" :edaAwards="detail.eda2018"/>
-                </MeasureInfo>
+
+                <p style="min-height: 50px; margin: 0">
+                    {{$root.drMeasures[source.id].desc}}
+                </p>
+                <CompositePlot v-if="detail" :cutters="source.stats" :edaAwards="detail.eda2018"/>
+                <br>
+
+                <p>
+                    <el-button size="mini" @click="toggleMeasureDetail(source)" round>
+                        <span v-if="source.showDetail">Hide</span>
+                        <span v-else>Show</span>
+                        Detail
+                    </el-button>
+                </p>
+                <slide-up-down :active="source.showDetail">
+                    <small>
+                        {{$root.drMeasures[source.id].calcDesc}}
+                    </small>
+                </slide-up-down>
             </div>
             <br clear="both"> 
         </div>
@@ -176,9 +219,9 @@ import Histogram from '@/components/Histogram.vue'
 import BarGraph from '@/components/BarGraph.vue'
 import Event from '@/components/Event.vue'
 import IndicatorInfo from '@/components/IndicatorInfo.vue'
-import MeasureInfo from '@/components/MeasureInfo.vue'
 import Footer from '@/components/Footer.vue'
 import CompositePlot from '@/components/CompositePlot.vue'
+import NaicsInfo from '@/components/NaicsInfo.vue'
 
 import Eligibility2018 from '@/components/Eligibility2018.vue'
 import Eligibility2019 from '@/components/Eligibility2019.vue'
@@ -209,12 +252,11 @@ Vue.directive('scroll', {
         Event, 
         Eligibility2018, 
         Eligibility2019,
-        //VueBarGraph,
         IndicatorInfo,
-        MeasureInfo,
         Footer,
         SlideUpDown,
         CompositePlot,
+        NaicsInfo,
     },
 })
 
@@ -229,11 +271,28 @@ export default class CountyDetail extends Vue {
 
     history = [];
 
+    /*
     bvi = [];
     bviEstData = null;
     bviEmpData = null;
     bviEstLayout = null;
     bviEmpLayout = null;
+    */
+
+    bvi2Layout = {
+        height: 100,
+        //title: "Establishment",
+        margin: {
+            l: 50,
+            r: 0,
+            t: 10,
+            b: 30,
+            pad: 10,
+        },
+        'paper_bgcolor': '#0000',
+        'plot_bgcolor': '#0000',
+    }
+    bvi2 = {}; //keyed by naics code, then {years, estab, estab_v, emp, emp_v} 
 
     stormLayout = null;
     stormData = null;
@@ -241,19 +300,43 @@ export default class CountyDetail extends Vue {
     showPastHistory = false;
     shownIndicators = [];
 
+    /*
     demo2GraphData = [];
     demo2GraphLayout = {
-        width: 290,
-        height: 140,
+        width: 350,
+        height: 200,
         margin: {
-            l: 0,
-            r: 0,
-            t: 0,
-            b: 15,
+            l: 30,
+            r: 30,
+            t: 50,
+            b: 30,
         },
         barmode: 'stack',
         'plot_bgcolor': '#0000',
         'paper_bgcolor': '#0000',
+    }
+    */
+
+    demoGraphData = [];
+    demoGraphLayout = {
+        width: 350,
+        height: 200,
+        margin: {
+            l: 30,
+            r: 30,
+            t: 55,
+            b: 20,
+        },
+        barmode: 'stack',
+        'plot_bgcolor': '#0000',
+        'paper_bgcolor': '#0000',
+        /*
+        legend: {
+            x: 1,
+            xanchor: 'right',
+            y: 1
+        }
+        */
     }
 
     cuttersData = {}; //group by incode then {states: {avg, sdev}, us: {avg, sdev}, county} 
@@ -270,12 +353,18 @@ export default class CountyDetail extends Vue {
         else this.shownIndicators.push(incode);
     }  
 
+    toggleMeasureDetail(source) {
+        Vue.set(source, "showDetail", !source.showDetail);
+    }
+
     update() {
         this.processHistory();
-        this.processBVI();
+        //this.processBVI();
+        this.processBVI2();
         this.processStorms();
         this.processMap();
-        this.processDemo2();
+        //this.processDemo2();
+        this.processDemo();
     }
 
     goto(id) {
@@ -304,6 +393,53 @@ export default class CountyDetail extends Vue {
         });
     }
 
+    processBVI2() {
+        if(!this.detail.bvis2) return;
+        for(const naics in this.detail.bvis2) {
+            const data = this.detail.bvis2[naics];
+            this.bvi2[naics] = {
+                est: [
+                    {
+                        x: data.years,
+                        y: data.estab,
+                        //fill: 'tozeroy',
+                        name: 'Total',
+                        mode: 'none',
+                        stackgroup: 'one',
+                        //marker: {color: 'rgb(100, 100, 100)'},
+                        //type: 'bar'
+                    },
+                    {
+                        x: data.years,
+                        y: data.estab_v,
+                        //fill: 'tonexty',
+                        stackgroup: 'one',
+                        name: 'Vulnerable',
+                        mode: 'none',
+                        //marker: {color: 'rgb(100, 100, 100)'},
+                    }
+                ],
+                emp: [
+                    {
+                        x: data.years,
+                        y: data.emp,
+                        name: 'Total',
+                        mode: 'none',
+                        stackgroup: 'one',
+                    },
+                    {
+                        x: data.years,
+                        y: data.emp_v,
+                        stackgroup: 'one',
+                        name: 'Vulnerable',
+                        mode: 'none',
+                    }
+                ]
+            }
+        }
+    }
+
+    /*
     processBVI() {
         if(!this.detail.bvis) return;
         this.bviEstLayout = {
@@ -339,6 +475,7 @@ export default class CountyDetail extends Vue {
                 bordercolor: 'rgba(255, 255, 255, 0)',
                 orientation: 'h',
             },
+            //barmode: 'stack',
             //barmode: 'group',
             //bargroupgap: 0.1
         }
@@ -379,35 +516,43 @@ export default class CountyDetail extends Vue {
             },
             //type: 'scatter',
             //mode: 'lines+markers',
-            //barmode: 'group',
+            //barmode: 'stack',
             //bargroupgap: 0.1
         }
 
         const x = [];
         const bviBt = []; //establishment total
         const bviBtV = []; //vulnerable establishment
+        const bviBtVRatio = []; //ratio between es and ves
         const bviEt = []; //employee total
         const bviEtV = []; //vulnerable total
+        const bviEtVRatio = []; //ratio between es and ves
         this.detail.bvis.forEach(rec=>{
             x.push(rec.year);
             bviBt.push(rec.estab_total);
             bviBtV.push(rec.estab_vuln_total);
+            bviBtVRatio.push((rec.estab_vuln_total/rec.estab_total*100).toFixed(1)+"%");
             bviEt.push(rec.mm_employees);
             bviEtV.push(rec.emp_vuln_total);
+            bviEtVRatio.push((rec.emp_vuln_total/rec.mm_employees*100).toFixed(1)+"%");
         })
         const traceBt = {
             x,y: bviBt,
             name: 'Total Businesses',
             marker: {color: 'rgb(100, 100, 100)'},
+            //text: bviBtVRatio,
+            //textposition: 'auto',
             type: 'bar'
         }
         const traceBtV = {
             x, y: bviBtV,
             name: 'Vulnerable Businesses',
             marker: {color: '#f56c6c'},
+            text: bviBtVRatio,
+            textposition: 'auto',
             type: 'bar'
         }
-        this.bviEstData = [traceBt, traceBtV ];
+        this.bviEstData = [traceBt, traceBtV];
 
         const traceEt = {
             x,y: bviEt,
@@ -419,10 +564,13 @@ export default class CountyDetail extends Vue {
             x, y: bviEtV,
             name: 'Vulnerable Employees',
             marker: {color: '#f56c6c'},
+            text: bviEtVRatio,
+            textposition: 'auto',
             type: 'bar'
         }
         this.bviEmpData = [traceEt, traceEtV];
     }
+    */
 
     processStorms() {
         this.stormLayout = {
@@ -441,6 +589,8 @@ export default class CountyDetail extends Vue {
                 orientation: 'h',
             },
             barmode: 'stack',
+            //yaxis: {fixedrange: true},   
+            //xaxis: {fixedrange: true},   
 
             //bargroupgap: 0.1
         }
@@ -474,6 +624,7 @@ export default class CountyDetail extends Vue {
         }
     }
 
+    /*
     processDemo2() {
         this.demo2GraphData = [];
 
@@ -512,20 +663,69 @@ export default class CountyDetail extends Vue {
 
         this.demo2GraphData.push(Object.assign({ 
             y: merge.call(this, [312, 313]), 
-            name: "0-17"
+            name: "0-17",
+            hoverinfo: 'y+text',
         }, template));
         this.demo2GraphData.push(Object.assign({ 
             y: merge.call(this, [314]), 
-            name: "18-24"
+            name: "18-24",
+            hoverinfo: 'y+text',
         }, template));
         this.demo2GraphData.push(Object.assign({ 
             y: merge.call(this, [315, 316]), 
-            name: "25-44"
+            name: "25-44",
+            hoverinfo: 'y+text',
         }, template));
         this.demo2GraphData.push(Object.assign({ 
             y: merge.call(this, [317]), 
-            name: "65+"
+            name: "65+",
+            hoverinfo: 'y+text',
         }, template));
+
+        //compute percentages
+        const ylen = this.demo2GraphData[0].y.length;
+        for(let y = 0;y < ylen; ++y) {
+            const total = this.demo2GraphData.reduce((sum, v)=>sum+v.y[y], 0);
+            this.demo2GraphData.forEach(v=>{
+                if(!v.hovertext) v.hovertext = [];
+                if(total == 0) v.hovertext.push(null);
+                else v.hovertext.push((v.y[y]/total*100).toFixed(1)+"%");
+            });
+        }
+    }
+    */
+
+    processDemo() {
+        this.demoGraphData = [];
+
+        const template = {
+            x: this.detail.pops.years,
+            stackgroup: 'one',
+            line: {
+                width: 0,
+                shape: 'spline',
+                smoothing: 0.8,
+            },
+            mode: 'lines',
+        }
+
+        this.detail.pops.groups.forEach(group=>{
+            this.demoGraphData.push(Object.assign({ 
+                y: group.y,
+                name: group.name,
+                hoverinfo: 'y+text',
+            }, template));
+        });
+
+        //compute percentages
+        for(let y = 0;y < this.detail.pops.years.length; ++y) {
+            const total = this.demoGraphData.reduce((sum, v)=>sum+v.y[y], 0);
+            this.demoGraphData.forEach(v=>{
+                if(!v.hovertext) v.hovertext = [];
+                if(total == 0) v.hovertext.push(null);
+                else v.hovertext.push((v.y[y]/total*100).toFixed(1)+"%");
+            });
+        }
     }
 
     initStateMap() {
@@ -663,19 +863,6 @@ export default class CountyDetail extends Vue {
             }
         });
     }
-
-    /*
-    populationPoints(demo) { 
-        return [
-            {label: '0-4', value: demo[0].value},
-            {label: '5-17', value: demo[1].value},
-            {label: '18-24', value: demo[2].value},
-            {label: '25-44', value: demo[3].value},
-            {label: '45-64', value: demo[4].value},
-            {label: '>65', value: demo[5].value},
-        ];
-    }
-    */
 
     get recentHistory() {
         return this.history.filter(h=>(h.date >= new Date("2017-01-01")));
@@ -818,7 +1005,7 @@ h4 {
 }
 
 .sub-heading {
-    opacity: 0.8;
+    opacity: 0.6;
     font-weight: bold;
     font-size: 90%;
     color: black;
@@ -826,7 +1013,7 @@ h4 {
 }
 .primary {
     font-weight: bold;
-    font-size: 150%;
+    font-size: 125%;
 }
 
 .important, 
@@ -870,7 +1057,7 @@ h4 {
     padding-left: 20px;
     padding-top: 10px;
 }
-@media only screen and (max-width: 500px) {
+@media only screen and (max-width: 650px) {
     .demo {
         display: none;
     }
@@ -964,6 +1151,13 @@ small {
     opacity: 0.5;
 }
 .measure-info {
+display: inline-block;
+float: left;
+width: 475px;
+margin-right: 20px;
+margin-bottom: 10px;
+}
+.bvi {
 display: inline-block;
 float: left;
 width: 475px;

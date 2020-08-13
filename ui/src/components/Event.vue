@@ -18,7 +18,7 @@
                 <el-tag class="program-tag" size="small" type="danger" v-if="event.ihProgramDeclared" title="Individuals and Households Program">
                     <a href="https://www.fema.gov/media-library/assets/documents/24945" target="fema"><i class="el-icon-house"/></a>
                 </el-tag>&nbsp;
-                <el-tag class="program-tag" size="small" v-if="event.iaProgramDeclared" title="Individual Assistance Progra">
+                <el-tag class="program-tag" size="small" v-if="event.iaProgramDeclared" title="Individual Assistance Program">
                     <a href="https://www.fema.gov/media-library/assets/documents/133744" target="fema"><i class="el-icon-user"/></a>
                 </el-tag>&nbsp;
                 <a :href="'https://www.fema.gov/disaster/'+event.disasterNumber" target="fema">
@@ -70,11 +70,11 @@
                 </el-tag>&nbsp;
             </p>
 
-            <slide-up-down :active="show_pa" style="background-color: #eee; padding: 10px;">
+            <slide-up-down :active="show_pa" style="padding: 10px;">
                 <div v-if="!event.pa">
-                    <p>
-                        There are no funded PA project associated with this disaster.
-                    </p>
+                    <small>
+                        There are no funded PA project associated with this disaster in this county.
+                    </small>
                 </div>
                 <div v-if="event.pa">
                     <p style="font-size: 95%; opacity: 0.7">FEMA funded Public-Assistance projects associated with this disaster declaration.</p>

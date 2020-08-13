@@ -1,15 +1,24 @@
 <template>
 <div>
     <svg viewBox="0 0 1000 270" height="150px" width="450px">
+        <!--
+        <defs>
+            <filter x="-0.02" y="0" width="1.04" height="1.1" id="solid">
+                <feFlood flood-color="black"/>
+                <feComposite in="SourceGraphic" operator="xor" />
+            </filter>
+        </defs>
+        -->
+
         <!--grid lines-->
         <g>
-            <line v-for="(year, idx) in years" :key="year" :x1="itox(idx)" y1="20" :x2="itox(idx)" :y2="ptoy(ymin)" style="stroke:rgb(200,200,200);stroke-width:0.5" /> 
-            <line v-for="(y, idx) in yticks" :key="idx" :x1="120" :y1="ptoy(y)" :x2="1000" :y2="ptoy(y)" style="stroke:rgb(200, 200, 200);stroke-width: 0.5"/>
+            <line v-for="(year, idx) in years" :key="year" :x1="itox(idx)" y1="20" :x2="itox(idx)" :y2="ptoy(ymin)" style="stroke:rgb(175,175,175);stroke-width:0.5" /> 
+            <line v-for="(y, idx) in yticks" :key="idx" :x1="120" :y1="ptoy(y)" :x2="1000" :y2="ptoy(y)" style="stroke:rgb(175, 175, 175);stroke-width: 0.5"/>
         </g>
 
         <!--legend-->
+        <!--
         <g>
-            <!--
             <rect x="900" y="5" width="25" height="5" fill="#409EFF"/>
             <text x="930" y="12" class="legend">This County</text>
 
@@ -18,30 +27,28 @@
 
             <rect x="600" y="0" width="25" height="15" fill="#0003"/>
             <text x="630" y="12" class="legend">US Avg/std</text>
-            -->
 
-            <!--
             <rect x="450" y="0" width="25" height="15" fill="green"/>
             <text x="480" y="12" class="legend">EDA Awards</text>
-            -->
         </g>
+        -->
 
         <!--x axis / ticks-->
         <g>
             <line :x1="120" :y1="ptoy(ymin)" :x2="1000" :y2="ptoy(ymin)" style="stroke:rgb(100,100,100);" /> 
-            <text v-for="(year, idx) in years" :key="year" :x="itox(idx)-15" :y="height" class="ticks">{{year}}</text>
+            <text v-for="(year, idx) in years" :key="year" :x="itox(idx)-25" :y="height" class="ticks">{{year}}</text>
         </g>
 
         <!--y axix / ticks-->
         <g>
             <line x1="120" :y1="ptoy(ymin)" x2="120" :y2="ptoy(ymax)" style="stroke:rgb(100,100,100);" /> 
-            <text v-for="(y, idx) in yticks" :key="idx" :x="100" :y="ptoy(y)+3" text-anchor="end" class="ticks">{{(y*100).toFixed(fixed)}} %</text>
+            <text v-for="(y, idx) in yticks" :key="idx" :x="100" :y="ptoy(y)+8" text-anchor="end" class="ticks">{{(y*100).toFixed(fixed)}} %</text>
         </g>
 
         <!-- us avg/sdev-->
         <g>
             <path :d="sdevPath(cutters.us.avg, cutters.us.sdev, lineCommand)" fill="#0002" stroke="none"/>
-            <path :d="svgPath(cutters.us.avg, lineCommand)" fill="none" stroke="#0005"/>
+            <path :d="svgPath(cutters.us.avg, lineCommand)" fill="none" stroke="#0005" stroke-width="2"/>
             <!--
             <circle v-for="(p, idx) in cutters.us.avg" :key="idx" :cx="itox(idx)" :cy="ptoy(p)" r="4" stroke="#0505" stroke-width="1" fill="white" />
             -->
@@ -50,7 +57,7 @@
         <!-- state avg/sdev-->
         <g>
             <path :d="sdevPath(cutters.states.avg, cutters.states.sdev, lineCommand)" fill="#09f4" stroke="none"/>
-            <path :d="svgPath(cutters.states.avg, lineCommand)" fill="none" stroke="#09f8"/>
+            <path :d="svgPath(cutters.states.avg, lineCommand)" fill="none" stroke="#09f8" stroke-width="2"/>
             <!--
             <circle v-for="(p, idx) in cutters.states.avg" :key="idx" :cx="itox(idx)" :cy="ptoy(p)" r="4" stroke="#0045" stroke-width="1" fill="white" />
             -->
@@ -59,7 +66,10 @@
         <!-- county-->
         <g>
             <path :d="svgPath(cutters.county, lineCommand)" fill="none" stroke="#409EFF" stroke-width="3"/>
-            <circle v-for="(p, idx) in cutters.county" :key="idx" :cx="itox(idx)" :cy="ptoy(p)" r="10" stroke="#409EFF" stroke-width="4" fill="white" />
+            <g v-for="(p, idx) in cutters.county" :key="idx" class="with-tooltip">
+                <circle :cx="itox(idx)" :cy="ptoy(p)" r="10" stroke="#409EFF" stroke-width="4" fill="white"/>
+                <text :x="itox(idx)-30" :y="ptoy(p)-30" class="tooltip">{{(p*100).toFixed(3)}}%</text>
+            </g>
         </g>
 
         <!--eda awards-->
@@ -180,7 +190,6 @@ export default class CompositePlot extends Vue {
             if(i === 0) return `M ${this.itox(i)},${this.ptoy(point)}`
             else return `${acc} ${command(point, i)}`
         }, '')
-        //return `<path d="${d}" fill="none" stroke="grey" />`
         return d;
     }
 
@@ -194,25 +203,14 @@ export default class CompositePlot extends Vue {
         const range = this.ymax - this.ymin;
 
         const step = range/4;
-        /* //can't quite get this right..
-        if(range > 0.5) step = 2;
-        else if(range > 0.25) step = 0.25;
-        else if(range > 0.05) step = 0.1;
-        else if(range > 0.025) step = 0.05;
-        else {
-            step = 0.0005;
-            this.fixed = 2;
-        } 
-        */
-        if(range < 0.025) {
-            this.fixed = 2;
-        }
+        if(range < 0.025) this.fixed = 2;
 
         const min = Math.round(this.ymin/step)*step;
         const max = this.ymax;
-        for(let y = min;y <= max;y+=step) {
-            //if(y < 0) continue;
-            ticks.push(y);
+        for(let p = min;p <= max;p+=step) {
+            const y = this.ptoy(p);
+            if(y !== undefined && y > this.height-30) continue;
+            ticks.push(p);
         }
         return ticks;
     }
@@ -229,4 +227,18 @@ svg {
     font-size: 25px;
     text-align: right;
 }
+.with-tooltip .tooltip {
+color: gray;
+font-size: 30px;
+text-align: center;
+opacity: 0;
+}
+.with-tooltip:hover .tooltip {
+opacity: 1;
+}
+/*
+.with-tooltip:hover circle {
+stroke-width:6px;
+}
+*/
 </style>
