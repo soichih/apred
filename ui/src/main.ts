@@ -29,10 +29,28 @@ Vue.use(VueAxios, axios)
 import VueAnalytics from 'vue-analytics'
 
 Vue.use(VueAnalytics, {
-  id: 'UA-161425227-2'
+    id: 'UA-161425227-2'
 })
 
 new Vue({
-  router,
-  render: h => h(App)
+    data() {
+        return {
+            //dataUrl: "https://ctil.iu.edu/projects/apred-data/",
+            dataUrl: "https://gpu1-pestillilab.psych.indiana.edu/apred",
+            drMeasures: {}, //keyed by measure code, then {name, desc, calcDesc}
+        }
+    },
+    mounted() {
+        fetch(this.dataUrl+"/dr_measure.json").then(res=>res.json()).then(data=>{
+            data.forEach(rec=>{
+                this.drMeasures[rec.measure] = {
+                    name: rec["measure_name"],
+                    desc: rec["measure_desc"],
+                    calcDesc: rec["measure_calculation_desc"],
+                }
+            });
+        });
+    },
+    router,
+    render: h => h(App)
 }).$mount('#app')
