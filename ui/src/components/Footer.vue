@@ -11,7 +11,7 @@
         <div style="float: right">
             <a href="mailto:ctil@iu.edu">ctil@iu.edu</a> | <a href="mailto:ctil@iu.edu">Contact Us</a>
         </div>
-        <h3>CTIL <small>Crisis Technologies Innovation Lab</small></h3>
+        <h3><a href="https://ctil.iu.edu/">CTIL</a> <small>Crisis Technologies Innovation Lab</small></h3>
     </div>
     <br>
     <br>
