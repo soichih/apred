@@ -201,7 +201,7 @@ export default class Disaster extends Vue {
             color: "#a00",
         },
         "ECON": {
-            name: "Economical",
+            name: "Economic",
             color: "#0a0",
         },
         "IHFR": {
