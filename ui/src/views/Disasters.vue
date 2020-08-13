@@ -96,7 +96,7 @@
                                 </el-select>
                             </el-col>
                             <el-col :span="4">
-                                 <el-button icon="el-icon-right" size="mini" @click="edaNext" :disabled="edaYear == '2020'"></el-button>
+                                 <el-button icon="el-icon-right" size="mini" @click="edaNext" :disabled="edaYear == '2020' || edaYear == 'all'"></el-button>
                             </el-col>
                         </el-row>
                     </p>
