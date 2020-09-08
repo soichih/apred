@@ -13,6 +13,7 @@
                         <el-tab-pane name="resilience" label="Disaster Resilience"></el-tab-pane>
                     </el-tabs>
                 </div>
+
                 <div class="legend" v-if="mode == 'dr'">
                     <p>
                         <b>Date Range</b>
@@ -69,7 +70,7 @@
                         <el-radio v-model="drLayer" :label="cid" @change="showDRLayers" :style="{color: info.color}">{{info.name}}</el-radio>
                     </div>
                     <br>
-                    <div :style="'background-image: linear-gradient(to right, white, '+cutterIndicators[drLayer].color+'); width: 100%; height: 5px;'">&nbsp;</div>
+                    <div style="background-image: linear-gradient(to right, red, yellow, green); width: 100%; height: 5px;">&nbsp;</div>
                     <span style="float: left;">Low</span>
                     <span style="float: right">High</span>
                 </div>
@@ -107,10 +108,10 @@
                         <span class="legend-color" style="background-color: #0066ff">&nbsp;</span>&nbsp;County Awards
                     </div>
                 </div>
-
-                <div class="county-selecter" style="width: 230px">
-                    <CountySelecter style="width: 230px" @selected="countySelected" :options="countyList"/>
+                <div class="county-selecter">
+                    <CountySelecter style="width: 210px" @selected="countySelected" :options="countyList"/>
                 </div>
+
             </div>
 
             <!--
@@ -127,32 +128,32 @@
         </div>
     </div>
     <div class="tutorial">
-        <div class="tutorial-text tutorial-text-legend" @click="showTutorial('selecter')">
-            <i class="el-icon-top-left" style="float: left; font-size: 150%;"></i>
-            <p style="margin: 0 0 0 40px;">
-                Welcome to APRED! Just a few notes about our platform.<br> 
-                Here, you can select the disaster types to show on the map.
-                <br>
-                <br>
-                <el-button type="primary" size="small">Next</el-button>
-            </p>
-        </div> 
-        <div class="tutorial-text tutorial-text-selecter" @click="showTutorial('tab')">
-            <i class="el-icon-top-right" style="float: right; font-size: 150%;"></i>
-            <p style="margin: 0 40px 0 0 0;">
-                Search and select a county here, or you can click a county on the map to show details.
-                <br>
-                <br>
-                <el-button type="primary" size="small">Next</el-button>
-            </p>
-        </div> 
-        <div class="tutorial-text tutorial-text-tab" @click="showTutorial()">
+        <div class="tutorial-text tutorial-text-tab" @click="showTutorial('legend')">
             <i class="el-icon-top" style="font-size: 150%; font-weight: bold;"/>
             <p style="margin: 0 40px 0 0 0;">
-                Switch tabs to show different information layers.
+                Welcome to APRED! Let us quickly introduce you to our platform.<br> 
+                Here you can switch tabs to show different information layers.
                 <br>
                 <br>
-                <el-button type="primary" size="small">Start!</el-button>
+                <el-button type="primary" size="small">Next</el-button>
+            </p>
+        </div> 
+        <div class="tutorial-text tutorial-text-legend" @click="showTutorial('county')">
+            <i class="el-icon-right" style="float: right; font-size: 150%;"></i>
+            <p style="margin: 0 0 0 40px;">
+                Select date range, and various other options for each information layers.
+                <br>
+                <br>
+                <el-button type="primary" size="small">Next</el-button>
+            </p>
+        </div> 
+        <div class="tutorial-text tutorial-text-county" @click="showTutorial()">
+            <i class="el-icon-right" style="float: right; font-size: 150%;"></i>
+            <p style="margin: 0 40px 0 0 0;">
+                Here, you can search and select a county to show the county detail. You can also click a county on the map.
+                <br>
+                <br>
+                <el-button type="primary" size="small">Done!</el-button>
             </p>
         </div> 
     </div>
@@ -214,15 +215,15 @@ export default class Disaster extends Vue {
     cutterIndicators = {
         "SOC": {
             name: "Social",
-            color: "#a00",
+            color: "#444",
         },
         "ECON": {
             name: "Economic",
-            color: "#0a0",
+            color: "#444",
         },
         "IHFR": {
             name: "Infrastructure",
-            color: "#00a",
+            color: "#444",
         },
         "COMM": {
             name: "Community Capital",
@@ -420,14 +421,24 @@ export default class Disaster extends Vue {
     loadCutters(year, measure) {
         //create source / layer
         this.map.addSource('dr'+measure, { type: "geojson", data: this.geojson });
-
         this.map.addLayer({
             "id": "dr"+measure,
             "type": "fill",
             "source": "dr"+measure,
             "paint": {
-                "fill-opacity": ['get', 'resilience'],
-                "fill-color": this.cutterIndicators[measure].color,
+                //"fill-opacity": ['get', 'resilience'],
+                //"fill-color": this.cutterIndicators[measure].color,
+                'fill-color': [
+                    'interpolate',
+                    ['linear'],
+                    [ "get", "resilience" ],
+                    0,
+                    'red',
+                    0.5,
+                    'yellow',
+                    1,
+                    'green'
+                ]
             },
             layout: {
                 visibility: 'none',
@@ -443,7 +454,7 @@ export default class Disaster extends Vue {
         this.map = new mapboxgl.Map({
             container: 'map', // HTML container id
             style: 'mapbox://styles/mapbox/light-v10', // style URL
-            center: [-110, 41.5], // starting position as [lng, lat]
+            center: [-100, 41.5], // starting position as [lng, lat]
             minZoom: 2,
             pitch: 30, // pitch in degrees
             //bearing: 10, // bearing in degrees
@@ -704,9 +715,8 @@ export default class Disaster extends Vue {
                     //need to reset display from default(none) to block for smooth animation initially
                     const tutorial = document.getElementsByClassName("tutorial")[0];
                     tutorial.style.display = "block";
-
                     this.$nextTick(()=>{
-                        this.showTutorial('legend');
+                        this.showTutorial('tab');
                     });
                 }
             });
@@ -724,23 +734,23 @@ export default class Disaster extends Vue {
         if(text) text.classList.remove("tutorial-text-show");
 
         switch(page) {
-        case "legend":
-            item = document.getElementsByClassName("legend")[0];
-            text = document.getElementsByClassName("tutorial-text-legend")[0];
-            text.style["top"] = (item.offsetTop + 240)+"px";
-            text.style["left"] = (item.offsetLeft + 220)+"px";
-            break;
-        case "selecter":
-            item = document.getElementsByClassName("county-selecter")[0];
-            text = document.getElementsByClassName("tutorial-text-selecter")[0];
-            text.style["top"] = (item.offsetTop + 100)+"px";
-            text.style["left"] = (item.offsetLeft - 500)+"px";
-            break;
         case "tab":
             item = document.getElementsByClassName("tabs")[0];
             text = document.getElementsByClassName("tutorial-text-tab")[0];
-            text.style["top"] = (item.offsetTop + 120)+"px";
-            text.style["left"] = (item.offsetLeft + 250)+"px";
+            text.style["top"] = (item.offsetTop + 110)+"px";
+            text.style["left"] = (item.offsetLeft + 20)+"px";
+            break;
+        case "legend":
+            item = document.getElementsByClassName("legend")[0];
+            text = document.getElementsByClassName("tutorial-text-legend")[0];
+            text.style["top"] = (item.offsetTop + 60)+"px";
+            text.style["left"] = (item.offsetLeft - 420)+"px";
+            break;
+        case "county":
+            item = document.getElementsByClassName("county-selecter")[0];
+            text = document.getElementsByClassName("tutorial-text-county")[0];
+            text.style["top"] = (item.offsetTop + 50)+"px";
+            text.style["left"] = (item.offsetLeft - 420)+"px";
             break;
         default:
             tutorial.classList.remove("tutorial-active");
@@ -927,8 +937,9 @@ h4 {
     text-transform: uppercase;
     font-size: 80%;
     border-radius: 5px;
+    margin-right: 40px;
     
-    float: left; 
+    float: right;
     z-index: 1; 
     position: relative; 
     width: 190px;
@@ -965,10 +976,12 @@ h4 {
     
 }
 .county-selecter {
-    margin-right: 30px;
     float: right; 
     z-index: 1; 
+    margin-right: 40px;
     position: relative; 
+    clear: right;
+    margin-top: 20px;
 }
 
 @media (max-width: 600px) {
@@ -993,7 +1006,7 @@ h4 {
     }
     .tutorial-text {
         position: fixed;
-        width: 500px;
+        width: 400px;
         color: white;
         opacity: 0;
         transition: opacity 1s;

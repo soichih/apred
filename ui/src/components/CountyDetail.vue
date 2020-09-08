@@ -20,7 +20,7 @@
                 </el-col>
                 <el-col :span="9" class="border-left demo">
                     <p style="margin: 0; float: left;">
-                        <span class="sub-heading">Population</span><br>
+                        <span class="sub-heading">Population <small>(ACS)</small></span><br>
                         <span class="primary" v-if="detail.population"> {{detail.population | formatNumber}}</span>
                         <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
                     </p>
@@ -197,7 +197,8 @@
             <br>
             <h3>Storm History</h3>
             <p>This graph shows the counts of storm event published by NOAA since 1950s.</p>
-            <p>Storm Data has gone through many changes and versions over the years. The source data ingested into the database are widely varied and leads to many questions about the precision and accuracy of the location data. Please see <a href="https://www.ncdc.noaa.gov/stormevents/details.jsp" target="noaa">https://www.ncdc.noaa.gov/stormevents/faq.jsp</a> for more detail</p>
+            <p>Storm data has gone through many changes and versions over the years. The source data ingested into the database are widely varied and leads to many questions about the precision and accuracy of the location data. Please see <a href="https://www.ncdc.noaa.gov/stormevents/details.jsp" target="noaa">https://www.ncdc.noaa.gov/stormevents/faq.jsp</a> for more detail.</p>
+            <p>You can click on the chart legend to select or deselect which storm events to show on the graph.</p>
             <Plotly :data="stormData" :layout="stormLayout" :display-mode-bar="false"></Plotly>
             <br>
             <br>
@@ -1025,7 +1026,6 @@ h4 {
     display: block;
     z-index: 1;
     top: 120px;
-    //width: 150px;
     background-color: #fff9;
     padding: 10px;
     text-transform: uppercase;
