@@ -9,10 +9,11 @@
                 <div style="padding-top: 10px; margin-bottom: 10px;">
                     <el-tabs v-model="mode" class="tabs">
                         <el-tab-pane name="dr" label="FEMA Disaster Declarations"></el-tab-pane>
-                        <el-tab-pane name="eda2018" label="EDA Supplemental Awards"></el-tab-pane>
+                        <el-tab-pane name="eda" label="EDA Supplemental Awards"></el-tab-pane>
                         <el-tab-pane name="resilience" label="Disaster Resilience"></el-tab-pane>
                     </el-tabs>
                 </div>
+
                 <div class="legend" v-if="mode == 'dr'">
                     <p>
                         <b>Date Range</b>
@@ -69,11 +70,11 @@
                         <el-radio v-model="drLayer" :label="cid" @change="showDRLayers" :style="{color: info.color}">{{info.name}}</el-radio>
                     </div>
                     <br>
-                    <div :style="'background-image: linear-gradient(to right, white, '+cutterIndicators[drLayer].color+'); width: 100%; height: 5px;'">&nbsp;</div>
+                    <div style="background-image: linear-gradient(to right, red, yellow, green); width: 100%; height: 5px;">&nbsp;</div>
                     <span style="float: left;">Low</span>
                     <span style="float: right">High</span>
                 </div>
-                <div class="legend" v-if="mode == 'eda2018'">
+                <div class="legend" v-if="mode == 'eda'">
                     <!--
                     <p>
                         <b>EDA2018 Awards</b>
@@ -81,9 +82,24 @@
                     -->
                     <p>
                         <b>Year</b>
-                        <el-select v-model="edaRange" placeholder="Select" size="mini">
-                            <el-option v-for="item in [{value: 'recent', label:'2018'}]" :key="item.value" :label="item.label" :value="item.value"> </el-option>
+                        <!--
+                        <el-select v-model="edaYear" placeholder="Select" size="mini">
+                            <el-option v-for="item in edaYears" :key="item.value" :label="item.label" :value="item.value"> </el-option>
                         </el-select>
+                        -->
+                        <el-row :gutter="5">
+                            <el-col :span="4">
+                                 <el-button icon="el-icon-back" size="mini" @click="edaPrevious" :disabled="edaYear == '2012'"></el-button>
+                            </el-col>
+                            <el-col :span="16">
+                                <el-select v-model="edaYear" placeholder="Select" size="mini">
+                                    <el-option v-for="item in edaYears" :key="item.value" :label="item.label" :value="item.value"> </el-option>
+                                </el-select>
+                            </el-col>
+                            <el-col :span="4">
+                                 <el-button icon="el-icon-right" size="mini" @click="edaNext" :disabled="edaYear == '2020' || edaYear == 'all'"></el-button>
+                            </el-col>
+                        </el-row>
                     </p>
                     <div class="legend-item">
                         <span class="legend-color" style="background-color: #00ff00">&nbsp;</span>&nbsp;Statewide Awards
@@ -92,10 +108,10 @@
                         <span class="legend-color" style="background-color: #0066ff">&nbsp;</span>&nbsp;County Awards
                     </div>
                 </div>
-
-                <div class="county-selecter" style="width: 230px">
-                    <CountySelecter style="width: 230px" @selected="countySelected" :options="countyList"/>
+                <div class="county-selecter">
+                    <CountySelecter style="width: 210px" @selected="countySelected" :options="countyList"/>
                 </div>
+
             </div>
 
             <!--
@@ -112,32 +128,32 @@
         </div>
     </div>
     <div class="tutorial">
-        <div class="tutorial-text tutorial-text-legend" @click="showTutorial('selecter')">
-            <i class="el-icon-top-left" style="float: left; font-size: 150%;"></i>
-            <p style="margin: 0 0 0 40px;">
-                Welcome to APRED! Just a few notes about our platform.<br> 
-                Here, you can select the disaster types to show on the map.
-                <br>
-                <br>
-                <el-button type="primary" size="small">Next</el-button>
-            </p>
-        </div> 
-        <div class="tutorial-text tutorial-text-selecter" @click="showTutorial('tab')">
-            <i class="el-icon-top-right" style="float: right; font-size: 150%;"></i>
-            <p style="margin: 0 40px 0 0 0;">
-                Search and select a county here, or you can click a county on the map to show details.
-                <br>
-                <br>
-                <el-button type="primary" size="small">Next</el-button>
-            </p>
-        </div> 
-        <div class="tutorial-text tutorial-text-tab" @click="showTutorial()">
+        <div class="tutorial-text tutorial-text-tab" @click="showTutorial('legend')">
             <i class="el-icon-top" style="font-size: 150%; font-weight: bold;"/>
             <p style="margin: 0 40px 0 0 0;">
-                Switch tabs to show different information layers.
+                Welcome to APRED! Let us quickly introduce you to our platform.<br> 
+                Here you can switch tabs to show different information layers.
                 <br>
                 <br>
-                <el-button type="primary" size="small">Start!</el-button>
+                <el-button type="primary" size="small">Next</el-button>
+            </p>
+        </div> 
+        <div class="tutorial-text tutorial-text-legend" @click="showTutorial('county')">
+            <i class="el-icon-right" style="float: right; font-size: 150%;"></i>
+            <p style="margin: 0 0 0 40px;">
+                Select date range, and various other options for each information layers.
+                <br>
+                <br>
+                <el-button type="primary" size="small">Next</el-button>
+            </p>
+        </div> 
+        <div class="tutorial-text tutorial-text-county" @click="showTutorial()">
+            <i class="el-icon-right" style="float: right; font-size: 150%;"></i>
+            <p style="margin: 0 40px 0 0 0;">
+                Here, you can search and select a county to show the county detail. You can also click a county on the map.
+                <br>
+                <br>
+                <el-button type="primary" size="small">Done!</el-button>
             </p>
         </div> 
     </div>
@@ -193,20 +209,21 @@ export default class Disaster extends Vue {
     resYear = null; //will be set to "2018" once cutter info is loaded
     resYears = [];
 
-    edaRange = '2018';
+    edaYear = 'all';
+    edaYears = [];
 
     cutterIndicators = {
         "SOC": {
             name: "Social",
-            color: "#a00",
+            color: "#444",
         },
         "ECON": {
-            name: "Economical",
-            color: "#0a0",
+            name: "Economic",
+            color: "#444",
         },
         "IHFR": {
             name: "Infrastructure",
-            color: "#00a",
+            color: "#444",
         },
         "COMM": {
             name: "Community Capital",
@@ -300,6 +317,21 @@ export default class Disaster extends Vue {
         }
     }
     
+    @Watch('edaYear')
+    onEdaYearChange(v) {
+        if(!v) return;
+        if(this.edaYear == "all") {
+            this.map.setFilter('eda', null); //reset filter
+            return;
+        }
+        const startDate = new Date(this.edaYear+"-01-01").getTime();
+        const endDate = new Date(this.edaYear+"-12-31").getTime();
+        this.map.setFilter('eda', [
+            "all",     
+            [">=", ['get', 'date'], startDate],
+            ["<=", ['get', 'date'], endDate]
+        ]);
+    }
  
     created() {
         const h = window.localStorage.getItem("hiddenLayers");
@@ -321,6 +353,10 @@ export default class Disaster extends Vue {
                 {value: year.toString(), label: year.toString()},
             );
         }
+        this.edaYears.push({value: 'all', label: 'All'});
+        for(let year = 2020; year >= 2012; --year) {
+            this.edaYears.push({value: year.toString(), label: year.toString()});
+        }
     }
 
     @Watch('mode')
@@ -340,7 +376,7 @@ export default class Disaster extends Vue {
         case "resilience":
             this.showDRLayers();
             break;
-        case "eda2018":
+        case "eda":
             this.showEDA2018Layers();
             break;
         }
@@ -374,25 +410,35 @@ export default class Disaster extends Vue {
     }
     hideEDA2018Layers() {
         this.map.setLayoutProperty('eda-labels', 'visibility', 'none');
-        this.map.setLayoutProperty('eda2018', 'visibility', 'none');
+        this.map.setLayoutProperty('eda', 'visibility', 'none');
     }
 
     showEDA2018Layers() {
         this.map.setLayoutProperty('eda-labels', 'visibility', 'visible');
-        this.map.setLayoutProperty('eda2018', 'visibility', 'visible');
+        this.map.setLayoutProperty('eda', 'visibility', 'visible');
     }
 
     loadCutters(year, measure) {
         //create source / layer
         this.map.addSource('dr'+measure, { type: "geojson", data: this.geojson });
-
         this.map.addLayer({
             "id": "dr"+measure,
             "type": "fill",
             "source": "dr"+measure,
             "paint": {
-                "fill-opacity": ['get', 'resilience'],
-                "fill-color": this.cutterIndicators[measure].color,
+                //"fill-opacity": ['get', 'resilience'],
+                //"fill-color": this.cutterIndicators[measure].color,
+                'fill-color': [
+                    'interpolate',
+                    ['linear'],
+                    [ "get", "resilience" ],
+                    0,
+                    'red',
+                    0.5,
+                    'yellow',
+                    1,
+                    'green'
+                ]
             },
             layout: {
                 visibility: 'none',
@@ -408,7 +454,7 @@ export default class Disaster extends Vue {
         this.map = new mapboxgl.Map({
             container: 'map', // HTML container id
             style: 'mapbox://styles/mapbox/light-v10', // style URL
-            center: [-110, 41.5], // starting position as [lng, lat]
+            center: [-100, 41.5], // starting position as [lng, lat]
             minZoom: 2,
             pitch: 30, // pitch in degrees
             //bearing: 10, // bearing in degrees
@@ -521,7 +567,6 @@ export default class Disaster extends Vue {
                 return res.json()
             }).then(data=>{
                 const geojson = {type: "FeatureCollection", features: []};
-
                 for(const recid in data) {
                     const rec = data[recid];
                     const ep = 0.15;
@@ -538,21 +583,33 @@ export default class Disaster extends Vue {
                             ]
                         },
                         properties: {
-                            height: rec.award_amount/50,
+                            height: rec.award_amount/20,
                             //awardStr: "$"+this.$options.filters.formatNumber(rec.award_amount/1000)+"k",
+                            date: new Date(rec.grant_award_date).getTime(),
                             color: rec.statewide?'#00ff00':'#0066ff',
                         }
                     });
                 }
-                this.map.addSource('eda2018', { type: "geojson", data: geojson });
+                /*
+                const startDate = new Date("2019-01-01").getTime();
+                const endDate = new Date("2020-01-01").getTime();
+                */
+                this.map.addSource('eda', { type: "geojson", data: geojson });
                 this.map.addLayer({
-                    'id': 'eda2018',
+                    'id': 'eda',
                     'type': 'fill-extrusion',
-                    "source": "eda2018",
+                    "source": "eda",
                     "paint": {
                         "fill-extrusion-color": ['get', 'color'],
                         "fill-extrusion-height": ['get', 'height'],
                     },
+                    /*
+                    filter: [
+                         "all",     
+                        [">=", ['get', 'date'], startDate],
+                        ["<=", ['get', 'date'], endDate]
+                    ],
+                    */
                     layout: {
                         visibility: 'none', 
                     }
@@ -574,12 +631,12 @@ export default class Disaster extends Vue {
                         }
                     });
                 }
-                this.map.addSource('eda2018-point', { type: "geojson", data: geojsonPoint });
+                this.map.addSource('eda-point', { type: "geojson", data: geojsonPoint });
 
                 this.map.addLayer({
                     'id': 'eda-labels',
                     'type': 'symbol',
-                    "source": "eda2018-point",
+                    "source": "eda-point",
                     layout: {
                         visibility: 'none', 
                         'text-field': ['get', 'awardStr'],
@@ -658,9 +715,8 @@ export default class Disaster extends Vue {
                     //need to reset display from default(none) to block for smooth animation initially
                     const tutorial = document.getElementsByClassName("tutorial")[0];
                     tutorial.style.display = "block";
-
                     this.$nextTick(()=>{
-                        this.showTutorial('legend');
+                        this.showTutorial('tab');
                     });
                 }
             });
@@ -678,23 +734,23 @@ export default class Disaster extends Vue {
         if(text) text.classList.remove("tutorial-text-show");
 
         switch(page) {
-        case "legend":
-            item = document.getElementsByClassName("legend")[0];
-            text = document.getElementsByClassName("tutorial-text-legend")[0];
-            text.style["top"] = (item.offsetTop + 240)+"px";
-            text.style["left"] = (item.offsetLeft + 220)+"px";
-            break;
-        case "selecter":
-            item = document.getElementsByClassName("county-selecter")[0];
-            text = document.getElementsByClassName("tutorial-text-selecter")[0];
-            text.style["top"] = (item.offsetTop + 100)+"px";
-            text.style["left"] = (item.offsetLeft - 500)+"px";
-            break;
         case "tab":
             item = document.getElementsByClassName("tabs")[0];
             text = document.getElementsByClassName("tutorial-text-tab")[0];
-            text.style["top"] = (item.offsetTop + 120)+"px";
-            text.style["left"] = (item.offsetLeft + 250)+"px";
+            text.style["top"] = (item.offsetTop + 110)+"px";
+            text.style["left"] = (item.offsetLeft + 20)+"px";
+            break;
+        case "legend":
+            item = document.getElementsByClassName("legend")[0];
+            text = document.getElementsByClassName("tutorial-text-legend")[0];
+            text.style["top"] = (item.offsetTop + 60)+"px";
+            text.style["left"] = (item.offsetLeft - 420)+"px";
+            break;
+        case "county":
+            item = document.getElementsByClassName("county-selecter")[0];
+            text = document.getElementsByClassName("tutorial-text-county")[0];
+            text.style["top"] = (item.offsetTop + 50)+"px";
+            text.style["left"] = (item.offsetLeft - 420)+"px";
             break;
         default:
             tutorial.classList.remove("tutorial-active");
@@ -792,6 +848,18 @@ export default class Disaster extends Vue {
         this.resYear = (parseInt(this.resYear)+1).toString();
     }
 
+    edaPrevious() {
+        if(this.edaYear == "all") {
+            this.edaYear = "2020";
+            return;
+        }
+        this.edaYear = (parseInt(this.edaYear)-1).toString();
+    }
+
+    edaNext() {
+        this.edaYear = (parseInt(this.edaYear)+1).toString();
+    }
+
     findIndexDrRange(range) {
         let idx = null;
         this.drRanges.forEach((i, _idx)=>{
@@ -869,8 +937,9 @@ h4 {
     text-transform: uppercase;
     font-size: 80%;
     border-radius: 5px;
+    margin-right: 40px;
     
-    float: left; 
+    float: right;
     z-index: 1; 
     position: relative; 
     width: 190px;
@@ -907,10 +976,12 @@ h4 {
     
 }
 .county-selecter {
-    margin-right: 30px;
     float: right; 
     z-index: 1; 
+    margin-right: 40px;
     position: relative; 
+    clear: right;
+    margin-top: 20px;
 }
 
 @media (max-width: 600px) {
@@ -935,7 +1006,7 @@ h4 {
     }
     .tutorial-text {
         position: fixed;
-        width: 500px;
+        width: 400px;
         color: white;
         opacity: 0;
         transition: opacity 1s;

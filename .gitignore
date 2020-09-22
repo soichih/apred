@@ -29,3 +29,5 @@ data
 #loaded in ctil webserver
 data/COVID2019StateTrackingChart.csv
 data/travelrestriction.json
+
+**/barn
