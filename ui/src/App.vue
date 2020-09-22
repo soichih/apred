@@ -1,7 +1,7 @@
 <template>
-  <div id="app">
-    <router-view/>
-  </div>
+    <div id="app">
+        <router-view/>
+    </div>
 </template>
 
 <script>
@@ -14,21 +14,6 @@ import { Component, Watch, Vue, State } from 'vue-property-decorator';
 Vue.filter("formatNumber", (value)=>{
     return numeral(value).format("0,0"); // displaying other groupings/separators is possible, look at the docs
 });
-
-/*
-import Vuex from 'vuex'
-Vue.use(Vuex)
-const store = new Vuex.Store({
-    state: {
-        count: 0,
-    },
-    mutations: {
-        increment (state) {
-            state.count++
-        },
-    }
-})
-*/
 
 export default {
     name: 'App',

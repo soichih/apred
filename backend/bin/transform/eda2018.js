@@ -54,16 +54,6 @@ async.eachSeries(need_geocode, (fain, next_fain)=>{
         if(res.data.status == "OK") {
             let result = res.data.results[0]
             console.dir(result);
-            /*
-            { types: [ 'administrative_area_level_1', 'political' ],
-              address_components:
-               [ { types: [Array], short_name: 'U', long_name: 'U' },
-                 { types: [Array], short_name: 'se', long_name: 'Sweden' } ],
-              geometry:
-               { location_type: 'APPROXIMATE',
-                 location: { lat: 59.8, lng: 15.55 },
-                 viewport: { northeast: [Object], southwest: [Object] } } }
-            */
             rec.lat = result.geometry.location.lat;
             rec.lon = result.geometry.location.lng;
             geocodes[fain] = rec;
@@ -79,6 +69,5 @@ async.eachSeries(need_geocode, (fain, next_fain)=>{
 
     //store previously coded geocode
     fs.writeFileSync(__dirname+'/../../../data/fain_geocodes.json', JSON.stringify(geocodes));
-
     fs.writeFileSync(__dirname+'/../../../data/eda2018.json', JSON.stringify(eda2018));
 });
