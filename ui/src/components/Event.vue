@@ -12,14 +12,14 @@
 
         <h3 v-if="event.type == 'dr'" :style="eventIconStyle">
             <span style="float: right;">
-                <el-tag class="program-tag" size="small" type="warning" v-if="event.hmProgramDeclared" title="Hazard Mitigation Program">
-                    <a href="https://www.fema.gov/media-library/assets/documents/107704" target="fema">⚠️ </a>
+                <el-tag class="program-tag" size="small" type="warning" v-if="event.hmProgramDeclared">
+                    <a href="https://www.fema.gov/grants/mitigation/hazard-mitigation" target="fema">Hazard Mitigation</a>
                 </el-tag>&nbsp;
-                <el-tag class="program-tag" size="small" type="danger" v-if="event.ihProgramDeclared" title="Individuals and Households Program">
-                    <a href="https://www.fema.gov/media-library/assets/documents/24945" target="fema"><i class="el-icon-house"/></a>
+                <el-tag class="program-tag" size="small" type="danger" v-if="event.ihProgramDeclared">
+                    <a href="https://www.fema.gov/assistance/individual/program" target="fema">Individuals and Households</a>
                 </el-tag>&nbsp;
                 <el-tag class="program-tag" size="small" v-if="event.iaProgramDeclared" title="Individual Assistance Program">
-                    <a href="https://www.fema.gov/media-library/assets/documents/133744" target="fema"><i class="el-icon-user"/></a>
+                    <a href="https://www.fema.gov/assistance/individual" target="fema">Individual Assistance</a>
                 </el-tag>&nbsp;
                 <a :href="'https://www.fema.gov/disaster/'+event.disasterNumber" target="fema">
                     <el-tag size="small" effect="plain" type="info">Disaster # {{event.disasterNumber}}</el-tag>&nbsp;
@@ -57,9 +57,8 @@
             </small>
             <slot/>
         
+            <!--
             <p style="line-height: 200%; margin-bottom: 0;">
-                <!-- https://www.fema.gov/openfema-dataset-disaster-declarations-summaries-v1 -->
-
                 <el-tag class="program-tag" size="small" effect="plain" type="info" style="cursor: pointer"
                     title="Total project amount"
                     v-if="event.paProgramDeclared" @click="show_pa = !show_pa">
@@ -110,6 +109,7 @@
                     <a href="https://www.fema.gov/media-library/assets/documents/90743" target="fema">Public Assistance Program</a>
                 </p>
             </slide-up-down>
+            -->
         </div>
 
         <div v-else-if="event.type == 'eda2018'">
