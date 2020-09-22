@@ -1,7 +1,6 @@
 <template>
 <div>
-    <br>
-    <el-button type="primary" plain @click="showDetail = true" v-if="!showDetail">
+    <el-button type="primary" plain @click="showDetail = true" v-if="!showDetail" size="mini">
         <i class="el-icon-caret-right"/> This incident may be eligible for <b>2018</b> disaster supplemental funding
     </el-button>
 
