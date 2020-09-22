@@ -57,18 +57,115 @@ async.series([
 ], err=>{
     if(err) throw err;
 
-    let recs = [];
+    //load fips info to each cutter counties
     for(let fips in data.cutter.counties) {
-      let fips_rec = data.fips.find(rec=>(rec.statefips+"."+rec.countyfips == fips));
-      if(!fips_rec) throw "no such fip:"+fips;
-      recs.push(Object.assign(data.cutter.counties[fips], {
-          fips,
-          state: fips_rec.state,
-          stabb: fips_rec.stabb,
-          county: fips_rec.county,
-      }));
+        let fips_rec = data.fips.find(rec=>(rec.statefips+"."+rec.countyfips == fips));
+        if(!fips_rec) throw "no such fip:"+fips;
+        Object.assign(data.cutter.counties[fips], {
+            fips,
+            state: fips_rec.state,
+            stabb: fips_rec.stabb,
+            county: fips_rec.county,
+        });
     }
     fs.writeFileSync(__dirname+"/../../../data/cutter2.json", JSON.stringify(data.cutter));
+
+    //create cutter_long.json which contains summarized indices for each county 
+    //aggregate measure into 4 big categories like..
+    /*
+  "56.029": {
+    "SOC": [
+      0.611,
+      0.599,
+      0.624,
+      0.593,
+      0.614,
+      0.623,
+      0.599
+    ],
+    "ECON": [
+      0.721,
+      0.726,
+      0.726,
+      0.706,
+      0.694,
+      0.677,
+      0.68
+    ],
+    "IHFR": [
+      0.531,
+      0.512,
+      0.54,
+      0.596,
+      0.601,
+      0.595,
+      0.651
+    ],
+    "COMM": [
+      0.702,
+      0.705,
+      0.593,
+      0.621,
+      0.719,
+      0.614,
+      0.391
+    ]
+  },
+    */
+   
+    //find min/max for each measure so we can normalize values
+    let mins = {}; 
+    let maxs = {}; 
+    /*
+    {
+        "12": 0.2,
+        "10": 0.1,
+        ...
+    }
+    */
+    for(let fips in data.cutter.counties) {
+        for(let id in data.cutter.counties[fips]) {
+            let values = Object.values(data.cutter.counties[fips][id]);
+            values = values.filter(v=>v !== undefined);
+            let min = Math.min(...values);
+            let max = Math.max(...values);
+            if(mins[id] === undefined) mins[id] = min;
+            else mins[id] = Math.min(mins[id], min);
+            if(maxs[id] === undefined) maxs[id] = max;
+            else maxs[id] = Math.max(maxs[id], max);
+        }
+    }
+
+    //for each county
+    let summaries = {};
+    for(let fips in data.cutter.counties) {
+        summaries[fips] = {};
+        //iterate over indicator groups
+        for(let indicator in data.cutter.indicators) {
+            summaries[fips][indicator] = []; //contains years
+            //we process each year separately
+            for(let year = 2012; year <= 2018; ++year) {
+                let total = 0;
+                let counts = 0;
+                //then iterate over measure id (source.id) and aggregate that year
+                data.cutter.indicators[indicator].sources.forEach(source=>{
+                    if(data.cutter.counties[fips][source.id]) {
+                        const v = data.cutter.counties[fips][source.id][year.toString()]
+                        if(v !== undefined) {
+                            let normalized = (v - mins[source.id]) / (maxs[source.id] - mins[source.id]);
+                            total += normalized;
+                            counts++;
+                        }
+                    }
+                });
+                let avg = null;
+                if(counts > 0) avg = total/counts;
+                summaries[fips][indicator].push(avg);
+            }
+        }
+    }
+
+    fs.writeFileSync(__dirname+"/../../../data/cutter_long.json", JSON.stringify(summaries));
 });
 
 function load_fips(cb) {
@@ -105,7 +202,6 @@ function load_dr(cb) {
     let count_missing = 0;
     
     let dr = require(__dirname+'/../../../raw/dr.json');
-
     dr.forEach(rec=>{
         /*
         {
@@ -128,6 +224,7 @@ function load_dr(cb) {
         }
         if(!data.cutter.counties[fips][rec.measure]) data.cutter.counties[fips][rec.measure] = {};
         data.cutter.counties[fips][rec.measure][rec.year] = parseFloat(v);
+        
         //aggregate average across whole country
         if(!sources[rec.measure]) sources[rec.measure] = {};
         if(!sources[rec.measure][rec.year]) sources[rec.measure][rec.year] = {
@@ -141,8 +238,8 @@ function load_dr(cb) {
         if(!source.states[rec.statefips]) source.states[rec.statefips] = { vs: [] };
         source.states[rec.statefips].vs.push(parseFloat(v));
     });
-    console.log("coudn't find fips for", count_missing, "out of", dr.length, "drs");
 
+    //compute average/sdev
     for(let measure in sources) {
         for(let year in sources[measure]) {
             let source = sources[measure][year];
@@ -166,9 +263,6 @@ function load_dr(cb) {
         }
     }
     
-    //console.log(JSON.stringify(sources, null, 4));
-    //process.exit(1);
-
     for(let indicator in data.cutter.indicators) {
         data.cutter.indicators[indicator].sources.forEach(source=>{
             source.stats = sources[source.id];

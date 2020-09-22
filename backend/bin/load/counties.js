@@ -128,7 +128,7 @@ acs.forEach(rec=>{
         groups: [
             {name: "0-17", y: []},
             {name: "18-24", y: []},
-            {name: "25-44", y: []},
+            {name: "25-64", y: []},
             {name: "65+", y: []},
         ],
         /*
@@ -598,9 +598,9 @@ function handleBVINaics(cb) {
                 emp_v: [],
             }
             for(let year of years) {
-                console.dir(counties[fips].bvis2[naics]);
-                console.log("looking for", year);
-                console.dir(counties[fips].bvis2[naics][year]);
+                //console.dir(counties[fips].bvis2[naics]);
+                //console.log("looking for", year);
+                //console.dir(counties[fips].bvis2[naics][year]);
                 let o = counties[fips].bvis2[naics][year];
                 info.estab.push(o.estab);
                 info.estab_v.push(o.estab_v);
@@ -620,78 +620,79 @@ handleBVI(err=>{
     handleBVINaics(err=>{
         if(err) throw err;
 
+        /*
         handlePublicAssistances(err=>{
                 if(err) throw err;
-        
-            //sort some arrays
-            for(let fips in counties) {
-                if(counties[fips].bvis) counties[fips].bvis.sort((a,b)=>a.year - b.year);
-                if(counties[fips].disasters) counties[fips].disasters.sort((a,b)=>new Date(a.declarationDate) - new Date(b.declarationDate));
-            }
-          //create county/state summary json for each year
-    /*
-     statefips: '10',
-      countyfips: '001',
-      county: 'Kent',
-      state: 'Delaware',
-      area: 586.179,
-      _dd: undefined,
-      eda2018: [],
-      disasters: [
-        {
-          femaDeclarationString: 'DR-126-DE',
-          disasterNumber: '126',
-          state: 'DE',
-          declarationType: 'DR',
-          declarationDate: '1962-03-09T05:00:00.000Z',
-          fyDeclared: '1962',
-          incidentType: 'Flood',
-          declarationTitle: 'SEVERE STORMS, HIGH TIDES & FLOODING',
-          ihProgramDeclared: '0',
-          iaProgramDeclared: '1',
-          paProgramDeclared: '1',
-          hmProgramDeclared: '1',
-          incidentBeginDate: '1962-03-09T05:00:00.000Z',
-          incidentEndDate: '1962-03-09T05:00:00.000Z',
-          disasterCloseoutDate: null,
-          fipsStateCode: '10',
-          fipsCountyCode: '000',
-          placeCode: '0',
-          designatedArea: 'Statewide',
-          declarationRequestNumber: '62011',
-          hash: '00ba0f29d46437cbe75fcfdb67925ce3',
-          lastRefresh: '2019-07-26T18:49:32.222Z',
-          id: '5d1bceafd5b39c032f260362',
-          statewide: true
-        },
-    */
+        */
+    
+        //sort some arrays
+        for(let fips in counties) {
+            if(counties[fips].bvis) counties[fips].bvis.sort((a,b)=>a.year - b.year);
+            if(counties[fips].disasters) counties[fips].disasters.sort((a,b)=>new Date(a.declarationDate) - new Date(b.declarationDate));
+        }
+      //create county/state summary json for each year
+/*
+ statefips: '10',
+  countyfips: '001',
+  county: 'Kent',
+  state: 'Delaware',
+  area: 586.179,
+  _dd: undefined,
+  eda2018: [],
+  disasters: [
+    {
+      femaDeclarationString: 'DR-126-DE',
+      disasterNumber: '126',
+      state: 'DE',
+      declarationType: 'DR',
+      declarationDate: '1962-03-09T05:00:00.000Z',
+      fyDeclared: '1962',
+      incidentType: 'Flood',
+      declarationTitle: 'SEVERE STORMS, HIGH TIDES & FLOODING',
+      ihProgramDeclared: '0',
+      iaProgramDeclared: '1',
+      paProgramDeclared: '1',
+      hmProgramDeclared: '1',
+      incidentBeginDate: '1962-03-09T05:00:00.000Z',
+      incidentEndDate: '1962-03-09T05:00:00.000Z',
+      disasterCloseoutDate: null,
+      fipsStateCode: '10',
+      fipsCountyCode: '000',
+      placeCode: '0',
+      designatedArea: 'Statewide',
+      declarationRequestNumber: '62011',
+      hash: '00ba0f29d46437cbe75fcfdb67925ce3',
+      lastRefresh: '2019-07-26T18:49:32.222Z',
+      id: '5d1bceafd5b39c032f260362',
+      statewide: true
+    },
+*/
 
-            let years = {
-                //keyed by year, then by disaster type, and array of county fips and state fips
-            }; 
+        let years = {
+            //keyed by year, then by disaster type, and array of county fips and state fips
+        }; 
 
-            for(let fips in counties) {
-                counties[fips].disasters.forEach(dr=>{
-                    let _fips = fips;
-                    if(dr.statewide) {
-                        _fips = dr.fipsStateCode;
-                    }
-                    let date = new Date(dr.incidentBeginDate);
-                    let year = date.getFullYear();
-                    if(!years[year]) years[year] = {};
-                    if(!years[year][dr.incidentType]) years[year][dr.incidentType] = [];
-                    if(!years[year][dr.incidentType].includes(_fips)) years[year][dr.incidentType].push(_fips); 
-                });
-            }
-            console.log("saving years.json");
-            fs.writeFileSync(__dirname+"/../../../data/years.json", JSON.stringify(years));
+        for(let fips in counties) {
+            counties[fips].disasters.forEach(dr=>{
+                let _fips = fips;
+                if(dr.statewide) {
+                    _fips = dr.fipsStateCode;
+                }
+                let date = new Date(dr.incidentBeginDate);
+                let year = date.getFullYear();
+                if(!years[year]) years[year] = {};
+                if(!years[year][dr.incidentType]) years[year][dr.incidentType] = [];
+                if(!years[year][dr.incidentType].includes(_fips)) years[year][dr.incidentType].push(_fips); 
+            });
+        }
+        console.log("saving years.json");
+        fs.writeFileSync(__dirname+"/../../../data/years.json", JSON.stringify(years));
 
-            console.log("saving counties jsons");
-            for(let fips in counties) {
-                fs.writeFileSync(__dirname+"/../../../data/counties/county."+fips+".json", JSON.stringify(counties[fips]));
-            }
-            console.log("all done");
-        });
+        console.log("saving counties jsons");
+        for(let fips in counties) {
+            fs.writeFileSync(__dirname+"/../../../data/counties/county."+fips+".json", JSON.stringify(counties[fips]));
+        }
+        console.log("all done");
     });
 });
 
