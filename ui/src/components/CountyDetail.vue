@@ -30,9 +30,6 @@
                         <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
                     </p>
                     <Plotly :data="demoGraphData" :layout="demoGraphLayout" :display-mode-bar="false"/>
-                    <!--
-                    <Plotly :data="demo2GraphData" :layout="demo2GraphLayout" :display-mode-bar="false"/>
-                    -->
                 </el-col>
                 <el-col :span="5" class="border-left gdp">
                     <p>
@@ -41,7 +38,7 @@
                         <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
                     </p>
                     <p>
-                        <span class="sub-heading">Median Income</span> <small>(BEA 2018)</small><br>
+                        <span class="sub-heading">Median Income</span> <small title="US Census Bureau">(ACS)</small><br>
                         <span class="primary" v-if="detail.medianincome"> ${{detail.medianincome | formatNumber}}</span>
                         <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
                     </p>
@@ -108,17 +105,6 @@
             Businesses that were identified to be especially vulnerable to a disaster are those which are dependent on supply chains,
             have a high reliance on public utilities like water and electricity, or have a large infrastructure footprint and low infrastructure mobility.
         </p>
-
-        <!--
-        <el-row>
-            <el-col :span="12">
-                <Plotly :data="bviEstData" :layout="bviEstLayout" :display-mode-bar="false"></Plotly>
-            </el-col>
-            <el-col :span="12">
-                <Plotly :data="bviEmpData" :layout="bviEmpLayout" :display-mode-bar="false"></Plotly>
-            </el-col>
-        </el-row>
-        -->
         <br>
         <br>
         <div v-for="(data, naics) in bvi2" :key="naics">
@@ -196,10 +182,13 @@
         <div class="page">
             <br>
             <h3>Storm History</h3>
-            <p>This graph shows the counts of storm event published by NOAA since 1950s.</p>
-            <p>Storm data has gone through many changes and versions over the years. The source data ingested into the database are widely varied and leads to many questions about the precision and accuracy of the location data. Please see <a href="https://www.ncdc.noaa.gov/stormevents/details.jsp" target="noaa">https://www.ncdc.noaa.gov/stormevents/faq.jsp</a> for more detail.</p>
-            <p>You can click on the chart legend to select or deselect which storm events to show on the graph.</p>
-            <Plotly :data="stormData" :layout="stormLayout" :display-mode-bar="false"></Plotly>
+            <div v-if="stormData && stormData.length > 0">
+                <p>This graph shows the counts of storm event published by NOAA since 1950s.</p>
+                <p>Storm data has gone through many changes and versions over the years. The source data ingested into the database are widely varied and leads to many questions about the precision and accuracy of the location data. Please see <a href="https://www.ncdc.noaa.gov/stormevents/details.jsp" target="noaa">https://www.ncdc.noaa.gov/stormevents/faq.jsp</a> for more detail.</p>
+                <p>You can click on the chart legend to select or deselect which storm events to show on the graph.</p>
+                <Plotly :data="stormData" :layout="stormLayout" :display-mode-bar="false"></Plotly>
+            </div>
+            <p v-else>No storm data</p>
             <br>
             <br>
             <br>
@@ -272,14 +261,6 @@ export default class CountyDetail extends Vue {
 
     history = [];
 
-    /*
-    bvi = [];
-    bviEstData = null;
-    bviEmpData = null;
-    bviEstLayout = null;
-    bviEmpLayout = null;
-    */
-
     bvi2Layout = {
         height: 100,
         //title: "Establishment",
@@ -300,23 +281,6 @@ export default class CountyDetail extends Vue {
 
     showPastHistory = false;
     shownIndicators = [];
-
-    /*
-    demo2GraphData = [];
-    demo2GraphLayout = {
-        width: 350,
-        height: 200,
-        margin: {
-            l: 30,
-            r: 30,
-            t: 50,
-            b: 30,
-        },
-        barmode: 'stack',
-        'plot_bgcolor': '#0000',
-        'paper_bgcolor': '#0000',
-    }
-    */
 
     demoGraphData = [];
     demoGraphLayout = {
@@ -360,11 +324,9 @@ export default class CountyDetail extends Vue {
 
     update() {
         this.processHistory();
-        //this.processBVI();
         this.processBVI2();
         this.processStorms();
         this.processMap();
-        //this.processDemo2();
         this.processDemo();
     }
 
@@ -440,139 +402,6 @@ export default class CountyDetail extends Vue {
         }
     }
 
-    /*
-    processBVI() {
-        if(!this.detail.bvis) return;
-        this.bviEstLayout = {
-            margin: {
-                l: 30,
-                r: 30,
-                t: 100,
-                //b: 30,
-                //pad: 10,
-            },
-            'paper_bgcolor': '#0000',
-            'plot_bgcolor': '#fff',
-            height: 400,
-            title: 'Business Establishments',
-            xaxis: {tickfont: {
-                size: 14,
-                color: 'rgb(107, 107, 107)'
-            }},
-            yaxis: {
-                titlefont: {
-                    size: 16,
-                    color: 'rgb(107, 107, 107)'
-                },
-                tickfont: {
-                    size: 13,
-                    color: 'rgb(107, 107, 107)'
-                }
-            },
-            legend: {
-                //x: 0,
-                y: 1.15,
-                bgcolor: 'rgba(255, 255, 255, 0)',
-                bordercolor: 'rgba(255, 255, 255, 0)',
-                orientation: 'h',
-            },
-            //barmode: 'stack',
-            //barmode: 'group',
-            //bargroupgap: 0.1
-        }
-
-        this.bviEmpLayout = {
-            margin: {
-                l: 30,
-                r: 30,
-                t: 100,
-                //b: 30,
-                //pad: 10,
-            },
-            'paper_bgcolor': '#0000',
-            'plot_bgcolor': '#fff',
-            height: 400,
-            title: 'Employees',
-            xaxis: {tickfont: {
-                size: 14,
-                color: 'rgb(107, 107, 107)'
-            }},
-            yaxis: {
-                //title: 'Establishments',
-                titlefont: {
-                    size: 16,
-                    color: 'rgb(107, 107, 107)'
-                },
-                tickfont: {
-                    size: 13,
-                    color: 'rgb(107, 107, 107)'
-                }
-            },
-            legend: {
-                //x: 0,
-                y: 1.15,
-                bgcolor: 'rgba(255, 255, 255, 0)',
-                bordercolor: 'rgba(255, 255, 255, 0)',
-                orientation: 'h',
-            },
-            //type: 'scatter',
-            //mode: 'lines+markers',
-            //barmode: 'stack',
-            //bargroupgap: 0.1
-        }
-
-        const x = [];
-        const bviBt = []; //establishment total
-        const bviBtV = []; //vulnerable establishment
-        const bviBtVRatio = []; //ratio between es and ves
-        const bviEt = []; //employee total
-        const bviEtV = []; //vulnerable total
-        const bviEtVRatio = []; //ratio between es and ves
-        this.detail.bvis.forEach(rec=>{
-            x.push(rec.year);
-            bviBt.push(rec.estab_total);
-            bviBtV.push(rec.estab_vuln_total);
-            bviBtVRatio.push((rec.estab_vuln_total/rec.estab_total*100).toFixed(1)+"%");
-            bviEt.push(rec.mm_employees);
-            bviEtV.push(rec.emp_vuln_total);
-            bviEtVRatio.push((rec.emp_vuln_total/rec.mm_employees*100).toFixed(1)+"%");
-        })
-        const traceBt = {
-            x,y: bviBt,
-            name: 'Total Businesses',
-            marker: {color: 'rgb(100, 100, 100)'},
-            //text: bviBtVRatio,
-            //textposition: 'auto',
-            type: 'bar'
-        }
-        const traceBtV = {
-            x, y: bviBtV,
-            name: 'Vulnerable Businesses',
-            marker: {color: '#f56c6c'},
-            text: bviBtVRatio,
-            textposition: 'auto',
-            type: 'bar'
-        }
-        this.bviEstData = [traceBt, traceBtV];
-
-        const traceEt = {
-            x,y: bviEt,
-            name: 'Total Employees',
-            marker: {color: 'rgb(100, 100, 100)'},
-            type: 'bar'
-        }
-        const traceEtV = {
-            x, y: bviEtV,
-            name: 'Vulnerable Employees',
-            marker: {color: '#f56c6c'},
-            text: bviEtVRatio,
-            textposition: 'auto',
-            type: 'bar'
-        }
-        this.bviEmpData = [traceEt, traceEtV];
-    }
-    */
-
     processStorms() {
         this.stormLayout = {
             margin: {
@@ -590,10 +419,6 @@ export default class CountyDetail extends Vue {
                 orientation: 'h',
             },
             barmode: 'stack',
-            //yaxis: {fixedrange: true},   
-            //xaxis: {fixedrange: true},   
-
-            //bargroupgap: 0.1
         }
 
         this.stormData = [];
@@ -624,77 +449,6 @@ export default class CountyDetail extends Vue {
             });
         }
     }
-
-    /*
-    processDemo2() {
-        this.demo2GraphData = [];
-
-        const years = [];
-        for(let year = 2009; year <= 2018; ++year) {
-            years.push(year);
-        }
-
-        function merge(codes) {
-            const populations = [];
-            codes.forEach(code=>{
-                years.forEach((year, idx)=>{
-                    let v = 0;
-                    const group = this.detail.demo2[code];
-                    if(group) {
-                        const p = group.populations[idx];
-                        if(p) v = p;
-                    }
-                    if(!populations[idx]) populations[idx] = v;
-                    else populations[idx] += v;
-                });
-            });
-            return populations;
-        }        
-
-        const template = {
-            x: years,
-            stackgroup: 'one',
-            line: {
-                width: 0,
-                shape: 'spline',
-                smoothing: 0.8,
-            },
-            mode: 'lines',
-        }
-
-        this.demo2GraphData.push(Object.assign({ 
-            y: merge.call(this, [312, 313]), 
-            name: "0-17",
-            hoverinfo: 'y+text',
-        }, template));
-        this.demo2GraphData.push(Object.assign({ 
-            y: merge.call(this, [314]), 
-            name: "18-24",
-            hoverinfo: 'y+text',
-        }, template));
-        this.demo2GraphData.push(Object.assign({ 
-            y: merge.call(this, [315, 316]), 
-            name: "25-44",
-            hoverinfo: 'y+text',
-        }, template));
-        this.demo2GraphData.push(Object.assign({ 
-            y: merge.call(this, [317]), 
-            name: "65+",
-            hoverinfo: 'y+text',
-        }, template));
-
-        //compute percentages
-        const ylen = this.demo2GraphData[0].y.length;
-        for(let y = 0;y < ylen; ++y) {
-            const total = this.demo2GraphData.reduce((sum, v)=>sum+v.y[y], 0);
-            this.demo2GraphData.forEach(v=>{
-                if(!v.hovertext) v.hovertext = [];
-                if(total == 0) v.hovertext.push(null);
-                else v.hovertext.push((v.y[y]/total*100).toFixed(1)+"%");
-            });
-        }
-    }
-    */
 
     processDemo() {
         this.demoGraphData = [];
