@@ -56,6 +56,11 @@
                 <h5 ref="nav-cutter" class="navigator-item" @click="goto('cutter')">Disaster Resilience</h5>
                 <h5 ref="nav-storms" class="navigator-item" @click="goto('storms')">Storm History</h5>
             </div>
+            
+            <br>
+            <div style="margin-left: 13px">
+                <el-link type="primary" :target="'json.'+fips" :href="$root.dataUrl+'/counties/county.'+fips+'.json'">County Data (.json)</el-link>
+            </div>
         </div>
     </div>
 
@@ -70,7 +75,7 @@
         <p v-if="recentHistory.length == 0" style="opacity: 0.8;">No disaster declared since 2017</p>
         <div v-for="(event, idx) in recentHistory" :key="idx" class="history">
             <Event :event="event" :layers="layers">
-                <div class="connecter" v-if="idx < recentHistory.length">
+                <div class="connecter" v-if="idx < recentHistory.length" style="float: right;">
                     <Eligibility2018 v-if="is2018Eligible(event)"/>
                     <Eligibility2019 v-if="is2019Eligible(event) || is2019FloodEligible(event)"/>
                 </div>
@@ -92,7 +97,7 @@
         <br>
     </div>
 
-    <div style="background-color: #f0f0f0" v-if="detail.bvis" id="bvi">
+    <div style="background-color: #f9f9f9" v-if="detail.bvis" id="bvi">
     <div class="page">
         <br>
         <h3>Business Vulnerability</h3>
@@ -205,8 +210,6 @@
 
 import { Component, Vue, Prop, Watch } from 'vue-property-decorator'
 
-import Histogram from '@/components/Histogram.vue'
-import BarGraph from '@/components/BarGraph.vue'
 import Event from '@/components/Event.vue'
 import IndicatorInfo from '@/components/IndicatorInfo.vue'
 import Footer from '@/components/Footer.vue'
@@ -236,8 +239,6 @@ Vue.directive('scroll', {
 
 @Component({
     components: { 
-        BarGraph, 
-        Histogram, 
         Plotly, 
         Event, 
         Eligibility2018, 
@@ -253,6 +254,7 @@ Vue.directive('scroll', {
 export default class CountyDetail extends Vue {
 
     @Prop() detail;
+    @Prop() fips;
     @Prop() geojson;
     @Prop() layers;
 
@@ -263,7 +265,6 @@ export default class CountyDetail extends Vue {
 
     bvi2Layout = {
         height: 100,
-        //title: "Establishment",
         margin: {
             l: 50,
             r: 0,

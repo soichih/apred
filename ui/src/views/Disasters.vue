@@ -3,7 +3,7 @@
     <TopMenu/>
     <div>
         <div id="map"/>
-        <CountyDetail v-if="selected && geojson" :detail="selected" :layers="layers" :geojson="geojson"/>
+        <CountyDetail v-if="selected && geojson" :detail="selected" :fips="selectedFips" :layers="layers" :geojson="geojson"/>
         <div v-else style="position: relative;">
             <div class="page">
                 <div style="padding-top: 10px; margin-bottom: 10px;">
@@ -184,6 +184,7 @@ export default class Disaster extends Vue {
 
     popup;
     selected = null;
+    selectedFips = null;
     geojson = null;
 
     cutters = null;
@@ -770,6 +771,7 @@ export default class Disaster extends Vue {
     loadCounty(fips) {
         if(!fips) {
             this.selected = null;
+            this.selectedFips = null;
             this.$ga.page('/map')
             return;
         }
@@ -789,6 +791,7 @@ export default class Disaster extends Vue {
                 delete data.cutter.FLOR;
             }
             this.selected = data;
+            this.selectedFips = fips;
             loading.close();
         });
     }

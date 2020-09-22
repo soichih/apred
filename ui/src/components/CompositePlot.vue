@@ -1,37 +1,11 @@
 <template>
 <div>
     <svg viewBox="0 0 1000 270" height="150px" width="450px">
-        <!--
-        <defs>
-            <filter x="-0.02" y="0" width="1.04" height="1.1" id="solid">
-                <feFlood flood-color="black"/>
-                <feComposite in="SourceGraphic" operator="xor" />
-            </filter>
-        </defs>
-        -->
-
         <!--grid lines-->
         <g>
             <line v-for="(year, idx) in years" :key="year" :x1="itox(idx)" y1="20" :x2="itox(idx)" :y2="ptoy(ymin)" style="stroke:rgb(175,175,175);stroke-width:0.5" /> 
             <line v-for="(y, idx) in yticks" :key="idx" :x1="120" :y1="ptoy(y)" :x2="1000" :y2="ptoy(y)" style="stroke:rgb(175, 175, 175);stroke-width: 0.5"/>
         </g>
-
-        <!--legend-->
-        <!--
-        <g>
-            <rect x="900" y="5" width="25" height="5" fill="#409EFF"/>
-            <text x="930" y="12" class="legend">This County</text>
-
-            <rect x="750" y="0" width="25" height="15" fill="#09f5"/>
-            <text x="780" y="12" class="legend">State Avg/std</text>
-
-            <rect x="600" y="0" width="25" height="15" fill="#0003"/>
-            <text x="630" y="12" class="legend">US Avg/std</text>
-
-            <rect x="450" y="0" width="25" height="15" fill="green"/>
-            <text x="480" y="12" class="legend">EDA Awards</text>
-        </g>
-        -->
 
         <!--x axis / ticks-->
         <g>
@@ -49,18 +23,12 @@
         <g>
             <path :d="sdevPath(cutters.us.avg, cutters.us.sdev, lineCommand)" fill="#0002" stroke="none"/>
             <path :d="svgPath(cutters.us.avg, lineCommand)" fill="none" stroke="#0005" stroke-width="2"/>
-            <!--
-            <circle v-for="(p, idx) in cutters.us.avg" :key="idx" :cx="itox(idx)" :cy="ptoy(p)" r="4" stroke="#0505" stroke-width="1" fill="white" />
-            -->
         </g>
 
         <!-- state avg/sdev-->
         <g>
             <path :d="sdevPath(cutters.states.avg, cutters.states.sdev, lineCommand)" fill="#09f4" stroke="none"/>
             <path :d="svgPath(cutters.states.avg, lineCommand)" fill="none" stroke="#09f8" stroke-width="2"/>
-            <!--
-            <circle v-for="(p, idx) in cutters.states.avg" :key="idx" :cx="itox(idx)" :cy="ptoy(p)" r="4" stroke="#0045" stroke-width="1" fill="white" />
-            -->
         </g>
 
         <!-- county-->
@@ -71,23 +39,6 @@
                 <text :x="itox(idx)-30" :y="ptoy(p)-30" class="tooltip">{{(p*100).toFixed(3)}}%</text>
             </g>
         </g>
-
-        <!--eda awards-->
-        <!--
-        <g>
-            <g v-for="award in edaAwards" :key="award.fain">
-                <rect
-                    :x="t2x(award.grant_award_date)" 
-                    :y="height - a2h(award.award_amount) - 20" 
-                    width="8" 
-                    :height="a2h(award.award_amount)" 
-                    fill="green">
-                </rect>
-                <circle :cx="t2x(award.grant_award_date) + 4" :cy="height - a2h(award.award_amount) - 20" r="6" stroke="green" stroke-width="2" fill="white" />
-                <title>EDA Award (fain: {{award.fain}}) ${{award.award_amount|formatNumber}} for {{award.grant_purpose}}</title>
-            </g>
-        </g>
-        -->
     </svg>
 </div>
 </template>
@@ -111,7 +62,7 @@ export default class CompositePlot extends Vue {
     constructor() {
         super();
 
-        for(let year = 2012; year <= 2020; ++year) {
+        for(let year = 2012; year <= 2018; ++year) {
             this.years.push(year);
         }
 
