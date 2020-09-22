@@ -32,16 +32,31 @@ Vue.use(VueAnalytics, {
     id: 'UA-161425227-2'
 })
 
+interface RawDrMeasureRec {
+    measure: string;
+    measure_name: string;
+    measure_desc: string;
+    measure_calculation_desc: string;
+}
+interface DrMeasure {
+    name: string;
+    desc: string;
+    calcDesc: string;
+}
+interface DrMeasures {
+    [key: string]: DrMeasure;
+}
+
 new Vue({
     data() {
         return {
             //dataUrl: "https://ctil.iu.edu/projects/apred-data/",
             dataUrl: "https://gpu1-pestillilab.psych.indiana.edu/apred",
-            drMeasures: {}, //keyed by measure code, then {name, desc, calcDesc}
+            drMeasures: {} as DrMeasures, 
         }
     },
     mounted() {
-        fetch(this.dataUrl+"/dr_measure.json").then(res=>res.json()).then(data=>{
+        fetch(this.dataUrl+"/dr_measure.json").then(res=>res.json()).then((data: RawDrMeasureRec[])=>{
             data.forEach(rec=>{
                 this.drMeasures[rec.measure] = {
                     name: rec["measure_name"],
