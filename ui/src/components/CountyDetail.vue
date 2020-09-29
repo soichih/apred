@@ -19,8 +19,8 @@
                     <div id="statemap"/>
                 </el-col>
                 <el-col :span="9" class="border-left demo">
-                    <p style="margin: 0; float: left;">
-                        <span class="sub-heading">Population <small>(ACS)</small></span><br>
+                    <p style="margin: 0; float: left; z-index: 10; position: relative;">
+                        <span class="sub-heading">Population <small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS)</a></small></span><br>
                         <span class="primary" v-if="detail.population"> {{detail.population | formatNumber}}</span>
                         <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
                     </p>
@@ -33,12 +33,12 @@
                 </el-col>
                 <el-col :span="5" class="border-left gdp">
                     <p>
-                        <span class="sub-heading">GDP</span> <small>(BEA 2018)</small><br>
+                        <span class="sub-heading">GDP</span> <small><a href="https://www.bea.gov/" target="bea">(BEA)</a> 2018</small><br>
                         <span class="primary" v-if="detail.gdp"> ${{(detail.gdp/1000) | formatNumber}} M</span>
                         <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
                     </p>
                     <p>
-                        <span class="sub-heading">Median Household Income</span> <small title="US Census Bureau">(ACS)</small><br>
+                        <span class="sub-heading">Median Household Income</span> <small title="US Census Bureau"><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS)</a></small><br>
                         <span class="primary" v-if="detail.medianincome"> ${{detail.medianincome | formatNumber}}</span>
                         <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
                     </p>
