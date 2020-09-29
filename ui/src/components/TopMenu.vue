@@ -64,6 +64,9 @@ export default class TopMenu extends Vue {
     .sub-title {
         display: none;
     }
+    .disclaimer {
+        display: none;
+    }
 }
 .user {
     float: right;
