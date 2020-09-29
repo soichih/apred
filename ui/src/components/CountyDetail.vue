@@ -69,7 +69,7 @@
         <h3>Disaster Declarations / EDA Awards</h3>
         <p>
         This section provides information on Major Disaster Declarations declared under the Robert T. Stafford Disaster Relief and Emergency Assistance Act that may support eligibility for investment assistance from <a href="https://www.eda.gov/">EDA</a> (the U.S. Economic Development Administration) under the agency’s Public Works and Economic Adjustment Assistance Programs.
-        Through these Programs, EDA provides investment assistance to communities and regions to devise and implement long-term economic recovery strategies through a variety of non-construction and construction projects. 
+        Through these programs, EDA provides investment assistance to communities and regions to devise and implement long-term economic recovery strategies through a variety of non-construction and construction projects. 
         </p>
 
         <p v-if="recentHistory.length == 0" style="opacity: 0.8;">No disaster declared since 2017</p>
