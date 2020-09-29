@@ -14,6 +14,20 @@
                     </el-tabs>
                 </div>
 
+                <div class="map-description">
+                    <p v-if="mode == 'dr'">
+                        This map shows counties with FEMA declared disasters within specified time range. Please visit <a href="https://www.fema.gov/disasters/disaster-declarations">FEMA Disasters</a> page for more detail.
+                    </p>
+                    <p v-if="mode == 'eda'">
+                        This map shows locations and amounts of EDA (U.S. Economic Development Administration) fundings awarded in the specified time range. EDA assists communities experiencing economic distress or harm resulting from federally-declared natural disasters.
+                    </p>
+                    <p v-if="mode == 'resilience'">
+                        This map shows disaster resilience score for each counties in the specified year aggregated into 4 major categories (Social, Economic, Infrastructure, and Community Capital). 
+                        Disaster resilience measures the capacity of a community to recover from disaster events without losing their socioeconomic and infrastructural viability [Combaz, 2015] [UNISDR, 2005].
+                        The scores are calculated using data from U.S. Census using formulas defined by [Cuter et al. 2020]. Please click/select a county to show measures for each county under "Disaster Resilience" section, and formula used to compute the score are shown under "Show Detail" button.
+                    </p>
+                </div>
+                
                 <div class="legend" v-if="mode == 'dr'">
                     <p>
                         <b>Date Range</b>
@@ -444,7 +458,7 @@ export default class Disaster extends Vue {
             layout: {
                 visibility: 'none',
             }
-        });
+        }, 'counties');
 
         this.resYear = '2018';
     }
@@ -525,7 +539,7 @@ export default class Disaster extends Vue {
                         layout: {
                             visibility: 'none',
                         }
-                    });
+                    }, 'counties');
 
                     this.map.addLayer({
                         'id': 'state_disaster_'+t,
@@ -540,7 +554,7 @@ export default class Disaster extends Vue {
                         layout: {
                             visibility: 'none',
                         }
-                    });
+                    }, 'counties');
                 }
 
                 fetch(this.$root.dataUrl+"/years.json").then(res=>{ 
@@ -814,17 +828,6 @@ export default class Disaster extends Vue {
         window.localStorage.setItem("hiddenLayers", JSON.stringify(this.hiddenLayers));
     }
 
-    /*
-    toggleDRLayer(layer) {
-        const pos = this.hiddenDRLayers.indexOf(layer);
-        if(~pos) this.hiddenDRLayers.splice(pos, 1);
-        else this.hiddenDRLayers.push(layer);
-        this.map.setLayoutProperty('dr'+layer, 'visibility', this.hiddenDRLayers.includes(layer)?'none':'visible');
-        this.map.setLayoutProperty('dr'+layer, 'visibility', this.hiddenDRLayers.includes(layer)?'none':'visible');
-        window.localStorage.setItem("hiddenDRLayers", JSON.stringify(this.hiddenDRLayers));
-    }
-    */
-
     handleAll() {
         if(this.layersAll) {
             this.hiddenLayers = [];
@@ -975,9 +978,23 @@ h4 {
             height: 15px;
             top: -5px;
         }
-    }
-    
+    }    
 }
+
+.map-description {
+    position: relative;
+    opacity: 0.8;
+    background-color: #fff;
+    float: left;
+    width: calc(100% - 300px);
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 90%;
+    p {
+        margin-bottom: 0;
+    }
+}
+
 .county-selecter {
     float: right; 
     z-index: 1; 
@@ -989,6 +1006,9 @@ h4 {
 
 @media (max-width: 600px) {
     .county-selecter {
+        display: none;
+    }
+    .map-description {
         display: none;
     }
 }
