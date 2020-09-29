@@ -38,7 +38,7 @@
                         <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
                     </p>
                     <p>
-                        <span class="sub-heading">Median Income</span> <small title="US Census Bureau">(ACS)</small><br>
+                        <span class="sub-heading">Median Household Income</span> <small title="US Census Bureau">(ACS)</small><br>
                         <span class="primary" v-if="detail.medianincome"> ${{detail.medianincome | formatNumber}}</span>
                         <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
                     </p>
