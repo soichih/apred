@@ -14,7 +14,7 @@
                     </el-tabs>
                 </div>
 
-                <div class="map-description">
+                <div class="map-description" v-if="mode">
                     <p v-if="mode == 'dr'">
                         This map shows counties with FEMA declared disasters within specified time range. Please visit <a href="https://www.fema.gov/disasters/disaster-declarations">FEMA Disasters</a> page for more detail.
                     </p>
