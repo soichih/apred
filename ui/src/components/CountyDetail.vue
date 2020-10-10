@@ -1,52 +1,66 @@
 <template>
-<div class="countydetail" ref="scrolled-area" @scroll="handleScroll">
+<div ref="scrolled-area" @scroll="handleScroll" v-if="detail">
+
     <div class="header">
         <div class="page">
-            <h3 style="position: relative; font-weight: normal;">
+            <div style="float: right; width: 300px; padding-top: 15px;">
+                <CountySelecter @select="fips = $event"/>
+            </div>
+            <h3 style="position: relative; font-weight: normal; margin-right: 300px;">
                 <el-button type="primary" circle icon="el-icon-back" @click="goback()" class="back-button"/>
                 &nbsp;
                 &nbsp;
                 <span class="important"><b>{{detail.county}}</b> county,</span>
                 {{detail.state}}
             </h3>
+            <br clear="both">
+            <el-tabs v-model="tab">
+                <el-tab-pane name="info" label="County Detail"></el-tab-pane>
+                <el-tab-pane name="disaster" label="Disaster Declarations"></el-tab-pane>
+                <el-tab-pane v-if="detail.bvis" name="bvi" label="Business Vulnerability"></el-tab-pane>
+                <el-tab-pane name="resilience" label="Disaster Resilience"></el-tab-pane>
+                <el-tab-pane name="storms" label="Storm History"></el-tab-pane>
+            </el-tabs>
         </div>
     </div>
 
-    <div id="info-header">
-        <div class="page">
-            <el-row>
-                <el-col :span="10">
-                    <div id="statemap"/>
-                </el-col>
-                <el-col :span="9" class="border-left demo">
-                    <p style="margin: 0; float: left; z-index: 10; position: relative;">
-                        <span class="sub-heading">Population <small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS)</a></small></span><br>
-                        <span class="primary" v-if="detail.population"> {{detail.population | formatNumber}}</span>
-                        <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
-                    </p>
-                    <p style="margin: 0; float: right; padding-right: 20px;">
-                        <span class="sub-heading">Density</span><br>
-                        <span class="primary" v-if="detail.popdensity"> {{detail.popdensity | formatNumber}}/sq mile</span>
-                        <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
-                    </p>
-                    <Plotly :data="demoGraphData" :layout="demoGraphLayout" :display-mode-bar="false"/>
-                </el-col>
-                <el-col :span="5" class="border-left gdp">
-                    <p>
-                        <span class="sub-heading">GDP</span> <small><a href="https://www.bea.gov/" target="bea">(BEA)</a> 2018</small><br>
-                        <span class="primary" v-if="detail.gdp"> ${{(detail.gdp/1000) | formatNumber}} M</span>
-                        <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
-                    </p>
-                    <p>
-                        <span class="sub-heading">Median Household Income</span> <small title="US Census Bureau"><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS)</a></small><br>
-                        <span class="primary" v-if="detail.medianincome"> ${{detail.medianincome | formatNumber}}</span>
-                        <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
-                    </p>
-                </el-col>
-            </el-row>
-        </div>
+    <div class="page" v-if="tab == 'info'">
+        <br>
+        <br>
+        <el-row :gutter="20">
+            <el-col :span="12">
+                <h4>Population <small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS)</a></small></h4>
+                <span class="primary" v-if="detail.population"> {{detail.population | formatNumber}}</span>
+                <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
+
+                <h4>Population Density</h4>
+                <span class="primary" v-if="detail.popdensity"> {{detail.popdensity | formatNumber}} people per mile^2</span>
+                <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
+
+                <br>
+                <br>
+                <Plotly :data="demoGraphData" :layout="demoGraphLayout" :display-mode-bar="false"/>
+            </el-col>
+            <el-col :span="12">
+                <h4>GDP <small><a href="https://www.bea.gov/" target="bea">(BEA)</a></small></h4>
+                <p>
+                    <span class="primary" v-if="detail.gdp"> ${{(detail.gdp/1000) | formatNumber}} M</span>
+                    <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
+                </p>
+
+                <h4>Median Household Income <small title="US Census Bureau"><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS)</a></small></h4>
+                <p>
+                    <span class="primary" v-if="detail.medianincome"> ${{detail.medianincome | formatNumber}}</span>
+                    <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
+                </p>
+            </el-col>
+        </el-row>
+        <br>
+        <br>
+        <br>
     </div>
 
+    <!--
     <div class="page sidebar">
         <div style="position: absolute; right: -250px; width: 200px; margin: 20px;">
             <el-button circle icon="el-icon-arrow-up" @click="goto('info-header')"/>
@@ -63,18 +77,19 @@
             </div>
         </div>
     </div>
+    -->
 
-    <div class="page" id="disaster">
-
-        <h3>Disaster Declarations / EDA Awards</h3>
+    <div class="page" v-if="tab == 'disaster'">
+        <br>
+        <!-- <h3>Disaster Declarations / EDA Awards</h3> -->
         <p>
-        This section provides information on Major Disaster Declarations declared under the Robert T. Stafford Disaster Relief and Emergency Assistance Act that may support eligibility for investment assistance from <a href="https://www.eda.gov/">EDA</a> (the U.S. Economic Development Administration) under the agency’s Public Works and Economic Adjustment Assistance Programs.
+         Major Disaster Declarations declared under the Robert T. Stafford Disaster Relief and Emergency Assistance Act that may support eligibility for investment assistance from <a href="https://www.eda.gov/">EDA</a> (the U.S. Economic Development Administration) under the agency’s Public Works and Economic Adjustment Assistance Programs.
         Through these programs, EDA provides investment assistance to communities and regions to devise and implement long-term economic recovery strategies through a variety of non-construction and construction projects. 
         </p>
 
         <p v-if="recentHistory.length == 0" style="opacity: 0.8;">No disaster declared since 2017</p>
         <div v-for="(event, idx) in recentHistory" :key="idx" class="history">
-            <Event :event="event" :layers="layers">
+            <Event :event="event">
                 <div class="connecter" v-if="idx < recentHistory.length" style="float: right;">
                     <Eligibility2018 v-if="is2018Eligible(event)"/>
                     <Eligibility2019 v-if="is2019Eligible(event) || is2019FloodEligible(event)"/>
@@ -91,22 +106,18 @@
 
         <!-- don't use slide-down.. it will be slow :active="showPastHistory" :duration="1000"-->
         <div v-if="showPastHistory">
-            <Event :event="event" :layers="layers" v-for="(event, idx) in pastHistory" :key="idx" class="history"/>
+            <Event :event="event" v-for="(event, idx) in pastHistory" :key="idx" class="history"/>
         </div>
         <br>
         <br>
     </div>
 
-    <div style="background-color: #f9f9f9" v-if="detail.bvis" id="bvi">
-    <div class="page">
+    <div v-if="tab == 'bvi'" class="page">
         <br>
-        <h3>Business Vulnerability</h3>
+        <!-- <h3>Business Vulnerability</h3>-->
         <p>
             <b>Business Vulnerability Index (BVI)</b> is a percentage of businesses in a county
-            that are believed to be <i>vulnerable</i> to various natural disasters.
-        </p>
-        <p>
-            To calculate the BVI, we isolated businesses by NAICS code from the U.S. Census' most recent <a href="https://www.census.gov/econ/overview/mu0800.html">County Business Patterns</a>  based on their vulnerability to natural disaster (farmers, transportation companies, etc..)
+            that are believed to be <i>vulnerable</i> to various natural disasters. To calculate the BVI, we isolated businesses by NAICS code from the U.S. Census' most recent <a href="https://www.census.gov/econ/overview/mu0800.html">County Business Patterns</a>  based on their vulnerability to natural disaster (farmers, transportation companies, etc..)
             Businesses that were identified to be especially vulnerable to a disaster are those which are dependent on supply chains,
             have a high reliance on public utilities like water and electricity, or have a large infrastructure footprint and low infrastructure mobility.
         </p>
@@ -130,10 +141,10 @@
         </div>
         <br clear="both">
     </div>
-    </div>
 
-    <div class="page" id="cutter">
-        <h3>Disaster Resilience</h3>
+    <div class="page" v-if="tab == 'resilience'">
+        <br>
+        <!-- <h3>Disaster Resilience</h3>-->
         <p>
             Disaster resilience measures the capacity of a community to recover from disaster events without losing their socioeconomic and infrastructural viability <a href="https://gsdrc.org/topic-guides/disaster-resilience/concepts/what-is-disaster-resilience/">[Combaz, 2015]</a> <a href="https://www.unisdr.org/2005/wcdr/intergover/official-doc/L-docs/Hyogo-framework-for-action-english.pdf">[UNISDR, 2005]</a>. Using the framework provided by <a href="http://resiliencesystem.com/sites/default/files/Cutter_jhsem.2010.7.1.1732.pdf">[Cutter et al. 2010]</a>, this section merges the resilient and vulnerable variables of a city into a unified set of indices - to produce aggregated information on disaster resilience levels. Expand each measure to show more detail.
         </p>
@@ -183,26 +194,28 @@
         </div>
     </div>
 
-    <div id="storms" style="background-color: #f0f0f0;">
-        <div class="page">
-            <br>
-            <h3>Storm History</h3>
-            <div v-if="stormData && stormData.length > 0">
-                <p>This graph shows the counts of storm event published by NOAA since 1950s.</p>
-                <p>Storm data has gone through many changes and versions over the years. The source data ingested into the database are widely varied and leads to many questions about the precision and accuracy of the location data. Please see <a href="https://www.ncdc.noaa.gov/stormevents/details.jsp" target="noaa">https://www.ncdc.noaa.gov/stormevents/faq.jsp</a> for more detail.</p>
-                <p>You can click on the chart legend to select or deselect which storm events to show on the graph.</p>
-                <Plotly :data="stormData" :layout="stormLayout" :display-mode-bar="false"></Plotly>
-            </div>
-            <p v-else>No storm data</p>
-            <br>
-            <br>
-            <br>
+    <div v-if="tab == 'storms'" class="page">
+        <br>
+        <!--<h3>Storm History</h3>-->
+        <div v-if="stormData && stormData.length > 0">
+            <p>This graph shows the counts of storm event published by NOAA since 1950s.</p>
+            <p>Storm data has gone through many changes and versions over the years. The source data ingested into the database are widely varied and leads to many questions about the precision and accuracy of the location data. Please see <a href="https://www.ncdc.noaa.gov/stormevents/details.jsp" target="noaa">https://www.ncdc.noaa.gov/stormevents/faq.jsp</a> for more detail.</p>
+            <p>You can click on the chart legend to select or deselect which storm events to show on the graph.</p>
+            <Plotly :data="stormData" :layout="stormLayout" :display-mode-bar="false"></Plotly>
         </div>
+        <p v-else>No storm data</p>
+        <br>
+        <br>
+        <br>
     </div>
+
     <Footer/>
+
+    <!--
     <div class="contextmenu" ref="contextmenu">
         <p class="menu-item" @click="openContextMenuCounty">Open this county ({{contextMenuCounty}}) in a new tab</p>
     </div>
+    -->
 </div>
 </template>
 
@@ -215,14 +228,15 @@ import IndicatorInfo from '@/components/IndicatorInfo.vue'
 import Footer from '@/components/Footer.vue'
 import CompositePlot from '@/components/CompositePlot.vue'
 import NaicsInfo from '@/components/NaicsInfo.vue'
+import CountySelecter from '@/components/CountySelecter.vue'
 
 import Eligibility2018 from '@/components/Eligibility2018.vue'
 import Eligibility2019 from '@/components/Eligibility2019.vue'
 
 import SlideUpDown from 'vue-slide-up-down'
 
-import mapboxgl from 'mapbox-gl';
-import "mapbox-gl/dist/mapbox-gl.css";
+//import mapboxgl from 'mapbox-gl';
+//import "mapbox-gl/dist/mapbox-gl.css";
 
 import { Plotly } from 'vue-plotly'
 
@@ -248,18 +262,21 @@ Vue.directive('scroll', {
         SlideUpDown,
         CompositePlot,
         NaicsInfo,
+        CountySelecter,
     },
 })
 
 export default class CountyDetail extends Vue {
 
-    @Prop() detail;
+    //@Prop() detail;
     @Prop() fips;
-    @Prop() geojson;
-    @Prop() layers;
+    //@Prop() geojson;
 
     popup;
     statemap;
+    detail = null;
+
+    tab = "info";
 
     history = [];
 
@@ -285,32 +302,28 @@ export default class CountyDetail extends Vue {
 
     demoGraphData = [];
     demoGraphLayout = {
-        width: 350,
-        height: 200,
+        height: 150,
         margin: {
             l: 30,
             r: 30,
-            t: 55,
+            t: 10,
             b: 20,
         },
         barmode: 'stack',
         'plot_bgcolor': '#0000',
         'paper_bgcolor': '#0000',
-        /*
-        legend: {
-            x: 1,
-            xanchor: 'right',
-            y: 1
-        }
-        */
     }
 
     cuttersData = {}; //group by incode then {states: {avg, sdev}, us: {avg, sdev}, county} 
 
-    @Watch('detail')
+    @Watch('fips')
     onDetailChange() {
+        /*
         this.update();
         this.showPastHistory = false;
+        */
+        console.log("fips changes to", this.fips);
+        this.load();
     }
 
     toggleIndicator(incode) {
@@ -321,14 +334,6 @@ export default class CountyDetail extends Vue {
 
     toggleMeasureDetail(source) {
         Vue.set(source, "showDetail", !source.showDetail);
-    }
-
-    update() {
-        this.processHistory();
-        this.processBVI2();
-        this.processStorms();
-        this.processMap();
-        this.processDemo();
     }
 
     goto(id) {
@@ -484,6 +489,7 @@ export default class CountyDetail extends Vue {
         }
     }
 
+    /*
     initStateMap() {
         this.map = new mapboxgl.Map({container: 'statemap'});
         this.map.scrollZoom.disable();
@@ -593,10 +599,28 @@ export default class CountyDetail extends Vue {
             ['==', 'countyfips', this.detail.countyfips],
         ]);
     }
+    */
 
     mounted() {
-        this.initStateMap();
-        this.update();
+        //this.initStateMap();
+        if(this.fips) this.load();
+    }
+
+    load() {
+        console.log("loading", this.fips);
+        fetch(this.$root.dataUrl+"/counties/county."+this.fips+".json").then(res=>res.json()).then(data=>{
+            if(data.cutter) {
+                delete data.cutter.INST;
+                delete data.cutter.FLOR;
+            }
+            this.detail = data;
+
+            this.processHistory();
+            this.processBVI2();
+            this.processStorms();
+            //this.processMap();
+            this.processDemo();
+        });
     }
 
     handleScroll() {
@@ -758,6 +782,7 @@ h3 {
 
 h4 {
     opacity: 0.7;
+    margin-bottom: 10px;
 }
 
 .sub-heading {
@@ -769,7 +794,7 @@ h4 {
 }
 .primary {
     font-weight: bold;
-    font-size: 125%;
+    font-size: 150%;
 }
 
 .important, 
@@ -825,35 +850,25 @@ h4 {
 </style>
 
 <style lang="scss"> 
-.countydetail {
-    position: fixed;
-    top: 120px;
-    bottom: 0;
-    z-index: 1;
-    scroll-behavior: smooth;
-    overflow: auto;
-    left: 0;
-    right: 0;
-    background-color: white;
-}
 .el-collapse,
 .el-collapse-item__header {
     border: none;
 }
 .header {
-    position: fixed;
+    position: sticky;
     top: 50px;
     width: 100%;
     background-color: white;
     z-index: 1;
-    height: 70px;
     box-shadow: 0 0 3px #ddd;
 }
 
+/*
 #info-header {
     background-color: #eee;
     height: 220px;
 }
+*/
 
 .header h3 {
     margin: 0;
@@ -865,10 +880,12 @@ h4 {
     font-size: 100%;
     margin-right: 20px;
 }
+/*
 .sidebar {
-position: sticky; 
-top: 10px;
+    position: sticky; 
+    top: 10px;
 }
+*/
 .navigator {
     margin-top: 20px;
     .navigator-item {
@@ -886,6 +903,7 @@ top: 10px;
         border-color: #409EFF;
     }
 }
+/*
 @media only screen and (max-width: 1500px) {
     .sidebar {
         display: none;
@@ -896,6 +914,7 @@ top: 10px;
     width: 100%;
     height: 220px;
 }
+*/
 canvas:focus {
     outline: none;
 }

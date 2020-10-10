@@ -53,6 +53,38 @@ new Vue({
             //dataUrl: "https://ctil.iu.edu/projects/apred-data/",
             dataUrl: "https://gpu1-pestillilab.psych.indiana.edu/apred",
             drMeasures: {} as DrMeasures, 
+
+            layers: {
+                "biological": {
+                    color: "#396",
+                    opacity: 0.5,
+                    types: ["Biological"],
+                },
+                "other": {
+                    color: "#999",
+                    types: ["EarthQuake", "Coastal Storm", "Snow", "Mud/Landslide", "Volcano", "Dam/Levee Break", "Severe Ice Storm"],
+                }, 
+                "hurricane": {
+                    color: "#0af", 
+                    types: ["Hurricane"],
+                },
+                "tornado": {
+                    color: "#f6f", 
+                    types: ["Tornado"],
+                },
+                "severe storm": { 
+                    color: "#fa0", 
+                    types: ["Severe Storm(s)"],
+                },
+                "flood": {
+                    color: "#06f",
+                    types: ["Flood"],
+                },
+                "fire": {
+                    color: "#f00", 
+                    types: ["Fire"],
+                },
+            },
         }
     },
     mounted() {
