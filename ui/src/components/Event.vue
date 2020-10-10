@@ -115,7 +115,6 @@ import SlideUpDown from 'vue-slide-up-down'
 })
 export default class Event extends Vue {
     @Prop({type: Object}) event;
-    @Prop({type: Object}) layers;
 
     show_pa = false;
 
@@ -136,13 +135,13 @@ export default class Event extends Vue {
     }
 
     get eventIconStyle() {
-        let color = this.layers['other'].color;
+        let color = this.$root.layers['other'].color;
 
         //use incident specific color if available
         let type = this.event.incidentType.toLowerCase();
         if(~type.indexOf("(")) type = type.substring(0, type.indexOf("(")); 
         type = type.trim();
-        if(this.layers[type]) color = this.layers[type].color;
+        if(this.$root.layers[type]) color = this.$root.layers[type].color;
 
         return { color };
     }
