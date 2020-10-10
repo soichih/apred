@@ -1,7 +1,7 @@
 <template>
-    <div id="app">
-        <router-view/>
-    </div>
+<div id="app">
+    <router-view/>
+</div>
 </template>
 
 <script>
@@ -47,6 +47,7 @@ font-family: Avenir, Helvetica, Arial, sans-serif;
 color: #555;
 scroll-behavior: smooth;
 min-width: 400px;
+height: 100%;
 }
 a {
   text-decoration: none;
@@ -54,7 +55,7 @@ a {
 }
 
 #app {
-margin-top: 50px;
+padding-top: 50px;
 }
 
 p.small {
