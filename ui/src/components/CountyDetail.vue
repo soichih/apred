@@ -16,7 +16,7 @@
             <br clear="both">
             <el-tabs v-model="tab">
                 <el-tab-pane name="info" label="County Detail"></el-tab-pane>
-                <el-tab-pane name="disaster" label="Disaster Declarations"></el-tab-pane>
+                <el-tab-pane name="disaster" :label="'Disaster Declarations/EDA Awards ('+history.length+')'"></el-tab-pane>
                 <el-tab-pane v-if="detail.bvis" name="bvi" label="Business Vulnerability"></el-tab-pane>
                 <el-tab-pane name="resilience" label="Disaster Resilience"></el-tab-pane>
                 <el-tab-pane name="storms" label="Storm History"></el-tab-pane>
@@ -40,6 +40,8 @@
                 <br>
                 <br>
                 <Plotly :data="demoGraphData" :layout="demoGraphLayout" :display-mode-bar="false"/>
+
+                 
             </el-col>
             <el-col :span="12">
                 <h4>GDP <small><a href="https://www.bea.gov/" target="bea">(BEA)</a></small></h4>
@@ -55,9 +57,11 @@
                 </p>
             </el-col>
         </el-row>
-        <br>
-        <br>
-        <br>
+
+        <div style="border-top: 1px solid #ddd; margin: 20px; padding: 20px;">
+            <el-link type="primary" :target="'json.'+fips" :href="$root.dataUrl+'/counties/county.'+fips+'.json'">Download County Detail (.json)</el-link>
+        </div>
+
     </div>
 
     <!--
@@ -121,6 +125,12 @@
             Businesses that were identified to be especially vulnerable to a disaster are those which are dependent on supply chains,
             have a high reliance on public utilities like water and electricity, or have a large infrastructure footprint and low infrastructure mobility.
         </p>
+        <div class="plot-legend">
+            <div class="color-box" style="height: 4px; background-color: #49f"/> Total
+            <div class="color-box" style="height: 4px; background-color: #f00"/> Vulnerable
+        </div>
+        <br clear="both">
+
         <br>
         <br>
         <div v-for="(data, naics) in bvi2" :key="naics">
@@ -131,11 +141,15 @@
             <el-row>
                 <el-col :span="12">
                     <h4 style="margin: 0"><small>Establishments</small></h4>
-                    <Plotly :data="data.est" :layout="bvi2Layout" :display-mode-bar="false"></Plotly>
+                    <!--<Plotly :data="data.est" :layout="bvi2Layout" :display-mode-bar="false"></Plotly>-->
+                    <BVIPlot :data="data.est"/>
                 </el-col>
                 <el-col :span="12">
                     <h4 style="margin: 0"><small>Employment</small></h4>
+                    <!--
                     <Plotly :data="data.emp" :layout="bvi2Layout" :display-mode-bar="false"></Plotly>
+                    -->
+                    <BVIPlot :data="data.emp"/>
                 </el-col>
             </el-row>
         </div>
@@ -157,10 +171,9 @@
                 </p>
             </div>
 
-            <div class="resilience-legend">
+            <div class="plot-legend">
                 <div class="color-box" style="height: 4px; background-color: #409eff"/> This County
                 <div class="color-box" style="background-color: #09f5"/> State Average(+standard deviation) 
-
                 <div class="color-box" style="background-color: #0003"/> US Average(+standard deviation) 
             </div>
             <br clear="both">
@@ -227,6 +240,7 @@ import Event from '@/components/Event.vue'
 import IndicatorInfo from '@/components/IndicatorInfo.vue'
 import Footer from '@/components/Footer.vue'
 import CompositePlot from '@/components/CompositePlot.vue'
+import BVIPlot from '@/components/BVIPlot.vue'
 import NaicsInfo from '@/components/NaicsInfo.vue'
 import CountySelecter from '@/components/CountySelecter.vue'
 
@@ -261,6 +275,7 @@ Vue.directive('scroll', {
         Footer,
         SlideUpDown,
         CompositePlot,
+        BVIPlot,
         NaicsInfo,
         CountySelecter,
     },
@@ -367,43 +382,16 @@ export default class CountyDetail extends Vue {
         for(const naics in this.detail.bvis2) {
             const data = this.detail.bvis2[naics];
             this.bvi2[naics] = {
-                est: [
-                    {
-                        x: data.years,
-                        y: data.estab,
-                        //fill: 'tozeroy',
-                        name: 'Total',
-                        mode: 'none',
-                        stackgroup: 'one',
-                        //marker: {color: 'rgb(100, 100, 100)'},
-                        //type: 'bar'
-                    },
-                    {
-                        x: data.years,
-                        y: data.estab_v,
-                        //fill: 'tonexty',
-                        stackgroup: 'one',
-                        name: 'Vulnerable',
-                        mode: 'none',
-                        //marker: {color: 'rgb(100, 100, 100)'},
-                    }
-                ],
-                emp: [
-                    {
-                        x: data.years,
-                        y: data.emp,
-                        name: 'Total',
-                        mode: 'none',
-                        stackgroup: 'one',
-                    },
-                    {
-                        x: data.years,
-                        y: data.emp_v,
-                        stackgroup: 'one',
-                        name: 'Vulnerable',
-                        mode: 'none',
-                    }
-                ]
+                est: {
+                    years: data.years,
+                    total: data.estab,
+                    vul: data.estab_v,
+                },
+                emp: {
+                    years: data.years,
+                    total: data.emp,
+                    vul: data.emp_v,
+                },
             }
         }
     }
@@ -801,36 +789,6 @@ h4 {
 .primary {
     color: #409EFF;
 }
-.legend {
-    position: absolute;
-    display: block;
-    z-index: 1;
-    top: 120px;
-    background-color: #fff9;
-    padding: 10px;
-    text-transform: uppercase;
-    font-size: 80%;
-    border-radius: 5px;
-
-    .legend-color {
-        display: inline-block;
-        width: 10px;
-        height: 10px;
-    }
-
-    .legend-eda {
-        display: inline-block;
-        width: 10px;
-        height: 10px;   
-        border-radius: 50%;
-        background-color: #67c23a;
-    }
-
-    .legend-item {
-        display: inline-block; 
-        margin-right: 10px;
-    }
-}
 .border-left {
     border-left: 1px solid #0001;
     height: 200px;
@@ -941,7 +899,7 @@ margin-bottom: 10px;
 .measure-info:nth-child(even) {
 clear: both;
 }
-.resilience-legend {
+.plot-legend {
     text-align: center;
     font-size: 85%;
     .color-box {
