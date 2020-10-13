@@ -51,7 +51,6 @@ export default {
                 return;
             }
 
-            console.log("selecting", q);
             this.loading = true;
             const lq = q.toLowerCase();
             this.options = this.countyList.filter(o=>{
