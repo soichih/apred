@@ -40,7 +40,6 @@ export default class CountiesView extends Vue {
     */
 
     changeFips(v) {
-        console.log("fips changes to", v);
         this.$router.push('/county/'+v);
     }
     
