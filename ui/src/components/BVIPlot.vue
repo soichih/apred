@@ -51,29 +51,13 @@ export default class BviPlot extends Vue {
     ymin: (number|null) = null;
     fixed = 0;
 
-    //@Prop() readonly edaAwards: any;
     @Prop() readonly data: any;
 
-    constructor() {
-        super();
-
-        /*
-        for(let year = 2012; year <= 2018; ++year) {
-            this.years.push(year);
-        }
-        */
-
-        //if(this.ymin == null) return;
-        //if(this.ymax == null) return;
-
-        //add a bit of space top/bottom
-        //const r = this.ymax - this.ymin;
-        //this.ymax += r/5;
-        //this.ymin -= r/5;
+    mounted() {
         this.ymax = this.data.total.reduce((a: number,v: number)=>Math.max(a,v));
 
         //round to the next nearest 50
-        this.ymax = Math.floor(this.ymax / 50) * 50 + 50;
+        if(this.ymax) this.ymax = Math.floor(this.ymax / 50) * 50 + 50;
         this.ymin = 0;
     }
 
