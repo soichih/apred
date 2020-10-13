@@ -33,6 +33,21 @@ geojson.features.forEach(feature=>{
     delete feature.properties.GEO_ID;
     delete feature.properties.LSAD;
 });
-
 fs.writeFileSync(__dirname+"/../../../data/counties_geo.json", JSON.stringify(geojson));
+
+//for searching counties
+const countyList = [];
+geojson.features.forEach(feature=>{
+    const props = feature.properties;
+    if(props.countyfips) {
+        countyList.push({
+            value: props.statefips+props.countyfips, 
+            label: props.county+", "+props.state
+        });
+    }
+});
+fs.writeFileSync(__dirname+"/../../../data/countylist.json", JSON.stringify(countyList));
+
 console.log("all done");
+
+
