@@ -37,10 +37,10 @@ let data = {
         indicators: {
             "SOC": {id: "1", name: "Social Resilience"},
             "ECON": {id: "2", name: "Economic Resilience"},
-            //"INST": {id: "3", name: "Institutional Resilience"},
+            "INST": {id: "3", name: "Institutional Resilience"},
             "IHFR": {id: "4", name: "Infrastructure Resilience"},
             "COMM": {id: "5", name: "Community Capital"},
-            //"FLOR": {id: "100", name: "Special/Custom"},
+            "FLOR": {id: "100", name: "Special/Custom"},
         },
     }
 }; 
