@@ -19,15 +19,15 @@ function load(pool) {
     //years to pull data for
     let years = [];
     for(let year = today.getFullYear() /*1950*/; year <= today.getFullYear(); ++year) {
-	    let zones = [];
-	    let counties = [];
+        let zones = [];
+        let counties = [];
 
-	    console.log("loading data for "+year);
+        console.log("loading data for "+year);
 
-	    const request = pool.request();
-	    request.stream = true;
-	    request.query(`SELECT * from NOAA_StormEvents WHERE YEAR>=`+year+` and YEAR < `+(year+1));
-	    request.on('row', rec=>{
+        const request = pool.request();
+        request.stream = true;
+        request.query(`SELECT * from NOAA_StormEvents WHERE YEAR>=`+year+` and YEAR < `+(year+1));
+        request.on('row', rec=>{
             switch(rec.CZ_TYPE) {
             case "Z": 
                 zones.push(rec);
@@ -39,16 +39,16 @@ function load(pool) {
                 console.error("unknown CZ_TYPE:", rec.CZ_TYPE);
                 console.dir(rec);
             }
-	    });
-	    request.on('error', err=>{
+        });
+        request.on('error', err=>{
             throw err;
-	    });
-	    request.on('done', res=>{
+        });
+        request.on('done', res=>{
             console.dir(res);
             console.log("writing json "+year);
-            fs.writeFileSync(__dirname+"/../../../raw/statsamerica.noaa_storms_zones."+year+".json", JSON.stringify(zones));
-            fs.writeFileSync(__dirname+"/../../../raw/statsamerica.noaa_storms_counties."+year+".json", JSON.stringify(counties));
-	    });
+            fs.writeFileSync(config.pubdir+"/raw/statsamerica.noaa_storms_zones."+year+".json", JSON.stringify(zones));
+            fs.writeFileSync(config.pubdir+"/raw/statsamerica.noaa_storms_counties."+year+".json", JSON.stringify(counties));
+        });
     }
 }
 
