@@ -1,0 +1,43 @@
+id,name,indicator
+11,"Educational Equity",1
+12,Age,1
+13,"Transportation Access",1
+14,"Communication Capacity",1
+15,"Language Capacity",1
+16,"Special Needs",1
+17,"Health Coverage",1
+21,"Housing Capital",2
+22,Employment,2
+23,"Income and Equality (GINI Coeffecient)",2
+24,"Single Sector Employment Dependence",2
+25,"Employment (Female)",2
+26,"Business Size",2
+27,"Health Access",2
+31,"Mitigation - Hazard Mitigation Plan Coverage",3
+32,"Flood Coverage",3
+33,"Municipal Services",3
+34,"Mitigation - CRS Flood",3
+35,"Political Fragmentation",3
+36,"Previous Disaster Experience",3
+37,"Mitigation and Social Connectivity",3
+38,"Mitigation - Storm Ready Communities",3
+41,"Housing Type",4
+42,"Shelter Capacity",4
+43,"Medical Capacity",4
+44,"Access/Evacuation Potential",4
+45,"Housing Age",4
+46,"Sheltering Need",4
+47,"Recovery (Schools)",4
+51,"Place Attachment - Migration",5
+52,"Place Attachment - Born",5
+53,"Political Engagement",5
+54,"Social Capital - Religion",5
+55,"Social Capital - Civic Involvement",5
+56,"Social Capital - Advocacy",5
+57,Innovation,5
+101,"Business Vulnerability",100
+102,"Flood Zone",100
+103,Commuting,100
+104,"Housing Construction",100
+105,"Second Stage Businesses",100
+106,"Households with Broadband Access",100
