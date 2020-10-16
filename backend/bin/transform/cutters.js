@@ -8,8 +8,6 @@ console.log("cutters----------------------------------");
 
 //https://derickbailey.com/2014/09/21/calculating-standard-deviation-with-array-map-and-array-reduce-in-javascript/
 function standardDeviation(avg, values){
-  //var avg = average(values);
-
   var squareDiffs = values.map(function(value){
     var diff = value - avg;
     var sqrDiff = diff * diff;
@@ -68,7 +66,7 @@ async.series([
             county: fips_rec.county,
         });
     }
-    fs.writeFileSync(__dirname+"/../../../data/cutter2.json", JSON.stringify(data.cutter));
+    fs.writeFileSync(config.pubdir+"/cutter2.json", JSON.stringify(data.cutter));
 
     //create cutter_long.json which contains summarized indices for each county 
     //aggregate measure into 4 big categories like..
@@ -116,13 +114,6 @@ async.series([
     //find min/max for each measure so we can normalize values
     let mins = {}; 
     let maxs = {}; 
-    /*
-    {
-        "12": 0.2,
-        "10": 0.1,
-        ...
-    }
-    */
     for(let fips in data.cutter.counties) {
         for(let id in data.cutter.counties[fips]) {
             let values = Object.values(data.cutter.counties[fips][id]);
@@ -165,12 +156,12 @@ async.series([
         }
     }
 
-    fs.writeFileSync(__dirname+"/../../../data/cutter_long.json", JSON.stringify(summaries));
+    fs.writeFileSync(config.pubdir+"/cutter_long.json", JSON.stringify(summaries));
 });
 
 function load_fips(cb) {
     console.debug("loading fips");
-    data.fips = require(__dirname+"/../../../data/fips.json");
+    data.fips = require(config.pubdir+"/fips.json");
     data.fips.forEach(rec=>{
         let fips = rec.statefips+'.'+rec.countyfips;
         if(!data.cutter.counties[fips]) data.cutter.counties[fips] = {}; 
@@ -180,7 +171,7 @@ function load_fips(cb) {
 
 function load_cutter_sources(cb) {
     console.debug("loading cutter sources");
-    fs.createReadStream(__dirname+'/../../../raw/cutters/source_export.csv').pipe(csvParser({
+    fs.createReadStream(config.pubdir+'/raw/cutters/source_export.csv').pipe(csvParser({
         mapHeaders({header, index}) {
             return header.toLowerCase();
         },
@@ -195,13 +186,12 @@ function load_cutter_sources(cb) {
 }
 
 function load_dr(cb) {
-    //create dictionary of all sources 
     let sources = {};
 
     console.debug("loading dr");
     let count_missing = 0;
     
-    let dr = require(__dirname+'/../../../raw/dr.json');
+    let dr = require(config.pubdir+'/raw/dr.json');
     dr.forEach(rec=>{
         /*
         {

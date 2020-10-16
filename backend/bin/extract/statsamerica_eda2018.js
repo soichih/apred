@@ -36,8 +36,7 @@ mssql.connect(config.stats_america.db_red_dr).then(async pool=>{
         fains[rec.fain].fema_id = rec.fema_id;
     });
 
-    //console.dir(fains);
-    fs.writeFileSync(__dirname+"/../../../raw/statsamerica.eda2018.json", JSON.stringify(fains));
+    fs.writeFileSync(config.pubdir+"/raw/statsamerica.eda2018.json", JSON.stringify(fains));
     pool.close();
 });
 

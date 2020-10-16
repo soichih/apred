@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 const fs = require('fs');
+const config = require('../../config');
 
 console.log("count_noaa_storms---------------------------------");
 
-const rawdir = __dirname+"/../../../raw";
-const output_file = __dirname+"/../../../data/storm_counts.json";
+const rawdir = config.pubdir+"/raw";
+const output_file = config.pubdir+"/storm_counts.json";
 
 //keyed by state/county fips, then keyed by EVENT_TYPE, then keyed by year then count
 const storms = {
@@ -97,5 +98,7 @@ fs.readdir(rawdir, (err, files)=>{
         }
     });
     console.dir(storms["us"]);
-    fs.writeFileSync(output_file, JSON.stringify(storms));
+    fs.writeFileSync(config.pubdir+"/storm_counts.json", JSON.stringify(storms));
 });
+
+
