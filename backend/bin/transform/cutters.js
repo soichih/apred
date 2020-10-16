@@ -171,7 +171,7 @@ function load_fips(cb) {
 
 function load_cutter_sources(cb) {
     console.debug("loading cutter sources");
-    fs.createReadStream(config.pubdir+'/raw/cutters/source_export.csv').pipe(csvParser({
+    fs.createReadStream(__dirname+'/source_export.csv').pipe(csvParser({
         mapHeaders({header, index}) {
             return header.toLowerCase();
         },
