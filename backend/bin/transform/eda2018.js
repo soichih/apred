@@ -3,13 +3,14 @@
 const fs = require('fs');
 const async = require('async');
 const axios = require('axios');
+const config = require('../../config');
 
 console.log("eda2018-----------------------------------");
 
-const fips = require(__dirname+'/../../../data/fips.json');
-const geocodes = require(__dirname+'/../../../data/fain_geocodes.json');
+const fips = require(config.pubdir+'/fips.json');
+const geocodes = require(config.pubdir+'/fain_geocodes.json');
 
-const eda2018 = require(__dirname+'/../../../raw/statsamerica.eda2018.json');
+const eda2018 = require(config.pubdir+'/raw/statsamerica.eda2018.json');
 let need_geocode = [];
 
 for(let fain in eda2018) {
@@ -68,6 +69,8 @@ async.eachSeries(need_geocode, (fain, next_fain)=>{
     console.log("done");
 
     //store previously coded geocode
-    fs.writeFileSync(__dirname+'/../../../data/fain_geocodes.json', JSON.stringify(geocodes));
-    fs.writeFileSync(__dirname+'/../../../data/eda2018.json', JSON.stringify(eda2018));
+    fs.writeFileSync(config.pubdir+'/fain_geocodes.json', JSON.stringify(geocodes));
+    fs.writeFileSync(config.pubdir+'/eda2018.json', JSON.stringify(eda2018));
 });
+
+

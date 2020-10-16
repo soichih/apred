@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
-'strict';
-
 console.log("counties----------------------------");
 
 const fs = require('fs');
-const geo = require(__dirname+'/../../../data/counties_geo.json');
-const tribes = require(__dirname+'/../../../data/tribes.json');
+const config = require('../../config');
+
+const geo = require(config.pubdir+'/counties_geo.json');
+const tribes = require(config.pubdir+'/tribes.json');
 const csvParser = require('csv-parser');
 
 const counties = {}; //keyed by fips, then all information for that county
@@ -35,39 +35,14 @@ geo.features.forEach(feature=>{
     } 
 });
 
-
-/*
-//deprecaetd.. use demo2
-console.log("loading demographics");
-const demo = require(__dirname+'/../../../raw/statsamerica.demo.json');
-for(let fips in demo) {
-    if(!counties[fips]) {
-        //console.error("odd fips in demo?", fips);
-        continue;
-    }
-    counties[fips].demo = demo[fips];
-    //counties[fips].population = demo[fips].reduce((t,v)=>{ return t+v.value }, 0);
-}
-*/
-
 //deprecated again.. use acs
 console.log("loading demographics2");
-const demo2 = require(__dirname+'/../../../raw/statsamerica.demo2.json');
-
+const demo2 = require(config.pubdir+'/raw/statsamerica.demo2.json');
 
 for(let fips in demo2) {
     if(!counties[fips]) {
         continue;
     }
-    /*
-    //get total population by summing all 2018 records
-    let total = 0;
-    for(code in demo2[fips]) {
-        let recs = demo2[fips][code];
-        total += recs.filter(rec=>rec.year == 2018).reduce((t,rec)=>{ return t + rec.population }, 0);
-    }
-    counties[fips].population = total;
-    */
 
     for(code in demo2[fips]) {
         let years = [];
@@ -81,47 +56,22 @@ for(let fips in demo2) {
     counties[fips].demo2 = demo2[fips];
 }
 
-
-//console.log("dumping counties fips");
-//fs.writeFileSync("/tmp/cfips.list", JSON.stringify(Object.keys(counties)));
-
 console.log("loading acs");
-const acs = require(__dirname+'/../../../raw/statsamerica.acs.json');
+const acs = require(config.pubdir+'/raw/statsamerica.acs.json');
 
 acs.forEach(rec=>{
     const fips = rec.statefips+rec.countyfips;
 
     if(!counties[fips]) {
-        //console.error("no such fips", fips);
         return;
     }
-
-    /*
-    if(fips == "18105") {
-        console.log("fips is", fips);
-        console.dir(rec);
-    }
-    */
 
     //find the current(2018) info
     if(rec.year == "2018") {
         counties[fips].population = rec.totpop;
         counties[fips].popdensity = rec.pop_density;
-        //console.log(fips, rec.year, rec.pop_density);
     }
 
-    /*
-    for(code in demo2[fips]) {
-        let years = [];
-        let populations = [];
-        demo2[fips][code].forEach(rec=>{
-            years.push(rec.year);
-            populations.push(rec.population);
-        });
-        demo2[fips][code] = {years, populations}; //override..
-    }
-    counties[fips].demo2 = demo2[fips];
-    */
     let pops = counties[fips].pops;
     if(!pops) pops = {
         years: [],
@@ -131,14 +81,6 @@ acs.forEach(rec=>{
             {name: "25-64", y: []},
             {name: "65+", y: []},
         ],
-        /*
-        "312": {years: [], populations: []}, //0-4
-        "313": {years: [], populations: []}, //5-17
-        "314": {years: [], populations: []}, //18-24
-        "315": {years: [], populations: []}, //25-44
-        "316": {years: [], populations: []}, //45-64
-        "317": {years: [], populations: []}, //65+
-        */
     };
     pops.years.push(rec.year); //assume it's ordered by year..
     pops.groups[0].y.push(rec.pop_0to4 + rec.pop_5to17); //312, 313
@@ -147,9 +89,6 @@ acs.forEach(rec=>{
     pops.groups[3].y.push(rec.pop_65plus); //317
     counties[fips].pops = pops;
 });
-//console.dir(counties["18105"].pops);
-//console.dir(counties["18105"].pops.groups);
-//process.exit(1);
 
 //report counties with missing demo
 for(let fips in counties) {
@@ -159,111 +98,33 @@ for(let fips in counties) {
 }
 
 console.log("loading median income");
-const medianincome = require(__dirname+'/../../../raw/statsamerica.acs.medianincome.json');
+const medianincome = require(config.pubdir+'/raw/statsamerica.acs.medianincome.json');
 for(let rec of medianincome) {
     let fips = rec.geo_id.toString();
     if(fips.length > 6) continue; //ignore odd one
     if(fips.length == 6 && fips[0] == "1") fips = fips.substring(1);
     if(!counties[fips]) {
-        //console.error("odd fips in medianincome?", fips);
         continue;
     }
-    //{"geo_id":33647834,"time_id":2011,"code_id":307,"data":56404}
-    //counties[fips].demo = demo[fips];
-    //counties[fips].population = demo[fips].reduce((t,v)=>{ return t+v.value }, 0);
     counties[fips].medianincome = rec.data;
 }
 
 
 console.log("loading bea county gdb");
-const gdps = require(__dirname+'/../../../raw/statsamerica.bea.gdp.json');
+const gdps = require(config.pubdir+'/raw/statsamerica.bea.gdp.json');
 for(let gdp of gdps) {
-    /*
-    {
-      statefips: '02',
-      countyfips: '158',
-      linecd: '0036',
-      year: '2001',
-      disc_c: '0',
-      gcp_c: 3940,
-      disc_r: '0',
-      gcp_r: 4278,
-      disc_idx: '0',
-      gcp_idx: 90.032
-    }
-    GCP_C = GDP in current dollars
-    GCP_R = Real GDP in chained dollars (2012 dollars)
-    GCP_IDX = Quantity indexes for real GDP
-    */
     let fips = gdp.statefips+gdp.countyfips;
     if(!counties[fips]) {
-        //console.error("odd fips in gdp?", fips);
-        //console.dir(gdp);
         continue;
     }
-    //counties[fips].demo = demo[fips];
-    //counties[fips].population = demo[fips].reduce((t,v)=>{ return t+v.value }, 0);
     counties[fips].gdp = gdp.gcp_c; //GDP in current dollars
 }
-
-//deprecated by cutter2.. I will remove this once UI no longer uses it
-/*
-console.log("loading cutter info");
-const cutter = require(__dirname+'/../../../data/cutter.json');
-for(let fips in cutter.counties) {
-    let tokens = fips.split(".");
-    let statefips = tokens[0];
-    let countyfips = tokens[1];
-    sfips = statefips+countyfips;
-    let county_measures = cutter.counties[fips];
-    if(!counties[sfips]) {
-        //console.error("odd fips in cutter?", sfips);
-        continue;
-    }
-    counties[sfips].cutter = JSON.parse(JSON.stringify(cutter.indicators));
-    for(let indicator in counties[sfips].cutter) {
-        //if(indicator == "INST" || indicator == "FLOR") continue; //ignore institutional or special/custerom index
-
-        //aggregate for the whole indicator
-        let sum = {
-            us: 0,
-            states: 0,
-            county: 0,
-        }
-        let sumcount = 0;
-        counties[sfips].cutter[indicator].sources.forEach(source=>{
-            source.states = source.states[statefips];
-            let measure = county_measures.find(m=>m.source == source.id);
-            if(!measure) {
-                //there are too many that are missing..
-                //console.error("missing for source", source.id, "fips", sfips);
-                source.county = null;
-            } else {
-                source.county = measure.value;
-
-                sumcount++;
-                sum.us += source.us;
-                sum.states += source.states;
-                sum.county += source.county;
-            }
-        });
-
-        counties[sfips].cutter[indicator].aggregate = {
-            us: sum.us / sumcount,
-            state: sum.states / sumcount,
-            county: sum.county / sumcount,
-        };
-    }
-    //console.log(JSON.stringify(counties[sfips].cutter, null, 4));
-    //process.exit(1);
-}
-*/
 
 const years = [];
 for(let year = 2012; year <= 2018; ++year) years.push(year);
 
 console.log("loading cutter2 info");
-const cutter2 = require(__dirname+'/../../../data/cutter2.json');
+const cutter2 = require(config.pubdir+'/cutter2.json');
 for(let fips in cutter2.counties) {
     let tokens = fips.split(".");
     let statefips = tokens[0]; 
@@ -369,7 +230,7 @@ for(let fips in cutter2.counties) {
 }
 
 console.log("loading eda2018");
-const eda2018 = require(__dirname+'/../../../data/eda2018.json');
+const eda2018 = require(config.pubdir+'/eda2018.json');
 for(let fain in eda2018) {
     eda2018[fain].counties.forEach(county=>{
         let fips = county.statefips+county.countyfips;
@@ -432,30 +293,24 @@ function handle_disaster(rec) {
             }
             console.log("found a match!", fips);
             rec.tribe = true;
-            /*
-            if(!counties[fips]) {
-                console.log("but I can't find a county to put it");
-            }
-            */
         }
         counties[fips].disasters.push(rec);
     }
 }
 
 console.log("loading past disasters");
-const disasters_past = require(__dirname+"/../../../raw/statsamerica.disasters.1953-2015.json");
+const disasters_past = require(config.pubdir+"/raw/statsamerica.disasters.1953-2015.json");
 disasters_past.forEach(handle_disaster);
 
 console.log("loading recent disasters");
-const disasters_recent = require(__dirname+"/../../../raw/statsamerica.disasters.2015-now.json");
+const disasters_recent = require(config.pubdir+"/raw/statsamerica.disasters.2015-now.json");
 disasters_recent.forEach(handle_disaster);
 
 console.log("loading storm counts");
-const storm_counts = require(__dirname+"/../../../data/storm_counts.json");
+const storm_counts = require(config.pubdir+"/storm_counts.json");
 disasters_past.forEach(handle_disaster);
 
 console.log("number of odd dr", odd_dr_count);
-//process.exit(1);
 
 for(let fips in storm_counts) {
     let storms = storm_counts[fips];
@@ -470,7 +325,7 @@ for(let fips in storm_counts) {
 
 function handlePublicAssistances(cb) {
     console.log("loading PublicAssistanceFundedProjectsDetails");
-    fs.createReadStream(__dirname+'/../../../raw/PublicAssistanceFundedProjectsDetails.csv').pipe(csvParser({
+    fs.createReadStream(config.pubdir+'/raw/PublicAssistanceFundedProjectsDetails.csv').pipe(csvParser({
         mapValues({header, index, value}) {
             if(header.match("declarationDate")) return new Date(value);
             if(header.match("projectAmount")) return Number(value);
@@ -514,7 +369,7 @@ function handlePublicAssistances(cb) {
 //deprecated by handleBVINaics
 function handleBVI(cb) {
     console.log("loading bvi.csv");
-    fs.createReadStream(__dirname+'/../../../raw/bvi.csv').pipe(csvParser({
+    fs.createReadStream(config.pubdir+'/raw/bvi.csv').pipe(csvParser({
         headers: [ 
             "year","county","estab_total","estab_vuln_total","estab_vuln_pct","mm_employees","emp_vuln_total","emp_vuln_pct"
         ],
@@ -553,20 +408,7 @@ function handleBVI(cb) {
 
 function handleBVINaics(cb) {
     console.log("loading bvi.json");
-    const recs = require(__dirname+'/../../../raw/bvi.json');
-    /*
-    {
-        year: '2013',
-        fips: '40075',
-        naics_code: '72',
-        estab_total: 13,
-        estab_vuln_total: 9,
-        estab_vuln_pct: 0.692307,
-        mm_employees: 143,
-        emp_vuln_total: 40,
-        emp_vuln_pct: 0.27972
-    },
-    */
+    const recs = require(config.pubdir+'/raw/bvi.json');
 
     //organize into fips / naics / year
     recs.forEach(rec=>{
@@ -598,9 +440,6 @@ function handleBVINaics(cb) {
                 emp_v: [],
             }
             for(let year of years) {
-                //console.dir(counties[fips].bvis2[naics]);
-                //console.log("looking for", year);
-                //console.dir(counties[fips].bvis2[naics][year]);
                 let o = counties[fips].bvis2[naics][year];
                 info.estab.push(o.estab);
                 info.estab_v.push(o.estab_v);
@@ -620,11 +459,6 @@ handleBVI(err=>{
     handleBVINaics(err=>{
         if(err) throw err;
 
-        /*
-        handlePublicAssistances(err=>{
-                if(err) throw err;
-        */
-    
         //sort some arrays
         for(let fips in counties) {
             if(counties[fips].bvis) counties[fips].bvis.sort((a,b)=>a.year - b.year);
@@ -686,11 +520,11 @@ handleBVI(err=>{
             });
         }
         console.log("saving years.json");
-        fs.writeFileSync(__dirname+"/../../../data/years.json", JSON.stringify(years));
+        fs.writeFileSync(config.pubdir+"/years.json", JSON.stringify(years));
 
         console.log("saving counties jsons");
         for(let fips in counties) {
-            fs.writeFileSync(__dirname+"/../../../data/counties/county."+fips+".json", JSON.stringify(counties[fips]));
+            fs.writeFileSync(config.pubdir+"/counties/county."+fips+".json", JSON.stringify(counties[fips]));
         }
         console.log("all done");
     });
