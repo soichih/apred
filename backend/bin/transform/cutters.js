@@ -181,7 +181,7 @@ function load_cutter_sources(cb) {
         if(!indicator.sources) indicator.sources = [];
         indicator.sources.push({id: rec.id, name: rec.name});
     }).on('end', ()=>{
-        console.log(JSON.stringify(data.cutter.indicators, null, 4));
+        //console.log(JSON.stringify(data.cutter.indicators, null, 4));
         cb();
     });
 }
