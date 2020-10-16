@@ -2,6 +2,7 @@
 
 const csvParser = require('csv-parser');
 const fs = require('fs');
+const config = require('../../config');
 const async = require('async');
 
 console.log("cutters----------------------------------");
