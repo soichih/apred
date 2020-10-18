@@ -10,5 +10,5 @@ let url = "https://eric.clst.org/assets/wiki/uploads/Stuff/gz_2010_us_050_00_20m
 //let url = "https://eric.clst.org/assets/wiki/uploads/Stuff/gz_2010_us_050_00_500k.json"; //largest (most detailed)
 
 axios.get(url).then(res=>{
-    fs.writeFileSync(config.pubdir+"/counties_geo.json", JSON.stringify(res.data));
+    fs.writeFileSync(config.pubdir+"/raw/counties_geo.json", JSON.stringify(res.data));
 });

@@ -294,7 +294,7 @@ function handle_disaster(rec) {
             console.log("found a match!", fips);
             rec.tribe = true;
         }
-        counties[fips].disasters.push(rec);
+        if(counties[fips]) counties[fips].disasters.push(rec);
     }
 }
 
