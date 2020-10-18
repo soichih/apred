@@ -14,8 +14,9 @@
 ./transform/eda2018.js
 ./transform/cutters.js
 ./transform/count_noaa_storms.js
+./transform/geojson.js
 
-./load/counties.js >> apred.load.log
+./load/counties.js
 
 #service monitoring (send sms alert if key service is down)
 #*/15 * * * * cd ~/git/servicemonitor && ./check.sh > check.log 2>&1
