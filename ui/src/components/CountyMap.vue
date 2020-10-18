@@ -148,7 +148,7 @@ export default class Disaster extends Vue {
 
     hiddenLayers = ["biological"];
     drLayer = "SOC";
-    countyList = [];
+    //countyList = [];
     layersAll = true;
 
     contextMenuCounty = null;
@@ -376,9 +376,6 @@ export default class Disaster extends Vue {
     }
 
     mounted() {
-        //this.loadCounty(this.$route.params.fips);
-
-        console.log("creating map");
         this.map = new mapboxgl.Map({
             container: 'map', // HTML container id
             style: 'mapbox://styles/mapbox/light-v10', // style URL
@@ -416,6 +413,7 @@ export default class Disaster extends Vue {
             }).then(data=>{
                 this.geojson = data;
 
+                /*
                 data.features.forEach(feature=>{
                     const props = feature.properties;
                     if(props.countyfips) {
@@ -423,6 +421,7 @@ export default class Disaster extends Vue {
                     }
 
                 });
+                */
 
                 //all counties
                 this.map.addSource('counties', { type: "geojson", data });
@@ -431,7 +430,6 @@ export default class Disaster extends Vue {
                     "type": "fill",
                     "source": "counties",
                     "paint": {
-                        //"fill-outline-color": "rgba(0,0,0.5,0.1)",
                         "fill-color": "rgba(0,0,0,0.1)"
                     }
                 });
@@ -447,7 +445,6 @@ export default class Disaster extends Vue {
                             'fill-color': layer.color,
                             'fill-opacity': (layer.opacity||1)*0.75
                         },
-                        //filter: layer.filter,
                         filter: ['in', 'fips', ''],
                         layout: {
                             visibility: 'none',
@@ -462,7 +459,6 @@ export default class Disaster extends Vue {
                             'fill-color': layer.color,
                             'fill-opacity': (layer.opacity||1)*0.2,
                         },
-                        //'filter': layer.statefilter,
                         filter: ['in', 'statefips', ''],
                         layout: {
                             visibility: 'none',
@@ -471,7 +467,6 @@ export default class Disaster extends Vue {
                 }
 
                 fetch(this.$root.dataUrl+"/years.json").then(res=>{ 
-                    //this.drYearsUpdated = res.headers.get("last-modified")
                     return res.json()
                 }).then(data=>{
                     this.yearsDR = data;
@@ -541,7 +536,6 @@ export default class Disaster extends Vue {
                             coordinates: [ rec.lon, rec.lat ],
                         },
                         properties: {
-                            //award: rec.award_amount,
                             awardStr: "$"+this.$options.filters.formatNumber(rec.award_amount/1000)+"k",
                             type: rec.statewide?'state':'county',
                         }

@@ -280,4 +280,16 @@ It contains data that looks like
 
 ```
 
+## Jetstream Deployment
+
+create network "ctil"
+
+openstack server create \
+    --security-group web \
+    --security-group global-ssh \
+    --key-name home \
+    --flavor m1.medium \
+    --image "JS-API-Featured-Ubuntu20-Latest" \
+    --nic net-id=ctil \
+    apred 
 

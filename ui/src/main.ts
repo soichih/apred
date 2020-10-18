@@ -88,7 +88,7 @@ new Vue({
         }
     },
     mounted() {
-        fetch(this.dataUrl+"/dr_measure.json").then(res=>res.json()).then((data: RawDrMeasureRec[])=>{
+        fetch(this.dataUrl+"/raw/dr_measure.json").then(res=>res.json()).then((data: RawDrMeasureRec[])=>{
             data.forEach(rec=>{
                 this.drMeasures[rec.measure] = {
                     name: rec["measure_name"],
