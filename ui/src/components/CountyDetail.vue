@@ -333,11 +333,6 @@ export default class CountyDetail extends Vue {
 
     @Watch('fips')
     onDetailChange() {
-        /*
-        this.update();
-        this.showPastHistory = false;
-        */
-        console.log("fips changes to", this.fips);
         this.load();
     }
 
@@ -595,7 +590,6 @@ export default class CountyDetail extends Vue {
     }
 
     load() {
-        console.log("loading", this.fips);
         fetch(this.$root.dataUrl+"/counties/county."+this.fips+".json").then(res=>res.json()).then(data=>{
             if(data.cutter) {
                 delete data.cutter.INST;
@@ -606,7 +600,6 @@ export default class CountyDetail extends Vue {
             this.processHistory();
             this.processBVI2();
             this.processStorms();
-            //this.processMap();
             this.processDemo();
         });
     }
