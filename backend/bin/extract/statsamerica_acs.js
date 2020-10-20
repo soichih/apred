@@ -86,7 +86,7 @@ function load_medianincome(pool) {
           },
 
         */
-        fs.writeFileSync(config.pubdir+"/raw/statsamerica.acs.medianincome2.json", JSON.stringify(res.recordset));
+        fs.writeFileSync(config.pubdir+"/raw/statsamerica.acs.medianincome.json", JSON.stringify(res.recordset));
         pool.close();
     });
 }
