@@ -9,12 +9,11 @@ console.log("statsamerica c2k_uscnty_acs --------------------------");
 
 //I can only connect from IU VPN connected IPs - not dev1
 mssql.connect(config.stats_america.db_stats4).then(pool=>{
-    load(pool);
+    load_population(pool);
+    load_medianincome(pool);
 });
-
-function load(pool) {
+function load_population(pool) {
     let density = {};
-
     pool.request().query(` SELECT * FROM [stats_dms5].[dbo].[c2k_uscnty_acs] `).then(res=>{
         //res.recordset
         /*
@@ -71,6 +70,23 @@ function load(pool) {
         }
         */
         fs.writeFileSync(config.pubdir+"/raw/statsamerica.acs.json", JSON.stringify(res.recordset));
+        pool.close();
+    });
+}
+
+function load_medianincome(pool) {
+    let density = {};
+    pool.request().query(` SELECT * FROM [stats_dms5].[dbo].[acs_common_items_extract] WHERE code_id = '307' and time_id = '2018'`).then(res=>{
+        /*
+          {
+            "geo_id": 11000,
+            "time_id": 2017,
+            "code_id": 307,
+            "data": 77649
+          },
+
+        */
+        fs.writeFileSync(config.pubdir+"/raw/statsamerica.acs.medianincome2.json", JSON.stringify(res.recordset));
         pool.close();
     });
 }
