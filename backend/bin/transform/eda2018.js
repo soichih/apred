@@ -63,6 +63,9 @@ async.eachSeries(need_geocode, (fain, next_fain)=>{
             console.error(res.data);
         }
         next_fain();
+    }).catch(err=>{
+        console.error(err);
+        next_fain();
     });
 }, err=>{
     if(err) throw err;
