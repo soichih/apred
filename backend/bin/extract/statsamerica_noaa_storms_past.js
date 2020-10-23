@@ -15,10 +15,13 @@ mssql.connect(config.stats_america.db_stats4).then(pool=>{
 });
 
 function load(pool) {
-
-    //years to pull data for
-    let years = [];
+    let yearsToLoad = [];
     for(let year = 1950; year < today.getFullYear(); ++year) {
+        yearsToLoad.push(year);
+    }
+
+    async.eachSeries(yearsToLoad, (year, next_year)=>{
+    //for(let year = 2010; year < 2011; ++year) {
         let zones = [];
         let counties = [];
 
@@ -40,15 +43,17 @@ function load(pool) {
                 console.dir(rec);
             }
         });
-        request.on('error', err=>{
-            throw err;
-        });
+        request.on('error', next_year);
         request.on('done', res=>{
             console.dir(res);
             console.log("writing json "+year);
             fs.writeFileSync(config.pubdir+"/raw/statsamerica.noaa_storms_zones."+year+".json", JSON.stringify(zones));
             fs.writeFileSync(config.pubdir+"/raw/statsamerica.noaa_storms_counties."+year+".json", JSON.stringify(counties));
+            next_year();
         });
-    }
+    }, err=>{
+        if(err) throw err;
+        console.log("all done");
+    });
 }
 
