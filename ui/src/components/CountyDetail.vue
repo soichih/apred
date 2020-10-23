@@ -17,7 +17,7 @@
             <el-tabs v-model="tab">
                 <el-tab-pane name="info" label="County Detail"></el-tab-pane>
                 <el-tab-pane name="disaster" :label="'Disaster Declarations/EDA Awards ('+history.length+')'"></el-tab-pane>
-                <el-tab-pane v-if="detail.bvis" name="bvi" label="Business Vulnerability"></el-tab-pane>
+                <el-tab-pane v-if="detail.bvis2" name="bvi" label="Business Vulnerability"></el-tab-pane>
                 <el-tab-pane name="resilience" label="Disaster Resilience"></el-tab-pane>
                 <el-tab-pane name="storms" label="Storm History"></el-tab-pane>
             </el-tabs>

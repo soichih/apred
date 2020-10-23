@@ -54,6 +54,8 @@ new Vue({
             //dataUrl: "https://gpu1-pestillilab.psych.indiana.edu/apred",
             dataUrl: "https://api.ctil.iu.edu/pub",
             drMeasures: {} as DrMeasures, 
+            
+            map: null,
 
             layers: {
                 "biological": {

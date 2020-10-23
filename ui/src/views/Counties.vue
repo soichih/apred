@@ -52,10 +52,14 @@ export default class CountiesView extends Vue {
         if(!this.fips) {
             this.mountmap = true; //should only happen once
             this.showmap = true;
+            this.$nextTick(()=>{
+                if(this.$root.map) this.$root.map.resize();
+            });
         }
         if(this.fips) {
             //hiding map causes mapbox to resize to a default size??
-            //this.showmap = false;
+            //if I don't hide it, page will be screwed up
+            this.showmap = false;
         }
     }
 }
