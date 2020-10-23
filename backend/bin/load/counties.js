@@ -366,6 +366,7 @@ function handlePublicAssistances(cb) {
     });
 }
 
+/*
 //deprecated by handleBVINaics
 function handleBVI(cb) {
     console.log("loading bvi.csv");
@@ -385,14 +386,6 @@ function handleBVI(cb) {
     })).on('data', rec=>{
         delete rec.estab_vuln_pct;
         delete rec.emp_vuln_pct;
-        /*
-        { year: 2017,
-      county: 55141,
-      estab_total: 1781,
-      estab_vuln_total: 167,
-      mm_employees: 37082,
-      emp_vuln_total: 2053 }
-        */
         let fips = rec.county.toString()
         if(!counties[fips]) {
             console.error("odd fips in bvi (rec.county)", fips);
@@ -405,6 +398,7 @@ function handleBVI(cb) {
           cb();
     });
 }
+*/
 
 function handleBVINaics(cb) {
     console.log("loading bvi.json");
@@ -453,81 +447,74 @@ function handleBVINaics(cb) {
     cb();
 }
 
-handleBVI(err=>{
+handleBVINaics(err=>{
     if(err) throw err;
 
-    handleBVINaics(err=>{
-        if(err) throw err;
-
-        //sort some arrays
-        for(let fips in counties) {
-            if(counties[fips].bvis) counties[fips].bvis.sort((a,b)=>a.year - b.year);
-            if(counties[fips].disasters) counties[fips].disasters.sort((a,b)=>new Date(a.declarationDate) - new Date(b.declarationDate));
-        }
-      //create county/state summary json for each year
+    //sort some arrays
+    for(let fips in counties) {
+        if(counties[fips].bvis) counties[fips].bvis.sort((a,b)=>a.year - b.year);
+        if(counties[fips].disasters) counties[fips].disasters.sort((a,b)=>new Date(a.declarationDate) - new Date(b.declarationDate));
+    }
+  //create county/state summary json for each year
 /*
- statefips: '10',
-  countyfips: '001',
-  county: 'Kent',
-  state: 'Delaware',
-  area: 586.179,
-  _dd: undefined,
-  eda2018: [],
-  disasters: [
-    {
-      femaDeclarationString: 'DR-126-DE',
-      disasterNumber: '126',
-      state: 'DE',
-      declarationType: 'DR',
-      declarationDate: '1962-03-09T05:00:00.000Z',
-      fyDeclared: '1962',
-      incidentType: 'Flood',
-      declarationTitle: 'SEVERE STORMS, HIGH TIDES & FLOODING',
-      ihProgramDeclared: '0',
-      iaProgramDeclared: '1',
-      paProgramDeclared: '1',
-      hmProgramDeclared: '1',
-      incidentBeginDate: '1962-03-09T05:00:00.000Z',
-      incidentEndDate: '1962-03-09T05:00:00.000Z',
-      disasterCloseoutDate: null,
-      fipsStateCode: '10',
-      fipsCountyCode: '000',
-      placeCode: '0',
-      designatedArea: 'Statewide',
-      declarationRequestNumber: '62011',
-      hash: '00ba0f29d46437cbe75fcfdb67925ce3',
-      lastRefresh: '2019-07-26T18:49:32.222Z',
-      id: '5d1bceafd5b39c032f260362',
-      statewide: true
-    },
+statefips: '10',
+countyfips: '001',
+county: 'Kent',
+state: 'Delaware',
+area: 586.179,
+_dd: undefined,
+eda2018: [],
+disasters: [
+{
+  femaDeclarationString: 'DR-126-DE',
+  disasterNumber: '126',
+  state: 'DE',
+  declarationType: 'DR',
+  declarationDate: '1962-03-09T05:00:00.000Z',
+  fyDeclared: '1962',
+  incidentType: 'Flood',
+  declarationTitle: 'SEVERE STORMS, HIGH TIDES & FLOODING',
+  ihProgramDeclared: '0',
+  iaProgramDeclared: '1',
+  paProgramDeclared: '1',
+  hmProgramDeclared: '1',
+  incidentBeginDate: '1962-03-09T05:00:00.000Z',
+  incidentEndDate: '1962-03-09T05:00:00.000Z',
+  disasterCloseoutDate: null,
+  fipsStateCode: '10',
+  fipsCountyCode: '000',
+  placeCode: '0',
+  designatedArea: 'Statewide',
+  declarationRequestNumber: '62011',
+  hash: '00ba0f29d46437cbe75fcfdb67925ce3',
+  lastRefresh: '2019-07-26T18:49:32.222Z',
+  id: '5d1bceafd5b39c032f260362',
+  statewide: true
+},
 */
 
-        let years = {
-            //keyed by year, then by disaster type, and array of county fips and state fips
-        }; 
+    let years = {
+        //keyed by year, then by disaster type, and array of county fips and state fips
+    }; 
 
-        for(let fips in counties) {
-            counties[fips].disasters.forEach(dr=>{
-                let _fips = fips;
-                if(dr.statewide) {
-                    _fips = dr.fipsStateCode;
-                }
-                let date = new Date(dr.incidentBeginDate);
-                let year = date.getFullYear();
-                if(!years[year]) years[year] = {};
+    for(let fips in counties) {
+        counties[fips].disasters.forEach(dr=>{
+            let _fips = fips;
+            if(dr.statewide) _fips = dr.fipsStateCode;
+            let date = new Date(dr.incidentBeginDate);
+            let year = date.getFullYear();
+            if(!years[year]) years[year] = {};
                 if(!years[year][dr.incidentType]) years[year][dr.incidentType] = [];
                 if(!years[year][dr.incidentType].includes(_fips)) years[year][dr.incidentType].push(_fips); 
-            });
-        }
-        console.log("saving years.json");
-        fs.writeFileSync(config.pubdir+"/years.json", JSON.stringify(years));
+        });
+    }
+    console.log("saving years.json");
+    fs.writeFileSync(config.pubdir+"/years.json", JSON.stringify(years));
 
-        console.log("saving counties jsons");
-        for(let fips in counties) {
-            fs.writeFileSync(config.pubdir+"/counties/county."+fips+".json", JSON.stringify(counties[fips]));
-        }
-        console.log("all done");
-    });
+    console.log("saving counties jsons");
+    for(let fips in counties) {
+        fs.writeFileSync(config.pubdir+"/counties/county."+fips+".json", JSON.stringify(counties[fips]));
+    }
+    console.log("all done");
 });
-
 
