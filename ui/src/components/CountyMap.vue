@@ -385,6 +385,7 @@ export default class Disaster extends Vue {
             //bearing: 10, // bearing in degrees
             zoom: 1,
         });
+        this.$root.map = this.map; //hack to work around mapbox resizing bug
 
         // disable map zoom when using scroll
         //this.map.scrollZoom.disable();
