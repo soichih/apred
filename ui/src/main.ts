@@ -51,7 +51,8 @@ new Vue({
     data() {
         return {
             //dataUrl: "https://ctil.iu.edu/projects/apred-data/",
-            dataUrl: "https://gpu1-pestillilab.psych.indiana.edu/apred",
+            //dataUrl: "https://gpu1-pestillilab.psych.indiana.edu/apred",
+            dataUrl: "https://api.ctil.iu.edu/pub",
             drMeasures: {} as DrMeasures, 
 
             layers: {

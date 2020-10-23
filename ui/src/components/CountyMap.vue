@@ -6,7 +6,7 @@
         <div style="float: right; width: 300px;">
             <CountySelecter @select="countySelected"/>
         </div>
-        <div class="legend">
+        <div class="legend" v-if="mode">
             <p>
                 <el-select v-model="mode" placeholder="Select" size="mini" style="width: 100%;">
                     <el-option v-for="item in modes" :key="item.value" :label="item.label" :value="item.value"> </el-option>
