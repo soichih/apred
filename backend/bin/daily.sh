@@ -9,6 +9,7 @@
 ./extract/county_geojson.js
 ./extract/statsamerica_acs.js
 ./extract/statsamerica_demo2.js
+./extract/statsamerica_bvi.js
 
 #APRED transform
 #0 3 * * * cd ~/git/apred/data && ~/git/apred/backend/bin/extract/COVID2019StateTrackingChart.py > /tmp/new.csv && mv /tmp/new.csv COVID2019StateTrackingChart.csv
