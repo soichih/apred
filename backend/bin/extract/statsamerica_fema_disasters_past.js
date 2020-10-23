@@ -81,7 +81,7 @@ function load(pool) {
 
         console.log(dds.length);
 
-        fs.writeFileSync(config.pubdir+"raw/statsamerica.disasters.1953-2015.json", JSON.stringify(dds));
+        fs.writeFileSync(config.pubdir+"/raw/statsamerica.disasters.1953-2015.json", JSON.stringify(dds));
         pool.close();
     });
 
