@@ -1,9 +1,9 @@
 <template>
-<div>
+<div style="position: relative;">
     <TopMenu/>
     <!--<CountySelecter :fips="fips" @select="changeFips"/>-->
-    <CountyDetail style="z-index: 1; position: relative; background-color: white;" v-if="fips" :fips="fips"/>
-    <CountyMap style="z-indeX: 0;position: relative;" v-if="mountmap" v-show="showmap" @select="changeFips"/>
+    <CountyDetail v-if="fips" :fips="fips"/>
+    <CountyMap v-if="mountmap" v-show="showmap" @select="changeFips"/>
 </div>
 </template>
 
