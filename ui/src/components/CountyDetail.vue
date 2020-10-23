@@ -64,25 +64,6 @@
 
     </div>
 
-    <!--
-    <div class="page sidebar">
-        <div style="position: absolute; right: -250px; width: 200px; margin: 20px;">
-            <el-button circle icon="el-icon-arrow-up" @click="goto('info-header')"/>
-            <div class="navigator">
-                <h5 ref="nav-disaster" class="navigator-item navigator-item-active" @click="goto('disaster')">Disaster Declarations</h5>
-                <h5 ref="nav-bvi" class="navigator-item" v-if="detail.bvis" @click="goto('bvi')">Business Vulnerability</h5>
-                <h5 ref="nav-cutter" class="navigator-item" @click="goto('cutter')">Disaster Resilience</h5>
-                <h5 ref="nav-storms" class="navigator-item" @click="goto('storms')">Storm History</h5>
-            </div>
-            
-            <br>
-            <div style="margin-left: 13px">
-                <el-link type="primary" :target="'json.'+fips" :href="$root.dataUrl+'/counties/county.'+fips+'.json'">County Data (.json)</el-link>
-            </div>
-        </div>
-    </div>
-    -->
-
     <div class="page" v-if="tab == 'disaster'">
         <br>
         <!-- <h3>Disaster Declarations / EDA Awards</h3> -->
@@ -135,20 +116,16 @@
         <br>
         <div v-for="(data, naics) in bvi2" :key="naics">
             <p>
-                <small style="float: right;">{{naics}}</small>
+                <!--<small style="float: right;">{{naics}}</small>-->
                 <b><NaicsInfo :id="naics"/></b>
             </p>
             <el-row>
                 <el-col :span="12">
                     <h4 style="margin: 0"><small>Establishments</small></h4>
-                    <!--<Plotly :data="data.est" :layout="bvi2Layout" :display-mode-bar="false"></Plotly>-->
                     <BVIPlot :data="data.est"/>
                 </el-col>
                 <el-col :span="12">
                     <h4 style="margin: 0"><small>Employment</small></h4>
-                    <!--
-                    <Plotly :data="data.emp" :layout="bvi2Layout" :display-mode-bar="false"></Plotly>
-                    -->
                     <BVIPlot :data="data.emp"/>
                 </el-col>
             </el-row>
@@ -158,11 +135,9 @@
 
     <div class="page" v-if="tab == 'resilience'">
         <br>
-        <!-- <h3>Disaster Resilience</h3>-->
         <p>
             Disaster resilience measures the capacity of a community to recover from disaster events without losing their socioeconomic and infrastructural viability <a href="https://gsdrc.org/topic-guides/disaster-resilience/concepts/what-is-disaster-resilience/">[Combaz, 2015]</a> <a href="https://www.unisdr.org/2005/wcdr/intergover/official-doc/L-docs/Hyogo-framework-for-action-english.pdf">[UNISDR, 2005]</a>. Using the framework provided by <a href="http://resiliencesystem.com/sites/default/files/Cutter_jhsem.2010.7.1.1732.pdf">[Cutter et al. 2010]</a>, this section merges the resilient and vulnerable variables of a city into a unified set of indices - to produce aggregated information on disaster resilience levels. Expand each measure to show more detail.
         </p>
-
         <div v-for="(indicator, incode) in detail.cutter2" :key="incode" style="margin-bottom: 15px; clear: both;">
             <div class="indicator-header">
                 <b class="indicator-name">{{indicator.name}}</b>
@@ -181,7 +156,7 @@
             <div class="measure-info" v-for="source in detail.cutter2[incode].sources.filter(s=>s.stats)" :key="source.id">
                 <p style="margin: 0">
                     <b>{{source.name}}</b>
-                    <small style="float: right">{{source.id}}</small>
+                    <!--<small style="float: right">{{source.id}}</small>-->
                 </p>
 
                 <p style="min-height: 50px; margin: 0">
@@ -591,11 +566,11 @@ export default class CountyDetail extends Vue {
 
     load() {
         fetch(this.$root.dataUrl+"/counties/county."+this.fips+".json").then(res=>res.json()).then(data=>{
-            if(data.cutter) {
-                delete data.cutter.INST;
-                delete data.cutter.FLOR;
-            }
             this.detail = data;
+
+            //remove some categories that are not calculated
+            delete this.detail.cutter2["INST"];
+            delete this.detail.cutter2["FLOR"];
 
             this.processHistory();
             this.processBVI2();
