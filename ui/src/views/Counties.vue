@@ -2,8 +2,8 @@
 <div>
     <TopMenu/>
     <!--<CountySelecter :fips="fips" @select="changeFips"/>-->
-    <CountyDetail v-if="fips" :fips="fips"/>
-    <CountyMap v-if="mountmap" v-show="showmap" @select="changeFips"/>
+    <CountyDetail style="z-index: 1; position: relative; background-color: white;" v-if="fips" :fips="fips"/>
+    <CountyMap style="z-indeX: 0;position: relative;" v-if="mountmap" v-show="showmap" @select="changeFips"/>
 </div>
 </template>
 
@@ -50,11 +50,12 @@ export default class CountiesView extends Vue {
 
     togglemap() {
         if(!this.fips) {
-            this.mountmap = true;
+            this.mountmap = true; //should only happen once
             this.showmap = true;
         }
         if(this.fips) {
-            this.showmap = false;
+            //hiding map causes mapbox to resize to a default size??
+            //this.showmap = false;
         }
     }
 }
