@@ -308,10 +308,6 @@ disasters_recent.forEach(handle_disaster);
 
 console.log("loading storm counts");
 const storm_counts = require(config.pubdir+"/storm_counts.json");
-disasters_past.forEach(handle_disaster);
-
-console.log("number of odd dr", odd_dr_count);
-
 for(let fips in storm_counts) {
     let storms = storm_counts[fips];
     fips = fips.replace(".", "");
