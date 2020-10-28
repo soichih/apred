@@ -11,22 +11,6 @@
         </div>
 
         <h3 v-if="event.type == 'dr'" :style="eventIconStyle">
-            <!--
-            <span style="float: right;">
-                <el-tag class="program-tag" size="small" type="warning" v-if="event.hmProgramDeclared">
-                    <a href="https://www.fema.gov/grants/mitigation/hazard-mitigation" target="fema">Hazard Mitigation</a>
-                </el-tag>&nbsp;
-                <el-tag class="program-tag" size="small" type="danger" v-if="event.ihProgramDeclared">
-                    <a href="https://www.fema.gov/assistance/individual/program" target="fema">Individuals and Households</a>
-                </el-tag>&nbsp;
-                <el-tag class="program-tag" size="small" v-if="event.iaProgramDeclared" title="Individual Assistance Program">
-                    <a href="https://www.fema.gov/assistance/individual" target="fema">Individual Assistance</a>
-                </el-tag>&nbsp;
-                <a :href="'https://www.fema.gov/disaster/'+event.disasterNumber" target="fema">
-                    <el-tag size="small" effect="plain" type="info">Disaster # {{event.disasterNumber}}</el-tag>&nbsp;
-                </a>
-            </span>
-            -->
             <slot/>
             <el-tag type="info" style="position: relative; top: -2px;" v-if="event.statewide">STATEWIDE</el-tag> &nbsp;
             <el-tag type="info" style="position: relative; top: -2px;" v-if="event.tribe">{{event.designatedArea}}</el-tag> &nbsp;
@@ -40,6 +24,8 @@
             EDA 2018 Disaster Supplemental Award
             <span style="opacity: 0.5;"> | </span>
             ${{event.award_amount | formatNumber}}
+
+            <el-tag size="small" type="warning" v-if="event.counties.length">Multi-county({{event.counties.length}}) Award</el-tag>
         </h3>
     </div>
 
