@@ -15,9 +15,7 @@ mssql.connect(config.stats_america.db_stats4).then(pool=>{
 });
 function load_population(pool) {
     //pool.request().query(` SELECT * FROM [stats_dms5].[dbo].[c2k_uscnty_acs] `).then(res=>{
-    pool.request().query(`SELECT * FROM stats4.dbo.poparo_uscnty`).then(res=>{
-        //res.recordset
-        /*
+        /* c2k_uscnty_acs (old - only contains data since 2008?)
         {
           statefips: '72',
           countyfips: '153',
@@ -70,6 +68,43 @@ function load_population(pool) {
           code_id: 0
         }
         */
+
+    pool.request().query(`
+        SELECT p.*, c.pop_density 
+            FROM [stats4].[dbo].[poparo_uscnty] p 
+            LEFT JOIN [stats4].[dbo].[c2k_uscnty_acs] c 
+                ON c.statefips = p.statefips and c.countyfips = p.countyfips and c.year = p.year
+        `).then(res=>{
+        /* poparo_uscnty (new)
+        {
+          statefips: '06',
+          countyfips: '095',
+          year: '2009',
+          totpop: 410290,
+          white_alone: 249954,
+          black_alone: 63323,
+          aian_alone: 4777,
+          asian_alone: 62352,
+          hawaiian_alone: 4183,
+          two_or_more_races: 25701,
+          not_hisp: 313428,
+          hispanic: 96862,
+          pop_0to4: 26827,
+          pop_5to17: 75039,
+          pop_18to24: 40455,
+          pop_25to44: 109296,
+          pop_45to64: 113058,
+          pop_65plus: 45615,
+          medAge: 37.1,
+          pop_Under18: 101866,
+          pop_18to54: 213565,
+          pop_55plus: 94859,
+          c_e: 'e',
+          geo_id: 106095,
+          time_id: 2009,
+          code_id: 0
+        }
+         */
         fs.writeFileSync(config.pubdir+"/raw/statsamerica.acs.json", JSON.stringify(res.recordset));
         pool.close();
     });
