@@ -32,6 +32,7 @@ geo.features.forEach(feature=>{
         bvis: null, //keyed by each year
         gdp: null, 
         medianincome: null, 
+        percapitaincome: null, 
     } 
 });
 
@@ -103,12 +104,31 @@ for(let rec of medianincome) {
     let fips = rec.geo_id.toString();
     if(fips.length > 6) continue; //ignore odd one
     if(fips.length == 6 && fips[0] == "1") fips = fips.substring(1);
-    if(!counties[fips]) {
-        continue;
-    }
+    if(!counties[fips]) continue;
     counties[fips].medianincome = rec.data;
 }
 
+console.log("loading percapita income");
+const pcincome = require(config.pubdir+'/raw/statsamerica.acs.percapitaincome.json');
+for(let rec of pcincome) {
+    /*
+        {
+          statefips: '55',
+          LINECODE: '0030',
+          countyfips: '087',
+          REGION: null,
+          DATA: 51230,
+          YEAR: '2018',
+          DISC: 0,
+          naics: null
+        },
+    */
+    //TODO
+    let fips = rec.statefips + rec.countyfips;
+    if(!counties[fips]) continue;
+    console.log(fips, rec.DATA);
+    counties[fips].percapitaincome = rec.DATA;
+}
 
 console.log("loading bea county gdb");
 const gdps = require(config.pubdir+'/raw/statsamerica.bea.gdp.json');
