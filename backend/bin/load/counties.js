@@ -16,9 +16,9 @@ geo.features.forEach(feature=>{
     let fips = feature.properties.statefips + feature.properties.countyfips;
     counties[fips] = {
         //demo: null,
+        //demo2: null, //object keyed by "code" then {years: [], population: []}
         population: null,
         popdensity: null,
-        demo2: null, //object keyed by "code" then {years: [], population: []}
         cutter: null,
         statefips: feature.properties.statefips,
         countyfips: feature.properties.countyfips,
@@ -37,9 +37,9 @@ geo.features.forEach(feature=>{
 });
 
 //deprecated again.. use acs
+/*  
 console.log("loading demographics2");
 const demo2 = require(config.pubdir+'/raw/statsamerica.demo2.json');
-
 for(let fips in demo2) {
     if(!counties[fips]) {
         continue;
@@ -56,6 +56,7 @@ for(let fips in demo2) {
     }
     counties[fips].demo2 = demo2[fips];
 }
+*/
 
 console.log("loading acs");
 const acs = require(config.pubdir+'/raw/statsamerica.acs.json');
@@ -126,7 +127,6 @@ for(let rec of pcincome) {
     //TODO
     let fips = rec.statefips + rec.countyfips;
     if(!counties[fips]) continue;
-    console.log(fips, rec.DATA);
     counties[fips].percapitaincome = rec.DATA;
 }
 
