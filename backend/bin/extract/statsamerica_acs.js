@@ -11,6 +11,7 @@ console.log("statsamerica c2k_uscnty_acs --------------------------");
 mssql.connect(config.stats_america.db_stats4).then(pool=>{
     load_population(pool);
     load_medianincome(pool);
+    load_percapitaincome(pool);
 });
 function load_population(pool) {
     let density = {};
@@ -91,3 +92,25 @@ function load_medianincome(pool) {
     });
 }
 
+
+function load_percapitaincome(pool) {
+    let density = {};
+    pool.request().query(`
+        select * from stats4.dbo.pcpi_uscnty WHERE year = (SELECT TOP (1) year FROM stats4.dbo.pcpi_uscnty ORDER BY year DESC) AND countyfips <> '000' AND LINECODE = '0030'
+    `).then(res=>{
+        /*
+        {
+          statefips: '55',
+          LINECODE: '0030',
+          countyfips: '087',
+          REGION: null,
+          DATA: 51230,
+          YEAR: '2018',
+          DISC: 0,
+          naics: null
+        },
+        */
+        fs.writeFileSync(config.pubdir+"/raw/statsamerica.acs.percapitaincome.json", JSON.stringify(res.recordset));
+        pool.close();
+    });
+}
