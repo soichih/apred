@@ -8,7 +8,7 @@
 ./extract/statsamerica_dr.js
 ./extract/county_geojson.js
 ./extract/statsamerica_acs.js
-./extract/statsamerica_demo2.js
+#./extract/statsamerica_demo2.js
 ./extract/statsamerica_bvi.js
 
 #APRED transform

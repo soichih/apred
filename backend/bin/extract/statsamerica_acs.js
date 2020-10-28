@@ -14,8 +14,8 @@ mssql.connect(config.stats_america.db_stats4).then(pool=>{
     load_percapitaincome(pool);
 });
 function load_population(pool) {
-    let density = {};
-    pool.request().query(` SELECT * FROM [stats_dms5].[dbo].[c2k_uscnty_acs] `).then(res=>{
+    //pool.request().query(` SELECT * FROM [stats_dms5].[dbo].[c2k_uscnty_acs] `).then(res=>{
+    pool.request().query(`SELECT * FROM stats4.dbo.poparo_uscnty`).then(res=>{
         //res.recordset
         /*
         {
@@ -76,7 +76,6 @@ function load_population(pool) {
 }
 
 function load_medianincome(pool) {
-    let density = {};
     pool.request().query(` SELECT * FROM [stats_dms5].[dbo].[acs_common_items_extract] WHERE code_id = '307' and time_id = '2018'`).then(res=>{
         /*
           {
@@ -94,7 +93,6 @@ function load_medianincome(pool) {
 
 
 function load_percapitaincome(pool) {
-    let density = {};
     pool.request().query(`
         select * from stats4.dbo.pcpi_uscnty WHERE year = (SELECT TOP (1) year FROM stats4.dbo.pcpi_uscnty ORDER BY year DESC) AND countyfips <> '000' AND LINECODE = '0030'
     `).then(res=>{
