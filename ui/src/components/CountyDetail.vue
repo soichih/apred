@@ -302,7 +302,7 @@ export default class CountyDetail extends Vue {
 
     demoGraphData = [];
     demoGraphLayout = {
-        height: 150,
+        height: 200,
         margin: {
             l: 30,
             r: 30,
