@@ -50,6 +50,13 @@
                     <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
                 </p>
 
+                <h4>Per Capita Income <small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS)</a></small></h4>
+                <p>
+                    <span class="primary" v-if="detail.percapitaincome"> ${{detail.percapitaincome | formatNumber}}</span>
+                    <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
+                </p>
+
+
                 <h4>Median Household Income <small title="US Census Bureau"><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS)</a></small></h4>
                 <p>
                     <span class="primary" v-if="detail.medianincome"> ${{detail.medianincome | formatNumber}}</span>
