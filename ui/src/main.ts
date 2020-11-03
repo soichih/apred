@@ -96,6 +96,7 @@ new Vue({
             },
         }
     },
+
     mounted() {
         //intercept jwt send from auth service
         const urlParams = new URLSearchParams(window.location.search);
@@ -113,15 +114,14 @@ new Vue({
             this.user = JwtDecode(jwt); 
 
             //check expiration (again.. user can generate whatever the exp they want.. this is just for client niceness)
-            if(this.user.exp < new Date().getTime()/1000) {
-                console.error("jwt expired", this.user.exp, new Date().getTime());
+            if(this.user.exp < (new Date().getTime()/1000)) {
+                //console.error("jwt expired", this.user.exp, new Date().getTime());
                 localStorage.removeItem("jwt");
                 this.user = null; 
             } else {
                 //TODO - maybe I should keep refreshing like warehouse?
-
                 axios.defaults.headers.common['Authorization'] = 'Bearer '+jwt;
-                console.dir(this.user);
+                //console.dir(this.user);
             }
         }
 
