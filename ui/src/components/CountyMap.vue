@@ -353,7 +353,7 @@ export default class Disaster extends Vue {
             "type": "fill",
             "source": "dr"+measure,
             "paint": {
-                //"fill-opacity": ['get', 'resilience'],
+                "fill-opacity": 0.75,
                 //"fill-color": this.cutterIndicators[measure].color,
                 'fill-color': [
                     'interpolate',
@@ -413,16 +413,6 @@ export default class Disaster extends Vue {
                 return res.json()
             }).then(data=>{
                 this.geojson = data;
-
-                /*
-                data.features.forEach(feature=>{
-                    const props = feature.properties;
-                    if(props.countyfips) {
-                        this.countyList.push({value: props.statefips+props.countyfips, label: props.county+", "+props.state});
-                    }
-
-                });
-                */
 
                 //all counties
                 this.map.addSource('counties', { type: "geojson", data });
@@ -526,6 +516,7 @@ export default class Disaster extends Vue {
                         visibility: 'none', 
                     }
                 });
+                //}, 'counties');
 
                 const geojsonPoint = {type: "FeatureCollection", features: []};
                 for(const recid in data) {

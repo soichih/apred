@@ -4,7 +4,14 @@
         <a href="https://iu.edu">
             <img src="../assets/trident-large.png" height="50px" class="trident"/>
         </a>
-        <span class="apred">
+
+        <el-button class="pull-right" v-if="!$root.user" @click="login" size="small">Log In</el-button>
+        <el-button class="pull-right" v-if="!$root.user" @click="signup" size="small" type="primary">Sign Up</el-button>
+
+        <el-button class="pull-right" v-if="$root.user" @click="signout" size="small">Sign Out</el-button>
+        <el-button class="pull-right" v-if="$root.user" @click="settings" size="small" type="success">Settings</el-button>
+
+        <span class="pull-right" style="font-weight: bold; top: 15px;"> 
             <a href="https://ctil.iu.edu/" style="color: inherit;">CTIL</a>
         </span>
         <p class="title">
@@ -23,6 +30,29 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 @Component
 export default class TopMenu extends Vue {
     //nothing much going on here..
+
+    app = "prod";
+    constructor() {
+        super();
+        if(document.location.hostname == "localhost") this.app = "dev";
+    }
+
+    signup() {
+        document.location.href = "https://api.ctil.iu.edu/auth/#!/signup?app="+this.app;
+    }
+
+    login() {
+        document.location.href = "https://api.ctil.iu.edu/auth/#!/login?app="+this.app;
+    }
+
+    settings() {
+        document.location.href = "https://api.ctil.iu.edu/auth/#!/settings/account?app="+this.app;
+    }
+
+    signout() {
+        //document.location.href = "https://api.ctil.iu.edu/auth/#!/signout?app="+this.app;
+        this.$root.signout();
+    }
 }
 </script>
 
@@ -58,9 +88,10 @@ export default class TopMenu extends Vue {
     left: 85px;
     color: #999;
     font-style: italic;
+    display: inline-block;
 
 }
-@media only screen and (max-width: 700px) {
+@media only screen and (max-width: 950px) {
     .sub-title {
         display: none;
     }
@@ -76,12 +107,11 @@ export default class TopMenu extends Vue {
     top: -2px;
     color: #999;
 }
-.apred {
+.pull-right {
     float: right;
-    font-weight: bold;
     position: relative;
-    top: 15px;
-    margin-right: 20px;
+    top: 10px;
+    margin-right: 10px;
     opacity: 0.7;
 }
 .trident {
@@ -97,5 +127,8 @@ export default class TopMenu extends Vue {
     transform: rotate(-25deg);
     opacity: 0.3;
     z-index: -1;
+}
+.pull-right a:hover {
+    color: #409EFF;
 }
 </style>
