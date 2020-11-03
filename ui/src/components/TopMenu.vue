@@ -51,7 +51,7 @@ export default class TopMenu extends Vue {
 
     signout() {
         //document.location.href = "https://api.ctil.iu.edu/auth/#!/signout?app="+this.app;
-        this.$root.signout();
+        (this.$root as any).signout();
     }
 }
 </script>
