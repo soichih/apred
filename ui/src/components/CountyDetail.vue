@@ -86,8 +86,8 @@
         <div v-for="(event, idx) in recentHistory" :key="idx" class="history">
             <Event :event="event">
                 <div class="connecter" v-if="idx < recentHistory.length" style="float: right;">
-                    <Eligibility2018 v-if="is2018Eligible(event)"/>
-                    <Eligibility2019 v-if="is2019Eligible(event) || is2019FloodEligible(event)"/>
+                    <Eligibility2018 v-if="$root.user && is2018Eligible(event)"/>
+                    <Eligibility2019 v-if="$root.user && (is2019Eligible(event) || is2019FloodEligible(event))"/>
                 </div>
             </Event>
         </div>
