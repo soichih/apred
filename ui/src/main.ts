@@ -64,35 +64,42 @@ new Vue({
             map: null,
 
             layers: {
-                "biological": {
-                    color: "#396",
-                    opacity: 0.5,
-                    types: ["Biological"],
-                },
-                "other": {
-                    color: "#999",
-                    types: ["EarthQuake", "Coastal Storm", "Snow", "Mud/Landslide", "Volcano", "Dam/Levee Break", "Severe Ice Storm"],
-                }, 
                 "hurricane": {
                     color: "#0af", 
                     types: ["Hurricane"],
+                    zIndex: 5,
                 },
                 "tornado": {
                     color: "#f6f", 
                     types: ["Tornado"],
+                    zIndex: 6,
                 },
                 "severe storm": { 
                     color: "#fa0", 
                     types: ["Severe Storm(s)"],
+                    zIndex: 7,
                 },
                 "flood": {
                     color: "#06f",
                     types: ["Flood"],
+                    zIndex: 8,
                 },
                 "fire": {
                     color: "#f00", 
                     types: ["Fire"],
+                    zIndex: 9,
                 },
+                "biological": {
+                    color: "#396",
+                    opacity: 0.5,
+                    types: ["Biological"],
+                    zIndex: 0,
+                },
+                "other": {
+                    color: "#999",
+                    types: ["EarthQuake", "Coastal Storm", "Snow", "Mud/Landslide", "Volcano", "Dam/Levee Break", "Severe Ice Storm"],
+                    zIndex: 1,
+                }, 
             },
         }
     },

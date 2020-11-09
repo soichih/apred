@@ -425,11 +425,20 @@ export default class Disaster extends Vue {
                     }
                 });
 
+                const layers = [];
                 for(const t in this.$root.layers) {
                     const layer = this.$root.layers[t];
+                    layer.id = t; 
+                    layers.push(layer);
+                }
+                layers.sort((a,b)=>{
+                    return a.zIndex - b.zIndex;
+                });
+
+                layers.forEach(layer=>{
 
                     this.map.addLayer({
-                        id: 'county_disaster_'+t,
+                        id: 'county_disaster_'+layer.id,
                         type: 'fill',
                         source: 'counties',
                         paint: {
@@ -443,7 +452,7 @@ export default class Disaster extends Vue {
                     }, 'counties');
 
                     this.map.addLayer({
-                        'id': 'state_disaster_'+t,
+                        'id': 'state_disaster_'+layer.id,
                         'type': 'fill',
                         'source': 'counties',
                         'paint': {
@@ -455,7 +464,7 @@ export default class Disaster extends Vue {
                             visibility: 'none',
                         }
                     }, 'counties');
-                }
+                });
 
                 fetch(this.$root.dataUrl+"/years.json").then(res=>{ 
                     return res.json()
@@ -667,36 +676,6 @@ export default class Disaster extends Vue {
         item.classList.add("tutorial-focus");
         text.classList.add("tutorial-text-show");
     }
-
-    /*
-    loadCounty(fips) {
-        if(!fips) {
-            this.selected = null;
-            this.selectedFips = null;
-            this.$ga.page('/map')
-            return;
-        }
-        this.$ga.page('/county/'+fips)
-
-        this.showTutorial(null); //hiding tutorial
-
-        const loading = this.$loading({
-            lock: true,
-            text: 'Loading',
-            spinner: 'el-icon-loading',
-            background: 'rgba(255, 255, 255, 0.3)'
-        });
-        fetch(this.$root.dataUrl+"/counties/county."+fips+".json").then(res=>res.json()).then(data=>{
-            if(data.cutter) {
-                delete data.cutter.INST;
-                delete data.cutter.FLOR;
-            }
-            this.selected = data;
-            this.selectedFips = fips;
-            loading.close();
-        });
-    }
-    */
 
     countySelected(fips) {
         //this.$router.push('/county/'+fips);
