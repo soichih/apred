@@ -16,26 +16,35 @@
         <!--y axix / ticks-->
         <g>
             <line x1="120" :y1="ptoy(ymin)" x2="120" :y2="ptoy(ymax)" style="stroke:rgb(100,100,100);" /> 
-            <text v-for="(y, idx) in yticks" :key="idx" :x="100" :y="ptoy(y)+8" text-anchor="end" class="ticks">{{y}}</text>
+            <text v-for="(y, idx) in yticks" :key="idx" :x="100" :y="ptoy(y)+8" text-anchor="end" class="ticks">{{y|formatNumber}}</text>
         </g>
 
         <g>
-            <path :d="fillPath(data.total, lineCommand)" fill="#09f3" stroke="none"/>
-            <path :d="linePath(data.total, lineCommand)" fill="none" stroke="#49F" stroke-width="3"/>
+            <path :d="fillPath(data.total, lineCommand)" fill="rgba(0, 0, 0, 0.2)" stroke="none"/>
+            <path :d="linePath(data.total, lineCommand)" fill="none" stroke="#666" stroke-width="3"/>
 
             <path :d="fillPath(data.vul, lineCommand)" fill="#f403" stroke="none"/>
             <path :d="linePath(data.vul, lineCommand)" fill="none" stroke="#c00" stroke-width="3"/>
 
             <g v-for="(p, idx) in data.vul" :key="'v-'+idx" class="with-tooltip">
-                <circle :cx="itox(idx)" :cy="ptoy(p)" r="8" stroke="#900" stroke-width="4" fill="white"/>
-                <text :x="itox(idx)-20" :y="ptoy(p)-20" class="tooltip">{{p}}</text>
+                <circle :cx="itox(idx)" :cy="ptoy(p)" r="12" stroke="#900" stroke-width="4" fill="white"/>
             </g>
 
             <g v-for="(p, idx) in data.total" :key="'t-'+idx" class="with-tooltip">
-                <circle :cx="itox(idx)" :cy="ptoy(p)" r="8" stroke="#49F" stroke-width="4" fill="white"/>
-                <text :x="itox(idx)-20" :y="ptoy(p)-20" class="tooltip">{{p}}</text>
+                <circle :cx="itox(idx)" :cy="ptoy(p)" r="12" stroke="#666" stroke-width="4" fill="white"/>
+      
             </g>
+
+            <g v-for="(p, idx) in data.vul" :key="'vt-'+idx" class="with-tooltip">
+                <text :x="itox(idx)" :y="ptoy(p)-20" class="tooltip" text-anchor="middle" fill="#900">{{p|formatNumber}}</text>
+            </g>
+
+            <g v-for="(p, idx) in data.total" :key="'tt-'+idx" class="with-tooltip">
+                <text :x="itox(idx)" :y="ptoy(p)-20" class="tooltip" text-anchor="middle" fill="#666">{{p|formatNumber}}</text>
+            </g>
+
         </g>
+
     </svg>
 </div>
 </template>
@@ -68,7 +77,7 @@ export default class BviPlot extends Vue {
         if(this.ymax == null) return;
 
         const per = (p - this.ymin)/(this.ymax - this.ymin);
-        return (this.height-30) - (this.height - 40)*per;
+        return (this.height-40) - (this.height - 50)*per;
     }
 
     itox(y: number) {
@@ -145,12 +154,8 @@ svg {
     text-align: right;
 }
 .with-tooltip .tooltip {
-color: gray;
-font-size: 30px;
-text-align: center;
-opacity: 0;
-}
-.with-tooltip:hover .tooltip {
-opacity: 1;
+    font-size: 25px;
+    text-align: center;
+    opacity: 1;
 }
 </style>
