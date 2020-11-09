@@ -6,7 +6,7 @@
             <div style="float: right; width: 300px; padding-top: 15px;">
                 <CountySelecter @select="fips = $event"/>
             </div>
-            <h3 style="position: relative; font-weight: normal; margin-right: 300px;">
+            <h3 style="font-weight: normal; margin-right: 300px;">
                 <el-button type="primary" circle icon="el-icon-back" @click="goback()" class="back-button"/>
                 &nbsp;
                 &nbsp;
@@ -146,7 +146,12 @@
     <div class="page" v-if="tab == 'resilience'">
         <br>
         <p>
-            Disaster resilience measures the capacity of a community to recover from disaster events without losing their socioeconomic and infrastructural viability <a href="https://gsdrc.org/topic-guides/disaster-resilience/concepts/what-is-disaster-resilience/">[Combaz, 2015]</a> <a href="https://www.unisdr.org/2005/wcdr/intergover/official-doc/L-docs/Hyogo-framework-for-action-english.pdf">[UNISDR, 2005]</a>. Using the framework provided by <a href="http://resiliencesystem.com/sites/default/files/Cutter_jhsem.2010.7.1.1732.pdf">[Cutter et al. 2010]</a>, this section merges the resilient and vulnerable variables of a city into a unified set of indices - to produce aggregated information on disaster resilience levels. Expand each measure to show more detail.
+            Disaster resilience measures the capacity of a community to recover from disaster events without losing their socioeconomic and 
+            infrastructural viability <a href="https://gsdrc.org/topic-guides/disaster-resilience/concepts/what-is-disaster-resilience/">[Combaz, 2015]</a> 
+            <a href="https://www.unisdr.org/2005/wcdr/intergover/official-doc/L-docs/Hyogo-framework-for-action-english.pdf">[UNISDR, 2005]</a> (the higher, the better). 
+            Using the framework provided by <a href="http://resiliencesystem.com/sites/default/files/Cutter_jhsem.2010.7.1.1732.pdf">[Cutter et al. 2010]</a>, 
+            this section merges the resilient and vulnerable variables of a city into a unified set of indices - to produce aggregated 
+            information on disaster resilience levels. Expand each measure to show more detail.
         </p>
         <div v-for="(indicator, incode) in detail.cutter2" :key="incode" style="margin-bottom: 15px; clear: both;">
             <div class="indicator-header">
@@ -795,7 +800,7 @@ h4 {
     top: 50px;
     width: 100%;
     background-color: white;
-    z-index: 1;
+    z-index: 3;
     box-shadow: 0 0 3px #ddd;
 }
 
@@ -808,11 +813,10 @@ h4 {
 
 .header h3 {
     margin: 0;
+    padding-top: 10px;
 }
 .header .back-button {
     position: relative;
-    float: left;
-    top: -10px;
     font-size: 100%;
     margin-right: 20px;
 }

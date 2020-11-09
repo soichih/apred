@@ -1,5 +1,5 @@
 <template>
-  <div id="topmenu">
+<div id="topmenu">
     <div class="page">
         <a href="https://iu.edu">
             <img src="../assets/trident-large.png" height="50px" class="trident"/>
@@ -21,7 +21,7 @@
         </p>
         <p class="disclaimer">For testing purposes only. Not for public use or for supporting current EDA applications.</p>
     </div>
-  </div>
+</div>
 </template>
 
 <script lang="ts">
