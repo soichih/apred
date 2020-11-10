@@ -10,7 +10,7 @@
         <!--x axis / ticks-->
         <g>
             <line :x1="120" :y1="ptoy(ymin)" :x2="1000" :y2="ptoy(ymin)" style="stroke:rgb(100,100,100);" /> 
-            <text v-for="(year, idx) in years" :key="year" :x="itox(idx)-25" :y="height" class="ticks">{{year}}</text>
+            <text v-for="(year, idx) in years" :key="year" :x="itox(idx)"  text-anchor="middle" :y="height" class="ticks">{{year}}</text>
         </g>
 
         <!--y axix / ticks-->
@@ -36,7 +36,7 @@
             <path :d="svgPath(cutters.county, lineCommand)" fill="none" stroke="#409EFF" stroke-width="3"/>
             <g v-for="(p, idx) in cutters.county" :key="idx" class="with-tooltip">
                 <circle :cx="itox(idx)" :cy="ptoy(p)" r="10" stroke="#409EFF" stroke-width="4" fill="white"/>
-                <text :x="itox(idx)-30" :y="ptoy(p)-30" class="tooltip">{{(p*100).toFixed(3)}}%</text>
+                <text :x="itox(idx)" :y="ptoy(p)-30" text-anchor="middle" class="tooltip">{{(p*100).toFixed(fixed+1)}}%</text>
             </g>
         </g>
     </svg>
@@ -179,14 +179,16 @@ svg {
     text-align: right;
 }
 .with-tooltip .tooltip {
-color: gray;
-font-size: 30px;
+fill: #666;
+font-size: 25px;
 text-align: center;
-opacity: 0;
+opacity: 1;
 }
+/*
 .with-tooltip:hover .tooltip {
 opacity: 1;
 }
+*/
 /*
 .with-tooltip:hover circle {
 stroke-width:6px;
