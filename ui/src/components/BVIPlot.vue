@@ -27,11 +27,11 @@
             <path :d="linePath(data.vul, lineCommand)" fill="none" stroke="#c00" stroke-width="3"/>
 
             <g v-for="(p, idx) in data.vul" :key="'v-'+idx" class="with-tooltip">
-                <circle :cx="itox(idx)" :cy="ptoy(p)" r="12" stroke="#900" stroke-width="4" fill="white"/>
+                <circle :cx="itox(idx)" :cy="ptoy(p)" r="10" stroke="#900" stroke-width="4" fill="white"/>
             </g>
 
             <g v-for="(p, idx) in data.total" :key="'t-'+idx" class="with-tooltip">
-                <circle :cx="itox(idx)" :cy="ptoy(p)" r="12" stroke="#666" stroke-width="4" fill="white"/>
+                <circle :cx="itox(idx)" :cy="ptoy(p)" r="10" stroke="#666" stroke-width="4" fill="white"/>
       
             </g>
 
