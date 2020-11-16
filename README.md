@@ -1,10 +1,32 @@
-# Analysis Platform for Risk, Resilience and Expenditure in Disasters (APRED) App
+# APRED
 
-APRED will provide historical insights from the 2011 disaster data, 
-as well as a predictive capability that will be used to improve future
-funding decisions by local, state and federal agencies.
+APRED (Analysis Platform for Risk, Resilience and Expenditure in Disasters) will provide historical insights from the 2011 disaster data, 
+as well as a predictive capability that will be used to improve future funding decisions by local, state and federal agencies.
 
-## Raw Data Extraction
+This repository contains all the source code used to run https://ctil.iu.edu/projects/apred/ 
+It mainly consists of 1) backend ETL scripts to load and transform data from StatsAmerica DB, and
+2) VueJS frontend to show users the various data aggregated by 1).
+
+## Architecture
+
+<img src="https://docs.google.com/drawings/d/e/2PACX-1vQQ-32ru9jQyRephmCwxx4dVN3DmavPhblELL5pi-yh2AtpFbe9Mf4p4IFd7XsNXJADdNXb9bZnLqOO/pub?w=960&amp;h=720">
+
+apred VM runs on IU Jetstream (m1.medium).
+
+```
+openstack server create \
+    --security-group web \
+    --security-group global-ssh \
+    --key-name home \
+    --flavor m1.medium \
+    --image "JS-API-Featured-Ubuntu20-Latest" \
+    --nic net-id=ctil \
+    apred 
+
+```
+
+
+## Data Extraction
 
 All raw data is extracted to `raw` directory. The scripts inside `backend/bin/extract` are used to load various data
 
@@ -280,16 +302,4 @@ It contains data that looks like
 
 ```
 
-## Jetstream Deployment
-
-create network "ctil"
-
-openstack server create \
-    --security-group web \
-    --security-group global-ssh \
-    --key-name home \
-    --flavor m1.medium \
-    --image "JS-API-Featured-Ubuntu20-Latest" \
-    --nic net-id=ctil \
-    apred 
 
