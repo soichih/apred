@@ -9,7 +9,7 @@ It mainly consists of 1) backend ETL scripts to load and transform data from Sta
 
 ## Architecture
 
-<img src="https://docs.google.com/drawings/d/e/2PACX-1vQQ-32ru9jQyRephmCwxx4dVN3DmavPhblELL5pi-yh2AtpFbe9Mf4p4IFd7XsNXJADdNXb9bZnLqOO/pub?w=960&amp;h=720">
+<img src="https://docs.google.com/drawings/d/e/2PACX-1vQQ-32ru9jQyRephmCwxx4dVN3DmavPhblELL5pi-yh2AtpFbe9Mf4p4IFd7XsNXJADdNXb9bZnLqOO/pub">
 
 apred VM runs on IU Jetstream (m1.medium).
 
@@ -24,6 +24,9 @@ openstack server create \
     apred 
 
 ```
+
+Both ETL and auth services currently run on a single apred VM, but they can be launched on 
+multiple VMs. We could run multiple instances of those services as well. 
 
 
 ## Data Extraction
