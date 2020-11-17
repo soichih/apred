@@ -10,8 +10,7 @@
             </div>
         </div>
 
-        <h3 v-if="event.type == 'dr'" :style="eventIconStyle">
-            <slot/>
+        <h3 :style="eventIconStyle" v-if="event.type == 'dr'">
             <el-tag type="info" style="position: relative; top: -2px;" v-if="event.statewide">STATEWIDE</el-tag> &nbsp;
             <el-tag type="info" style="position: relative; top: -2px;" v-if="event.tribe">{{event.designatedArea}}</el-tag> &nbsp;
             <b>{{event.incidentType}}</b> &nbsp;
@@ -24,13 +23,13 @@
             EDA 2018 Disaster Supplemental Award
             <span style="opacity: 0.5;"> | </span>
             ${{event.award_amount | formatNumber}}
-
             <el-tag size="small" type="warning" v-if="event.counties.length">Multi-county({{event.counties.length}}) Award</el-tag>
         </h3>
     </div>
 
     <div class="event-body">
         <div v-if="event.type == 'dr'">
+            <slot/>
             <div class="event-date">
                 <small style="opacity: 0.6;">Incident date from </small>
                 &nbsp;
