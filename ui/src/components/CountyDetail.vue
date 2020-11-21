@@ -82,9 +82,6 @@
         strategies through a variety of non-construction and construction projects. Only the FEMA Disaster Declarations (not Emergency Declarations) are 
         displayed. 
         </p>
-        <p>
-        The resilience scores are calculated using information collected by the <a href="https://data.census.gov/cedsci/">U.S. Census</a> using formulas defined by Cutters, et all.
-        </p>
 
         <p v-if="recentHistory.length == 0" style="opacity: 0.8;">No disaster declared since 2017</p>
         <div v-for="(event, idx) in recentHistory" :key="idx" class="history">
@@ -154,9 +151,12 @@
             infrastructural viability <a href="https://gsdrc.org/topic-guides/disaster-resilience/concepts/what-is-disaster-resilience/">[Combaz, 2015]</a> 
             <a href="https://www.unisdr.org/2005/wcdr/intergover/official-doc/L-docs/Hyogo-framework-for-action-english.pdf">[UNISDR, 2005]</a> (the higher, the better). 
             Using the framework provided by <a href="http://resiliencesystem.com/sites/default/files/Cutter_jhsem.2010.7.1.1732.pdf">[Cutter et al. 2010]</a>, 
-            this section merges the resilient and vulnerable variables of a city into a unified set of indices - to produce aggregated 
+            this section merges the resilient and vulnerable variables of a county into a unified set of indices - to produce aggregated 
             information on disaster resilience levels. Expand each measure to show more detail.
         </p>
+        <p>
+        The resilience scores are calculated using information collected by the <a href="https://data.census.gov/cedsci/">U.S. Census</a> using formulas defined by Cutters, et all.
+        </p>        
         <div v-for="(indicator, incode) in detail.cutter2" :key="incode" style="margin-bottom: 15px; clear: both;">
             <div class="indicator-header">
                 <b class="indicator-name">{{indicator.name}}</b>
