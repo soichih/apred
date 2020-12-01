@@ -73,7 +73,6 @@
 
     <div class="page" v-if="tab == 'disaster'">
         <br>
-        <!-- <h3>Disaster Declarations / EDA Awards</h3> -->
         <p>
         Major Disaster Declarations declared under the Robert T. Stafford Disaster Relief and Emergency Assistance Act that may support eligibility for 
         investment assistance from <a href="https://www.eda.gov/">EDA</a> (the U.S. Economic Development Administration) under the agency’s Public Works 
@@ -113,7 +112,6 @@
 
     <div v-if="tab == 'bvi'" class="page">
         <br>
-        <!-- <h3>Business Vulnerability</h3>-->
         <p>
             <b>Business Vulnerability Index (BVI)</b> is a percentage of businesses in a county
             that are believed to be <i>vulnerable</i> to various natural disasters. To calculate the BVI, we isolated businesses by NAICS code from the U.S. Census' most recent <a href="https://www.census.gov/econ/overview/mu0800.html">County Business Patterns</a>  based on their vulnerability to natural disaster (farmers, transportation companies, etc.).
@@ -130,7 +128,6 @@
         <br>
         <div v-for="(data, naics) in bvi2" :key="naics">
             <p>
-                <!--<small style="float: right;">{{naics}}</small>-->
                 <b><NaicsInfo :id="naics"/></b>
             </p>
             <el-row>
@@ -175,7 +172,6 @@
             <div class="measure-info" v-for="source in detail.cutter2[incode].sources.filter(s=>s.stats)" :key="source.id">
                 <p style="margin: 0">
                     <b>{{source.name}}</b>
-                    <!--<small style="float: right">{{source.id}}</small>-->
                 </p>
 
                 <p style="min-height: 50px; margin: 0">
@@ -203,7 +199,6 @@
 
     <div v-if="tab == 'storms'" class="page">
         <br>
-        <!--<h3>Storm History</h3>-->
         <div v-if="stormData && stormData.length > 0">
             <p>This graph shows the counts of storm event published by NOAA since 1950s.</p>
             <p>Storm data has gone through many changes and versions over the years. The source data ingested into the database are widely varied and leads to many questions about the precision and accuracy of the location data. Please see <a href="https://www.ncdc.noaa.gov/stormevents/details.jsp" target="noaa">https://www.ncdc.noaa.gov/stormevents/faq.jsp</a> for more detail.</p>
@@ -217,12 +212,6 @@
     </div>
 
     <Footer/>
-
-    <!--
-    <div class="contextmenu" ref="contextmenu">
-        <p class="menu-item" @click="openContextMenuCounty">Open this county ({{contextMenuCounty}}) in a new tab</p>
-    </div>
-    -->
 </div>
 </template>
 
@@ -242,9 +231,6 @@ import Eligibility2018 from '@/components/Eligibility2018.vue'
 import Eligibility2019 from '@/components/Eligibility2019.vue'
 
 import SlideUpDown from 'vue-slide-up-down'
-
-//import mapboxgl from 'mapbox-gl';
-//import "mapbox-gl/dist/mapbox-gl.css";
 
 import { Plotly } from 'vue-plotly'
 
@@ -277,9 +263,7 @@ Vue.directive('scroll', {
 
 export default class CountyDetail extends Vue {
 
-    //@Prop() detail;
     @Prop() fips;
-    //@Prop() geojson;
 
     popup;
     statemap;
@@ -392,10 +376,8 @@ export default class CountyDetail extends Vue {
                 r: 30,
                 t: 10,
                 b: 30,
-                //pad: 10,
             },
             legend: {
-                //x: 0,
                 y: 1.15,
                 bgcolor: 'rgba(255, 255, 255, 0)',
                 bordercolor: 'rgba(255, 255, 255, 0)',
@@ -416,19 +398,7 @@ export default class CountyDetail extends Vue {
                 x,
                 y,
                 name: type,
-
-                //for bar graph
                 type: 'bar',
-
-                //for line chart
-                /*
-                stackgroup: 'one',
-                line: {
-                    width: 0,
-                    shape: 'spline',
-                    smoothing: 0.8,
-                },
-                */
             });
         }
     }
@@ -466,120 +436,7 @@ export default class CountyDetail extends Vue {
         }
     }
 
-    /*
-    initStateMap() {
-        this.map = new mapboxgl.Map({container: 'statemap'});
-        this.map.scrollZoom.disable();
-        this.map.addSource('counties', { type: "geojson", data: this.geojson });
-
-        //calculate mapbound
-        const bounds = {};
-        this.geojson.features.forEach(feature=>{
-            if(feature.properties.statefips == this.detail.statefips) {
-                feature.geometry.coordinates.forEach(coordinates=>{
-                    coordinates.forEach(points=>{
-                        if(feature.geometry.type == "Polygon") {
-                            points = [points]; 
-                        } else if(feature.geometry.type == "MultiPolygon") {
-                            //nothing to do..
-                        } else {
-                            //console.error("unknown feature geometry type", feature.geometry.type);
-                        }
-                        points.forEach(point=>{
-                            const longitude = point[0];
-                            const latitude = point[1];
-                            bounds.xMin = bounds.xMin < longitude ? bounds.xMin : longitude;
-                            bounds.xMax = bounds.xMax > longitude ? bounds.xMax : longitude;
-                            bounds.yMin = bounds.yMin < latitude ? bounds.yMin : latitude;
-                            bounds.yMax = bounds.yMax > latitude ? bounds.yMax : latitude;
-                        });
-                    });
-                });
-            }
-        });
-        this.map.fitBounds([[bounds.xMin, bounds.yMin-0.2], [bounds.xMax, bounds.yMax+0.2]]);
-
-        this.map.addLayer({
-            "id": "counties",
-            "type": "fill",
-            "source": "counties",
-            "paint": {
-                "fill-color": "rgba(100,100,100,0.3)"
-            },
-            filter: ['==', 'statefips', this.detail.statefips], 
-        });
-
-        this.map.addLayer({
-            "id": "selected-county",
-            "type": "fill",
-            "source": "counties",
-            "paint": {
-                "fill-color": "#409EFF",
-                "fill-outline-color": "white",
-            },
-            filter: ['==', 'statefips', 'tbd'],
-        });
-
-        this.map.on('click', e=>{
-            const features = this.map.queryRenderedFeatures(e.point, {
-                layers: ['counties']
-            });
-            if(features.length > 0) {
-                const fips = features[0].properties.statefips+features[0].properties.countyfips;
-                this.$router.push('/county/'+fips);
-            }
-        });
-
-        this.popup = new mapboxgl.Popup({
-            closeButton: false,
-            //offset: [0, -20],
-        });
-
-        this.map.on('mousemove', 'counties', (e)=> {
-            this.map.getCanvas().style.cursor = 'pointer';
-            const feature = e.features[0];
-            let text = feature.properties.county+", "+feature.properties.state;
-            for(const key in feature.properties) {
-                if(key.startsWith("is")) {
-                    text += " | "+key.substring(2);
-                }
-            }
-            this.popup.setLngLat(e.lngLat).setText(text).addTo(this.map);
-        });
-
-        this.map.on('mouseleave', 'counties', ()=>{
-            this.popup.remove();
-        });
-        this.map.on('contextmenu', e=>{
-            const features = this.map.queryRenderedFeatures(e.point, {
-                layers: ['counties']
-            });
-            if(features.length > 0) {
-                e.preventDefault();
-                const mapel = document.getElementById("map");
-                this.$refs["contextmenu"].style.display = "block";
-                this.$refs["contextmenu"].style.left = (e.point.x-20)+"px";
-                this.$refs["contextmenu"].style.top = (mapel.offsetTop + e.point.y - 10)+"px";
-                this.contextMenuCounty = features[0].properties.statefips+features[0].properties.countyfips;
-            }
-        });
-
-        //close context menu as soon as user leaves it
-        this.$refs["contextmenu"].addEventListener("mouseleave", ()=>{
-            this.$refs["contextmenu"].style.display = "none";
-        });
-    }
-
-    processMap() {
-        this.map.setFilter('selected-county', ['all',
-            ['==', 'statefips', this.detail.statefips],
-            ['==', 'countyfips', this.detail.countyfips],
-        ]);
-    }
-    */
-
     mounted() {
-        //this.initStateMap();
         if(this.fips) this.load();
     }
 
