@@ -60,12 +60,16 @@
                         </el-col>
                     </el-row>
                 </p>
-                <div class="legend-item">
+                <p class="legend-item">
+                    <b>Grant Purpose</b>
+                    <br>
+                    <el-radio v-for="type in edaTypes" :key="type" v-model="edaType" :label="type">{{type.split(" ").slice(0, 2).join(" ")}}</el-radio>
+                </p>
+                <p class="legend-item">
                     <span class="legend-color" style="background-color: #00ff00">&nbsp;</span>&nbsp;Statewide Awards
-                </div>
-                <div class="legend-item">
+                    <br>
                     <span class="legend-color" style="background-color: #0066ff">&nbsp;</span>&nbsp;County Awards
-                </div>
+                </p>
             </div>
 
             <div v-if="mode == 'resilience'">
@@ -168,6 +172,8 @@ export default class Disaster extends Vue {
 
     edaYear = 'all';
     edaYears = [];
+    edaType = 'Infrastructure';
+    edaTypes = [];
 
     cutterIndicators = {
         "SOC": {
@@ -247,17 +253,31 @@ export default class Disaster extends Vue {
     @Watch('edaYear')
     onEdaYearChange(v) {
         if(!v) return;
-        if(this.edaYear == "all") {
-            this.map.setFilter('eda', null); //reset filter
-            return;
+        this.updateEda();
+    }
+
+    @Watch('edaType')
+    onEdaTypeChange(v) {
+        if(!v) return;
+        this.updateEda();
+    }
+
+    updateEda() {
+        const filters = ["all"];
+        
+        //apply purpose filter
+        filters.push(["==", ['get', 'purpose'], this.edaType]);
+
+        //apply year filter
+        if(this.edaYear != "all") {
+            const startDate = new Date(this.edaYear+"-01-01").getTime();
+            const endDate = new Date(this.edaYear+"-12-31").getTime();
+            filters.push([">=", ['get', 'date'], startDate]);
+            filters.push(["<=", ['get', 'date'], endDate]);
         }
-        const startDate = new Date(this.edaYear+"-01-01").getTime();
-        const endDate = new Date(this.edaYear+"-12-31").getTime();
-        this.map.setFilter('eda', [
-            "all",     
-            [">=", ['get', 'date'], startDate],
-            ["<=", ['get', 'date'], endDate]
-        ]);
+
+        this.map.setFilter('eda', filters);
+        this.map.setFilter('eda-labels', filters);
     }
  
     created() {
@@ -489,44 +509,8 @@ export default class Disaster extends Vue {
             fetch(this.$root.dataUrl+"/eda2018.json").then(res=>{ 
                 return res.json()
             }).then(data=>{
-                const geojson = {type: "FeatureCollection", features: []};
-                for(const recid in data) {
-                    const rec = data[recid];
-                    const ep = 0.15;
-                    geojson.features.push({
-                        type: "Feature",
-                        geometry: {
-                            type: "Polygon",
-                            coordinates: [ 
-                            [    [ rec.lon-ep, rec.lat-ep ],
-                                [ rec.lon-ep, rec.lat+ep ],
-                                [ rec.lon+ep, rec.lat+ep ],
-                                [ rec.lon+ep, rec.lat-ep ],
-                                [ rec.lon-ep, rec.lat-ep ], ]
-                            ]
-                        },
-                        properties: {
-                            height: rec.award_amount/20,
-                            date: new Date(rec.grant_award_date).getTime(),
-                            color: rec.statewide?'#00ff00':'#0066ff',
-                        }
-                    });
-                }
-                this.map.addSource('eda', { type: "geojson", data: geojson });
-                this.map.addLayer({
-                    'id': 'eda',
-                    'type': 'fill-extrusion',
-                    "source": "eda",
-                    "paint": {
-                        "fill-extrusion-color": ['get', 'color'],
-                        "fill-extrusion-height": ['get', 'height'],
-                    },
-                    layout: {
-                        visibility: 'none', 
-                    }
-                });
-                //}, 'counties');
 
+                //amount labels
                 const geojsonPoint = {type: "FeatureCollection", features: []};
                 for(const recid in data) {
                     const rec = data[recid];
@@ -538,12 +522,14 @@ export default class Disaster extends Vue {
                         },
                         properties: {
                             awardStr: "$"+this.$options.filters.formatNumber(rec.award_amount/1000)+"k",
-                            type: rec.statewide?'state':'county',
+                            //type: rec.statewide?'state':'county',
+                            date: new Date(rec.grant_award_date).getTime(),
+                            purpose: rec.grant_purpose, //Infrastructure / Construction / Non-Construction / Technical.. / Disaster.. Revolving
+
                         }
                     });
                 }
                 this.map.addSource('eda-point', { type: "geojson", data: geojsonPoint });
-
                 this.map.addLayer({
                     'id': 'eda-labels',
                     'type': 'symbol',
@@ -565,6 +551,49 @@ export default class Disaster extends Vue {
                         'text-color': 'rgba(0,0,0,1)'
                     }
                 });
+
+                //bar graphs
+                const geojson = {type: "FeatureCollection", features: []};
+                for(const recid in data) {
+                    const rec = data[recid];
+                    const ep = 0.15;
+                    geojson.features.push({
+                        type: "Feature",
+                        geometry: {
+                            type: "Polygon",
+                            coordinates: [ 
+                                [   [ rec.lon-ep, rec.lat-ep ],
+                                    [ rec.lon-ep, rec.lat+ep ],
+                                    [ rec.lon+ep, rec.lat+ep ],
+                                    [ rec.lon+ep, rec.lat-ep ],
+                                    [ rec.lon-ep, rec.lat-ep ], ]
+                            ]
+                        },
+                        properties: {
+                            height: Math.max(25000, rec.award_amount/10),
+                            date: new Date(rec.grant_award_date).getTime(),
+                            color: rec.statewide?'#00ff00':'#0066ff',
+                            purpose: rec.grant_purpose, //Infrastructure / Construction / Non-Construction / Technical.. / Disaster.. Revolving
+                        }
+                    });
+                    if(!this.edaTypes.includes(rec.grant_purpose)) this.edaTypes.push(rec.grant_purpose);
+                }
+
+                this.map.addSource('eda', { type: "geojson", data: geojson });
+                this.map.addLayer({
+                    'id': 'eda',
+                    'type': 'fill-extrusion',
+                    "source": "eda",
+                    "paint": {
+                        "fill-extrusion-color": ['get', 'color'],
+                        "fill-extrusion-height": ['get', 'height'],
+                    },
+                    layout: {
+                        visibility: 'none', 
+                    }
+                }, 'eda-labels');
+
+                this.updateEda();
 
             });
 
@@ -809,8 +838,8 @@ h4 {
 .legend {
     background-color: #fff9;
     padding: 10px;
-    text-transform: uppercase;
-    font-size: 80%;
+    text-transform: capitalize;
+    font-size: 90%;
     border-radius: 5px;
     margin-top: 20px;
     margin-right: 40px;
@@ -834,7 +863,6 @@ h4 {
 
     .legend-item {
         width: 190px;
-        height: 20px;
         margin-right: 10px;
         cursor: pointer;
         &.hidden {
@@ -846,13 +874,13 @@ h4 {
             height: 15px;
             top: -5px;
         }
+        line-height: 175%;
     }    
 }
 
 .map-description {
     position: fixed;
     bottom: 0;
-    height: 100px;
     padding: 10px;
     box-sizing: border-box;
     background-color: #000;
@@ -861,6 +889,7 @@ h4 {
     font-size: 85%;
     p {
         color: white;
+        margin-bottom: 0;
     }
 }
 
