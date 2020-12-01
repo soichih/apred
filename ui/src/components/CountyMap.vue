@@ -8,7 +8,7 @@
         </div>
         <div class="legend" v-if="mode">
             <p>
-                <el-select v-model="mode" placeholder="Select" size="mini" style="width: 100%;">
+                <el-select v-model="mode" placeholder="Select" size="small" style="width: 100%;">
                     <el-option v-for="item in modes" :key="item.value" :label="item.label" :value="item.value"> </el-option>
                 </el-select>
             </p>
@@ -65,11 +65,11 @@
                     <br>
                     <el-radio v-for="type in edaTypes" :key="type" v-model="edaType" :label="type">{{type.split(" ").slice(0, 2).join(" ")}}</el-radio>
                 </p>
-                <p class="legend-item">
+                <div class="legend-item">
                     <span class="legend-color" style="background-color: #00ff00">&nbsp;</span>&nbsp;Statewide Awards
                     <br>
                     <span class="legend-color" style="background-color: #0066ff">&nbsp;</span>&nbsp;County Awards
-                </p>
+                </div>
             </div>
 
             <div v-if="mode == 'resilience'">
@@ -99,8 +99,8 @@
                 <div style="background-image: linear-gradient(to right, red, yellow, green); width: 100%; height: 5px;">&nbsp;</div>
                 <span style="float: left;">Low</span>
                 <span style="float: right">High</span>
+                <br>
             </div>
-            <br>
         </div>
     </div>
 
@@ -846,7 +846,7 @@ h4 {
     
     z-index: 1; 
     position: relative; 
-    width: 200px;
+    width: 210px;
     .legend-color {
         display: inline-block;
         width: 10px;
