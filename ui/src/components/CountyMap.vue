@@ -56,7 +56,7 @@
                             </el-select>
                         </el-col>
                         <el-col :span="4">
-                             <el-button icon="el-icon-right" size="mini" @click="edaNext" :disabled="edaYear == '2020' || edaYear == 'all'"></el-button>
+                             <el-button icon="el-icon-right" size="mini" @click="edaNext" :disabled="edaYear == 'all'"></el-button>
                         </el-col>
                     </el-row>
                 </p>
@@ -731,7 +731,8 @@ export default class Disaster extends Vue {
     }
 
     edaNext() {
-        this.edaYear = (parseInt(this.edaYear)+1).toString();
+        if(this.edaYear == "2020") this.edaYear = "all";
+        else this.edaYear = (parseInt(this.edaYear)+1).toString();
     }
 
     findIndexDrRange(range) {
