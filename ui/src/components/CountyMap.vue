@@ -105,7 +105,7 @@
     </div>
 
     <div class="contextmenu" ref="contextmenu">
-        <p class="menu-item" @click="openContextMenuCounty">Open this county ({{contextMenuCounty}}) in a new tab</p>
+        <p class="menu-item" @click="openContextMenuCounty">Open ({{contextMenuCounty}}) in a new tab</p>
     </div>
     <div class="map-description" v-if="mode">
         <p v-if="mode == 'dr'">
@@ -156,6 +156,7 @@ export default class Disaster extends Vue {
     layersAll = true;
 
     contextMenuCounty = null;
+    contextMenuFips = null;
 
     updatedDate = null;
 
@@ -237,12 +238,15 @@ export default class Disaster extends Vue {
             const values = {};
             for(const fip in this.cutters) {
                 const cutter = this.cutters[fip];
-                if(cutter[cid]) values[fip] = cutter[cid][year-2012];
+                //fip contains .(dot) between state and county
+                //to make it compatible with albers.geojson, let's remove it
+                const numfip = fip.replace(".", "");
+                if(cutter[cid]) values[numfip] = cutter[cid][year-2012];
             }   
 
             //apply to geojson 
             this.geojson.features.forEach(feature=>{
-                const fips = feature.properties["statefips"]+"."+feature.properties["countyfips"];
+                const fips = feature.properties["county_fips"];
                 feature.properties["resilience"] = values[fips]||0;
             });
 
@@ -390,7 +394,7 @@ export default class Disaster extends Vue {
             layout: {
                 visibility: 'none',
             }
-        }, 'counties');
+        }, 'map');
 
         this.resYear = '2018';
     }
@@ -400,13 +404,23 @@ export default class Disaster extends Vue {
             container: 'map', // HTML container id
 
             //style: 'mapbox://styles/mapbox/light-v10', // style URL
+            //center: [-100, 41.5], // starting position as [lng, lat]
+            //minZoom: 2,
 
             //https://www.mapbox.com/elections/albers-usa-projection-style
             //https://studio.mapbox.com/styles/soichih/ckig6p3ph51e719pcdusqyd1o/edit/#4.71/-0.86/-2.94
             style: 'mapbox://styles/soichih/ckig6p3ph51e719pcdusqyd1o', 
+            center: [0, 0], // starting position as [lng, lat]
+            minZoom: 4,
+            /* properties
+            county_fips: "20017"
+            county_name: "Chase"
+            state_abbrev: "KS"
+            state_fips: "20"
+            state_name: "Kansas"
+            type: "county"
+            */
 
-            center: [-100, 41.5], // starting position as [lng, lat]
-            minZoom: 2,
             pitch: 30, // pitch in degrees
             //bearing: 10, // bearing in degrees
             zoom: 1,
@@ -434,19 +448,38 @@ export default class Disaster extends Vue {
 
             //TODO - I should separate DR information from counties_geo.. so we can load data for each year ranges
             //counties_geo should just contain counties_geo
-            fetch(this.$root.dataUrl+"/counties_geo.albersusa.json").then(res=>{ 
+            fetch(this.$root.dataUrl+"/counties_geo.albers.json").then(res=>{ 
                 this.updatedDate = res.headers.get("last-modified")
                 return res.json()
             }).then(data=>{
                 this.geojson = data;
+                /* features[].properties = {
+                    CENSUSAREA: 27.887
+                    county: "Gurabo"
+                    countyfips: "063"
+                    fips: "72063"
+                    resilience: 0
+                    stabb: "PR"
+                    state: "Puerto Rico"
+                    statefips: "72"
+                }
+                */
+                /*
+                data.features.forEach(f=>{
+                    if(f.properties.fips.startsWith("06")) {
+                        console.dir(f);
+                    }
+                });
+                */
 
                 //all counties
                 this.map.addSource('counties', { type: "geojson", data });
+                console.log("adding counties layer");
                 this.map.addLayer({
-                    "id": "counties",
-                    "type": "fill",
-                    "source": "counties",
-                    "paint": {
+                    id: "map",
+                    type: "fill",
+                    source: "counties",
+                    paint: {
                         "fill-color": "rgba(0,0,0,0.1)"
                     }
                 });
@@ -462,7 +495,6 @@ export default class Disaster extends Vue {
                 });
 
                 layers.forEach(layer=>{
-
                     this.map.addLayer({
                         id: 'county_disaster_'+layer.id,
                         type: 'fill',
@@ -475,21 +507,21 @@ export default class Disaster extends Vue {
                         layout: {
                             visibility: 'none',
                         }
-                    }, 'counties');
+                    }, 'map');
 
                     this.map.addLayer({
-                        'id': 'state_disaster_'+layer.id,
-                        'type': 'fill',
-                        'source': 'counties',
-                        'paint': {
+                        id: 'state_disaster_'+layer.id,
+                        type: 'fill',
+                        source: 'counties',
+                        paint: {
                             'fill-color': layer.color,
                             'fill-opacity': (layer.opacity||1)*0.2,
                         },
-                        filter: ['in', 'statefips', ''],
+                        filter: ['in', 'fips', ''],
                         layout: {
                             visibility: 'none',
                         }
-                    }, 'counties');
+                    }, 'map');
                 });
 
                 fetch(this.$root.dataUrl+"/years.json").then(res=>{ 
@@ -537,9 +569,9 @@ export default class Disaster extends Vue {
                 }
                 this.map.addSource('eda-point', { type: "geojson", data: geojsonPoint });
                 this.map.addLayer({
-                    'id': 'eda-labels',
-                    'type': 'symbol',
-                    "source": "eda-point",
+                    id: 'eda-labels',
+                    type: 'symbol',
+                    source: "eda-point",
                     layout: {
                         visibility: 'none', 
                         'text-field': ['get', 'awardStr'],
@@ -553,7 +585,7 @@ export default class Disaster extends Vue {
                             [ "interpolate", [ "linear" ], [ "get", "award" ], 500, 10, 5000, 30 ]
                         ]
                     },
-                    'paint': {
+                    paint: {
                         'text-color': 'rgba(0,0,0,1)'
                     }
                 });
@@ -587,10 +619,10 @@ export default class Disaster extends Vue {
 
                 this.map.addSource('eda', { type: "geojson", data: geojson });
                 this.map.addLayer({
-                    'id': 'eda',
-                    'type': 'fill-extrusion',
-                    "source": "eda",
-                    "paint": {
+                    id: 'eda',
+                    type: 'fill-extrusion',
+                    source: "eda",
+                    paint: {
                         "fill-extrusion-color": ['get', 'color'],
                         "fill-extrusion-height": ['get', 'height'],
                     },
@@ -608,7 +640,8 @@ export default class Disaster extends Vue {
                     layers: ['counties']
                 });
                 if(features.length > 0) {
-                    this.countySelected(features[0].properties.statefips+features[0].properties.countyfips);
+                    //this.countySelected(features[0].properties.state_fips+features[0].properties.county_fips);
+                    this.countySelected(features[0].properties.county_fips);
                 }
             });
             this.map.on('contextmenu', e=>{
@@ -621,7 +654,8 @@ export default class Disaster extends Vue {
                     this.$refs["contextmenu"].style.display = "block";
                     this.$refs["contextmenu"].style.left = (e.point.x-20)+"px";
                     this.$refs["contextmenu"].style.top = (mapel.offsetTop + e.point.y - 10)+"px";
-                    this.contextMenuCounty = features[0].properties.statefips+features[0].properties.countyfips;
+                    this.contextMenuCounty = features[0].properties.county_name+", "+features[0].properties.state_name;
+                    this.contextMenuFips = features[0].properties.county_fips;
                 }
             });
 
@@ -638,7 +672,7 @@ export default class Disaster extends Vue {
                 const feature = e.features[0];
                 
                 // Display a popup with the name of the county
-                let text = feature.properties.county+", "+feature.properties.state;
+                let text = feature.properties.county_name+", "+feature.properties.state_name;
                 for(const key in feature.properties) {
                     if(key.startsWith("is")) {
                         text += " | "+key.substring(2);
@@ -717,7 +751,7 @@ export default class Disaster extends Vue {
         this.$emit("select", fips);
     }
     openContextMenuCounty() {
-        window.open("#/county/"+this.contextMenuCounty, "apred-"+this.contextMenuCounty);
+        window.open("#/county/"+this.contextMenuFips, "apred-"+this.contextMenuFips);
     }
 
     toggleLayer(layer) {
