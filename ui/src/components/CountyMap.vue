@@ -398,7 +398,13 @@ export default class Disaster extends Vue {
     mounted() {
         this.map = new mapboxgl.Map({
             container: 'map', // HTML container id
-            style: 'mapbox://styles/mapbox/light-v10', // style URL
+
+            //style: 'mapbox://styles/mapbox/light-v10', // style URL
+
+            //https://www.mapbox.com/elections/albers-usa-projection-style
+            //https://studio.mapbox.com/styles/soichih/ckig6p3ph51e719pcdusqyd1o/edit/#4.71/-0.86/-2.94
+            style: 'mapbox://styles/soichih/ckig6p3ph51e719pcdusqyd1o', 
+
             center: [-100, 41.5], // starting position as [lng, lat]
             minZoom: 2,
             pitch: 30, // pitch in degrees
@@ -428,7 +434,7 @@ export default class Disaster extends Vue {
 
             //TODO - I should separate DR information from counties_geo.. so we can load data for each year ranges
             //counties_geo should just contain counties_geo
-            fetch(this.$root.dataUrl+"/counties_geo.json").then(res=>{ 
+            fetch(this.$root.dataUrl+"/counties_geo.albersusa.json").then(res=>{ 
                 this.updatedDate = res.headers.get("last-modified")
                 return res.json()
             }).then(data=>{
