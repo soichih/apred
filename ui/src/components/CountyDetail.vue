@@ -113,10 +113,19 @@
     <div v-if="tab == 'bvi'" class="page">
         <br>
         <p>
-            <b>Business Vulnerability Index (BVI)</b> is a percentage of businesses in a county
-            that are believed to be <i>vulnerable</i> to various natural disasters. To calculate the BVI, we isolated businesses by NAICS code from the U.S. Census' most recent <a href="https://www.census.gov/econ/overview/mu0800.html">County Business Patterns</a>  based on their vulnerability to natural disaster (farmers, transportation companies, etc.).
-            Businesses that were identified to be especially vulnerable to a disaster are those which are dependent on supply chains,
-            have a high reliance on public utilities like water and electricity, or have a large infrastructure footprint and low infrastructure mobility.
+            <b>Business Vulnerability Index (BVI)</b> is a percentage of businesses in a county that are believed to be <i>vulnerable</i> to various natural disasters. 
+        </p>
+        <p>
+            To calculate the BVI, we isolated businesses by NAICS code from the U.S. Census' most recent <a href="https://www.census.gov/econ/overview/mu0800.html">County Business Patterns</a> 
+            based on their vulnerability to natural disaster (farmers, transportation companies, etc.).
+        </p>
+        <p>
+            Businesses that were identified to be especially vulnerable to a disater are..
+            <ul>
+                <li>dependent on supply chains</li>
+                <li>have a high reliance on public utilities like water and electricity</li>
+                <li>or have a large infrastructure footprint and low infrastructure mobility.</li>
+            </ul>
         </p>
         <div class="plot-legend">
             <div class="color-box" style="height: 4px; background-color: #49f"/> Total
