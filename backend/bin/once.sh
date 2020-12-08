@@ -8,3 +8,4 @@
 
 ./transform/find_nearest_tribes.js
 ./transform/count_noaa_storms.js
+./transform/county_geo2albersusa.sh
