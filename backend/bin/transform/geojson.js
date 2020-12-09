@@ -4,7 +4,7 @@ const config = require('../../config');
 
 console.log("simplify and augment countyes_geo.json ...........................");
 
-const geojson = require(config.pubdir+"/raw/counties_geo.albers.json");
+const geojson = require(config.pubdir+"/raw/counties_geo.json");
 const fips = require(config.pubdir+'/fips.json');
 
 const fips_map = {};
@@ -34,7 +34,7 @@ geojson.features.forEach(feature=>{
     delete feature.properties.GEO_ID;
     delete feature.properties.LSAD;
 });
-fs.writeFileSync(config.pubdir+"/counties_geo.albers.json", JSON.stringify(geojson));
+fs.writeFileSync(config.pubdir+"/counties_geo.json", JSON.stringify(geojson));
 
 //for searching counties
 const countyList = [];

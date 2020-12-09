@@ -246,7 +246,7 @@ export default class Disaster extends Vue {
 
             //apply to geojson 
             this.geojson.features.forEach(feature=>{
-                const fips = feature.properties["county_fips"];
+                const fips = feature.properties["fips"];
                 feature.properties["resilience"] = values[fips]||0;
             });
 
@@ -448,7 +448,7 @@ export default class Disaster extends Vue {
 
             //TODO - I should separate DR information from counties_geo.. so we can load data for each year ranges
             //counties_geo should just contain counties_geo
-            fetch(this.$root.dataUrl+"/counties_geo.albers.json").then(res=>{ 
+            fetch(this.$root.dataUrl+"/counties_geo.albers.geojson").then(res=>{ 
                 this.updatedDate = res.headers.get("last-modified")
                 return res.json()
             }).then(data=>{
@@ -544,11 +544,12 @@ export default class Disaster extends Vue {
                 });
             });
 
-            fetch(this.$root.dataUrl+"/eda2018.json").then(res=>{ 
+            fetch(this.$root.dataUrl+"/eda2018.geojson").then(res=>{ 
                 return res.json()
             }).then(data=>{
 
                 //amount labels
+                /*
                 const geojsonPoint = {type: "FeatureCollection", features: []};
                 for(const recid in data) {
                     const rec = data[recid];
@@ -567,11 +568,12 @@ export default class Disaster extends Vue {
                         }
                     });
                 }
-                this.map.addSource('eda-point', { type: "geojson", data: geojsonPoint });
+                */
+                this.map.addSource('eda2018', { type: "geojson", data });
                 this.map.addLayer({
                     id: 'eda-labels',
                     type: 'symbol',
-                    source: "eda-point",
+                    source: "eda2018",
                     layout: {
                         visibility: 'none', 
                         'text-field': ['get', 'awardStr'],
@@ -591,6 +593,7 @@ export default class Disaster extends Vue {
                 });
 
                 //bar graphs
+                /*
                 const geojson = {type: "FeatureCollection", features: []};
                 for(const recid in data) {
                     const rec = data[recid];
@@ -616,12 +619,13 @@ export default class Disaster extends Vue {
                     });
                     if(!this.edaTypes.includes(rec.grant_purpose)) this.edaTypes.push(rec.grant_purpose);
                 }
+                */
 
-                this.map.addSource('eda', { type: "geojson", data: geojson });
+                //this.map.addSource('eda', { type: "geojson", data });
                 this.map.addLayer({
                     id: 'eda',
                     type: 'fill-extrusion',
-                    source: "eda",
+                    source: "eda2018",
                     paint: {
                         "fill-extrusion-color": ['get', 'color'],
                         "fill-extrusion-height": ['get', 'height'],
@@ -631,8 +635,12 @@ export default class Disaster extends Vue {
                     }
                 }, 'eda-labels');
 
+                //create edatype catalog
+                for(const recid in eda2018) {
+                    const rec = eda2018[recid];
+                    if(!this.edaTypes.includes(rec.grant_purpose)) this.edaTypes.push(rec.grant_purpose); 
+                }
                 this.updateEda();
-
             });
 
             this.map.on('click', e=>{
