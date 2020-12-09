@@ -474,7 +474,6 @@ export default class Disaster extends Vue {
 
                 //all counties
                 this.map.addSource('counties', { type: "geojson", data });
-                console.log("adding counties layer");
                 this.map.addLayer({
                     id: "map",
                     type: "fill",
@@ -544,7 +543,7 @@ export default class Disaster extends Vue {
                 });
             });
 
-            fetch(this.$root.dataUrl+"/eda2018.geojson").then(res=>{ 
+            fetch(this.$root.dataUrl+"/eda2018.albers.geojson").then(res=>{ 
                 return res.json()
             }).then(data=>{
 
@@ -636,9 +635,10 @@ export default class Disaster extends Vue {
                 }, 'eda-labels');
 
                 //create edatype catalog
-                for(const recid in eda2018) {
-                    const rec = eda2018[recid];
-                    if(!this.edaTypes.includes(rec.grant_purpose)) this.edaTypes.push(rec.grant_purpose); 
+                for(const feature of data.features) {
+                    if(!this.edaTypes.includes(feature.properties.purpose)) {
+                        this.edaTypes.push(feature.properties.purpose); 
+                    }
                 }
                 this.updateEda();
             });
