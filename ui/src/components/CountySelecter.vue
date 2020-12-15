@@ -1,5 +1,6 @@
 <template>
 <el-select 
+    class="county-selecter"
     v-model="myfips" 
     filterable 
     clearable 
@@ -70,8 +71,11 @@ export default {
 }
 </script>
 
-<style scoped>
-.county-selecter {
-padding: 20px;
+<style>
+.county-selecter .el-input__inner {
+border: none;
+border-radius: 0;
+border-bottom: 1px solid #ddd;
+background: white;
 }
 </style>
