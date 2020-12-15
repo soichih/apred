@@ -2,20 +2,31 @@
 <div>
     <div id="map"/>
 
-    <div class="page">
-        <div style="float: right; width: 300px;">
-            <CountySelecter @select="countySelected"/>
-        </div>
+    <div class="side">
+        <CountySelecter @select="countySelected"/>
         <div class="legend" v-if="mode">
             <p>
                 <el-select v-model="mode" placeholder="Select" size="small" style="width: 100%;">
                     <el-option v-for="item in modes" :key="item.value" :label="item.label" :value="item.value"> </el-option>
                 </el-select>
             </p>
+            <div v-if="mode" class="map-description">
+                <p v-if="mode == 'dr'">
+                    This map shows counties with FEMA declared disasters within specified time range. Please visit <a href="https://www.fema.gov/disasters/disaster-declarations">FEMA Disasters</a> page for more detail.
+                </p>
+                <p v-if="mode == 'eda'">
+                    This map shows locations and amounts of EDA (U.S. Economic Development Administration) fundings awarded in the specified time range. EDA assists communities experiencing economic distress or harm resulting from federally-declared natural disasters.
+                </p>
+                <p v-if="mode == 'resilience'">
+                    This map shows disaster resilience score for each counties in the specified year aggregated into 4 major categories (Social, Economic, Infrastructure, and Community Capital).  Disaster resilience scores are calculated using data from U.S. Census using formulas defined by [Cuter et al. 2020].
+                </p>
+            </div>
 
             <div v-if="mode == 'dr'">
                 <p>
                     <b>Date Range</b>
+                </p>
+                <p>
                     <el-row :gutter="5">
                         <el-col :span="4">
                              <el-button icon="el-icon-back" size="mini" @click="drPrevious" :disabled="drRange == '1961'"></el-button>
@@ -106,17 +117,6 @@
 
     <div class="contextmenu" ref="contextmenu">
         <p class="menu-item" @click="openContextMenuCounty">Open ({{contextMenuCounty}}) in a new tab</p>
-    </div>
-    <div class="map-description" v-if="mode">
-        <p v-if="mode == 'dr'">
-            This map shows counties with FEMA declared disasters within specified time range. Please visit <a href="https://www.fema.gov/disasters/disaster-declarations">FEMA Disasters</a> page for more detail.
-        </p>
-        <p v-if="mode == 'eda'">
-            This map shows locations and amounts of EDA (U.S. Economic Development Administration) fundings awarded in the specified time range. EDA assists communities experiencing economic distress or harm resulting from federally-declared natural disasters.
-        </p>
-        <p v-if="mode == 'resilience'">
-            This map shows disaster resilience score for each counties in the specified year aggregated into 4 major categories (Social, Economic, Infrastructure, and Community Capital).  Disaster resilience scores are calculated using data from U.S. Census using formulas defined by [Cuter et al. 2020].
-        </p>
     </div>
 </div>
 </template>
@@ -479,7 +479,7 @@ export default class Disaster extends Vue {
                     type: "fill",
                     source: "counties",
                     paint: {
-                        "fill-color": "rgba(0,0,0,0.1)"
+                        "fill-color": "rgba(255,255,255,0.1)"
                     }
                 });
 
@@ -856,9 +856,11 @@ h4 {
 
 #map {
     position: fixed;
-    width: 100%;
+    left: 250px;
+    right: 0;
     top: 50px;
     bottom: 0;
+    box-shadow: inset 0 0 3px #eee;
 }
 
 .map-overlay {
@@ -872,6 +874,16 @@ h4 {
     padding: 10px;
     display: none;
 }
+
+.side {
+    position: fixed;
+    top: 50px;
+    left: 0;
+    width: 250px;
+    bottom: 0;
+    background-color: #f9f9f9;
+}
+
 .sub-heading {
     opacity: 0.8;
     font-weight: bold;
@@ -884,17 +896,25 @@ h4 {
     color: #409EFF;
 }
 .legend {
-    background-color: #fff9;
     padding: 10px;
-    text-transform: capitalize;
     font-size: 90%;
+    margin: 0;
+    /*
+    background-color: #fff9;
+    text-transform: capitalize;
     border-radius: 5px;
     margin-top: 20px;
     margin-right: 40px;
     
     z-index: 1; 
     position: relative; 
-    width: 210px;
+    width: 100%;
+    */
+
+    .map-description {
+        font-size: 85%;
+        opacity: 0.7;
+    }
     .legend-color {
         display: inline-block;
         width: 10px;
@@ -910,7 +930,6 @@ h4 {
     }
 
     .legend-item {
-        width: 190px;
         margin-right: 10px;
         cursor: pointer;
         &.hidden {
@@ -926,6 +945,7 @@ h4 {
     }    
 }
 
+/*
 .map-description {
     position: fixed;
     bottom: 0;
@@ -946,6 +966,8 @@ h4 {
         display: none;
     }
 }
+*/
+
 .tutorial {
     display: none;
     opacity: 0;
