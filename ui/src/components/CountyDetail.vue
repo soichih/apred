@@ -34,7 +34,7 @@
                 <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
 
                 <h4>Population Density</h4>
-                <span class="primary" v-if="detail.popdensity"> {{detail.popdensity | formatNumber}} people per mile^2</span>
+                <span class="primary" v-if="detail.popdensity"> {{detail.popdensity | formatNumber}} people per sq. mile</span>
                 <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
 
                 <br>
@@ -128,7 +128,7 @@
             </ul>
         </p>
         <div class="plot-legend">
-            <div class="color-box" style="height: 4px; background-color: #49f"/> Total
+            <div class="color-box" style="height: 4px; background-color: #999"/> Total
             <div class="color-box" style="height: 4px; background-color: #f00"/> Vulnerable
         </div>
         <br clear="both">
@@ -149,6 +149,33 @@
                     <BVIPlot :data="data.emp"/>
                 </el-col>
             </el-row>
+        </div>
+
+        <div v-if="!showNonvBVI && Object.keys(bvi2_nonv).length > 0" style="border-top: 2px solid #f3f3f3;">
+            <br>
+            <el-button round @click="showNonvBVI = !showNonvBVI">
+                <i class="el-icon-caret-right"/> Show Non-vulnerable Sectors ({{Object.keys(bvi2_nonv).length}})
+            </el-button>
+        </div>
+
+        <!-- don't use slide-down.. it will be slow :active="showPastHistory" :duration="1000"-->
+        <div v-if="showNonvBVI" style="border-top: 2px solid #f3f3f3;">
+            <br>
+            <div v-for="(data, naics) in bvi2_nonv" :key="naics">
+                <p>
+                    <b><NaicsInfo :id="naics"/></b>
+                </p>
+                <el-row>
+                    <el-col :span="12">
+                        <h4 style="margin: 0"><small>Establishments</small></h4>
+                        <BVIPlot :data="data.est"/>
+                    </el-col>
+                    <el-col :span="12">
+                        <h4 style="margin: 0"><small>Employment</small></h4>
+                        <BVIPlot :data="data.emp"/>
+                    </el-col>
+                </el-row>
+            </div>
         </div>
         <br clear="both">
     </div>
@@ -294,7 +321,10 @@ export default class CountyDetail extends Vue {
         'paper_bgcolor': '#0000',
         'plot_bgcolor': '#0000',
     }
+
     bvi2 = {}; //keyed by naics code, then {years, estab, estab_v, emp, emp_v} 
+    bvi2_nonv = {}; //bvi2 with all-0 vulnerablility
+    showNonvBVI = false;
 
     stormLayout = null;
     stormData = null;
@@ -363,7 +393,23 @@ export default class CountyDetail extends Vue {
         if(!this.detail.bvis2) return;
         for(const naics in this.detail.bvis2) {
             const data = this.detail.bvis2[naics];
-            this.bvi2[naics] = {
+
+            /*
+            console.log("naics", naics);
+            console.dir(data.estab_v);
+            console.dir(data.emp_v);
+            */
+
+            //see if there is any non-0 vulnerability values
+            let vuln = false;
+            data.estab_v.forEach(v=>{
+                if(v != 0) vuln = true;
+            });
+            data.emp_v.forEach(v=>{
+                if(v != 0) vuln = true;
+            });
+
+            if(vuln) this.bvi2[naics] = {
                 est: {
                     years: data.years,
                     total: data.estab,
@@ -373,6 +419,17 @@ export default class CountyDetail extends Vue {
                     years: data.years,
                     total: data.emp,
                     vul: data.emp_v,
+                },
+
+            }
+            else this.bvi2_nonv[naics] = {
+                est: {
+                    years: data.years,
+                    total: data.estab,
+                },
+                emp: {
+                    years: data.years,
+                    total: data.emp,
                 },
             }
         }
@@ -450,6 +507,9 @@ export default class CountyDetail extends Vue {
     }
 
     load() {
+        this.showPastHistory = false;
+        this.showNonvBVI = false;
+
         fetch(this.$root.dataUrl+"/counties/county."+this.fips+".json").then(res=>res.json()).then(data=>{
             this.detail = data;
 

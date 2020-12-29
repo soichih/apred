@@ -50,7 +50,7 @@
                 </div>
                 <div v-for="(info, layer) in $root.layers" :key="layer" class="legend-item" :class="{hidden: hiddenLayers.includes(layer)}" @click.stop="toggleLayer(layer)" style="clear: right;" :title="info.types.join(', ')">
                     <input type="checkbox" :checked="!hiddenLayers.includes(layer)"/>
-                    <span class="legend-color" :style="{backgroundColor: info.color}">&nbsp;</span>&nbsp;{{layer}}
+                    <span class="legend-color" :style="{backgroundColor: info.color}">&nbsp;</span>&nbsp;{{layer.toUpperCase()}}
                 </div>
             </div>
 
@@ -541,106 +541,106 @@ export default class Disaster extends Vue {
                         this.loadCutters(2018, cid);
                     }
                 });
-            });
 
-            fetch(this.$root.dataUrl+"/eda2018.albers.geojson").then(res=>{ 
-                return res.json()
-            }).then(data=>{
+                fetch(this.$root.dataUrl+"/eda2018.albers.geojson").then(res=>{ 
+                    return res.json()
+                }).then(data=>{
 
-                //amount labels
-                /*
-                const geojsonPoint = {type: "FeatureCollection", features: []};
-                for(const recid in data) {
-                    const rec = data[recid];
-                    geojsonPoint.features.push({
-                        type: "Feature",
-                        geometry: {
-                            type: "Point",
-                            coordinates: [ rec.lon, rec.lat ],
-                        },
-                        properties: {
-                            awardStr: "$"+this.$options.filters.formatNumber(rec.award_amount/1000)+"k",
-                            //type: rec.statewide?'state':'county',
-                            date: new Date(rec.grant_award_date).getTime(),
-                            purpose: rec.grant_purpose, //Infrastructure / Construction / Non-Construction / Technical.. / Disaster.. Revolving
+                    //amount labels
+                    /*
+                    const geojsonPoint = {type: "FeatureCollection", features: []};
+                    for(const recid in data) {
+                        const rec = data[recid];
+                        geojsonPoint.features.push({
+                            type: "Feature",
+                            geometry: {
+                                type: "Point",
+                                coordinates: [ rec.lon, rec.lat ],
+                            },
+                            properties: {
+                                awardStr: "$"+this.$options.filters.formatNumber(rec.award_amount/1000)+"k",
+                                //type: rec.statewide?'state':'county',
+                                date: new Date(rec.grant_award_date).getTime(),
+                                purpose: rec.grant_purpose, //Infrastructure / Construction / Non-Construction / Technical.. / Disaster.. Revolving
 
-                        }
-                    });
-                }
-                */
-                this.map.addSource('eda2018', { type: "geojson", data });
-                this.map.addLayer({
-                    id: 'eda-labels',
-                    type: 'symbol',
-                    source: "eda2018",
-                    layout: {
-                        visibility: 'none', 
-                        'text-field': ['get', 'awardStr'],
-                        'text-size': [
-                            "interpolate", 
-                            [ "linear" ],
-                            [ "zoom" ], 
-                            2,
-                            [ "interpolate", [ "linear" ], [ "get", "award" ], 500, 3, 5000, 6 ],
-                            9,
-                            [ "interpolate", [ "linear" ], [ "get", "award" ], 500, 10, 5000, 30 ]
-                        ]
-                    },
-                    paint: {
-                        'text-color': 'rgba(0,0,0,1)'
+                            }
+                        });
                     }
-                });
-
-                //bar graphs
-                /*
-                const geojson = {type: "FeatureCollection", features: []};
-                for(const recid in data) {
-                    const rec = data[recid];
-                    const ep = 0.15;
-                    geojson.features.push({
-                        type: "Feature",
-                        geometry: {
-                            type: "Polygon",
-                            coordinates: [ 
-                                [   [ rec.lon-ep, rec.lat-ep ],
-                                    [ rec.lon-ep, rec.lat+ep ],
-                                    [ rec.lon+ep, rec.lat+ep ],
-                                    [ rec.lon+ep, rec.lat-ep ],
-                                    [ rec.lon-ep, rec.lat-ep ], ]
+                    */
+                    this.map.addSource('eda2018', { type: "geojson", data });
+                    this.map.addLayer({
+                        id: 'eda-labels',
+                        type: 'symbol',
+                        source: "eda2018",
+                        layout: {
+                            visibility: 'none', 
+                            'text-field': ['get', 'awardStr'],
+                            'text-size': [
+                                "interpolate", 
+                                [ "linear" ],
+                                [ "zoom" ], 
+                                2,
+                                [ "interpolate", [ "linear" ], [ "get", "award" ], 500, 3, 5000, 6 ],
+                                9,
+                                [ "interpolate", [ "linear" ], [ "get", "award" ], 500, 10, 5000, 30 ]
                             ]
                         },
-                        properties: {
-                            height: Math.max(25000, rec.award_amount/10),
-                            date: new Date(rec.grant_award_date).getTime(),
-                            color: rec.statewide?'#00ff00':'#0066ff',
-                            purpose: rec.grant_purpose, //Infrastructure / Construction / Non-Construction / Technical.. / Disaster.. Revolving
+                        paint: {
+                            'text-color': 'rgba(0,0,0,1)'
                         }
                     });
-                    if(!this.edaTypes.includes(rec.grant_purpose)) this.edaTypes.push(rec.grant_purpose);
-                }
-                */
 
-                //this.map.addSource('eda', { type: "geojson", data });
-                this.map.addLayer({
-                    id: 'eda',
-                    type: 'fill-extrusion',
-                    source: "eda2018",
-                    paint: {
-                        "fill-extrusion-color": ['get', 'color'],
-                        "fill-extrusion-height": ['get', 'height'],
-                    },
-                    layout: {
-                        visibility: 'none', 
+                    //bar graphs
+                    /*
+                    const geojson = {type: "FeatureCollection", features: []};
+                    for(const recid in data) {
+                        const rec = data[recid];
+                        const ep = 0.15;
+                        geojson.features.push({
+                            type: "Feature",
+                            geometry: {
+                                type: "Polygon",
+                                coordinates: [ 
+                                    [   [ rec.lon-ep, rec.lat-ep ],
+                                        [ rec.lon-ep, rec.lat+ep ],
+                                        [ rec.lon+ep, rec.lat+ep ],
+                                        [ rec.lon+ep, rec.lat-ep ],
+                                        [ rec.lon-ep, rec.lat-ep ], ]
+                                ]
+                            },
+                            properties: {
+                                height: Math.max(25000, rec.award_amount/10),
+                                date: new Date(rec.grant_award_date).getTime(),
+                                color: rec.statewide?'#00ff00':'#0066ff',
+                                purpose: rec.grant_purpose, //Infrastructure / Construction / Non-Construction / Technical.. / Disaster.. Revolving
+                            }
+                        });
+                        if(!this.edaTypes.includes(rec.grant_purpose)) this.edaTypes.push(rec.grant_purpose);
                     }
-                }, 'eda-labels');
+                    */
 
-                //create edatype catalog
-                for(const feature of data.features) {
-                    if(!this.edaTypes.includes(feature.properties.purpose)) {
-                        this.edaTypes.push(feature.properties.purpose); 
+                    //this.map.addSource('eda', { type: "geojson", data });
+                    this.map.addLayer({
+                        id: 'eda',
+                        type: 'fill-extrusion',
+                        source: "eda2018",
+                        paint: {
+                            "fill-extrusion-color": ['get', 'color'],
+                            "fill-extrusion-height": ['get', 'height'],
+                        },
+                        layout: {
+                            visibility: 'none', 
+                        }
+                    });
+
+                    //create edatype catalog
+                    for(const feature of data.features) {
+                        if(!this.edaTypes.includes(feature.properties.purpose)) {
+                            this.edaTypes.push(feature.properties.purpose); 
+                        }
                     }
-                }
-                this.updateEda();
+                    this.updateEda();
+                });
             });
 
             this.map.on('click', e=>{
@@ -932,6 +932,7 @@ h4 {
     .legend-item {
         margin-right: 10px;
         cursor: pointer;
+        font-size: 10pt;
         &.hidden {
             color: #999;
         }
