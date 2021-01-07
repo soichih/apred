@@ -218,9 +218,6 @@ export default class Disaster extends Vue {
 
             years.forEach(year=>{ 
                 types.forEach(type=>{
-                    if(!this.yearsDR[year]) {
-                        console.error("no", year, "in yearsDR");
-                    }
                     if(this.yearsDR[year] && this.yearsDR[year][type]) {
                         filter = filter.concat(this.yearsDR[year][type].filter(fip=>fip.length == 5));
                         stateFilter = stateFilter.concat(this.yearsDR[year][type].filter(fip=>fip.length == 2));
@@ -260,7 +257,6 @@ export default class Disaster extends Vue {
     @Watch('edaYear')
     onEdaYearChange(v) {
         if(!v) return;
-        console.log("eda year changed", v);
         this.updateEda();
     }
 
@@ -271,7 +267,6 @@ export default class Disaster extends Vue {
     }
 
     updateEda() {
-        console.log("updateEda");
         const filters = ["all"];
         
         //apply purpose filter
@@ -470,13 +465,6 @@ export default class Disaster extends Vue {
                     statefips: "72"
                 }
                 */
-                /*
-                data.features.forEach(f=>{
-                    if(f.properties.fips.startsWith("06")) {
-                        console.dir(f);
-                    }
-                });
-                */
 
                 //all counties
                 this.map.addSource('counties', { type: "geojson", data });
@@ -645,8 +633,6 @@ export default class Disaster extends Vue {
                             this.edaTypes.push(feature.properties.purpose); 
                         }
                     }
-                    //this.updateEda();
-                    console.log("created eda layers.. now settring to all");
                     this.edaYear = 'all';
                 });
             });
