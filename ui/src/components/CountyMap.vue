@@ -171,7 +171,7 @@ export default class Disaster extends Vue {
     resYear = null; //will be set to "2018" once cutter info is loaded
     resYears = [];
 
-    edaYear = 'all';
+    edaYear = null; //will be set to "all" once eda layers area loaded
     edaYears = [];
     edaType = 'Infrastructure';
     edaTypes = [];
@@ -218,7 +218,10 @@ export default class Disaster extends Vue {
 
             years.forEach(year=>{ 
                 types.forEach(type=>{
-                    if(this.yearsDR[year][type]) {
+                    if(!this.yearsDR[year]) {
+                        console.error("no", year, "in yearsDR");
+                    }
+                    if(this.yearsDR[year] && this.yearsDR[year][type]) {
                         filter = filter.concat(this.yearsDR[year][type].filter(fip=>fip.length == 5));
                         stateFilter = stateFilter.concat(this.yearsDR[year][type].filter(fip=>fip.length == 2));
                     }
@@ -257,6 +260,7 @@ export default class Disaster extends Vue {
     @Watch('edaYear')
     onEdaYearChange(v) {
         if(!v) return;
+        console.log("eda year changed", v);
         this.updateEda();
     }
 
@@ -267,6 +271,7 @@ export default class Disaster extends Vue {
     }
 
     updateEda() {
+        console.log("updateEda");
         const filters = ["all"];
         
         //apply purpose filter
@@ -294,7 +299,7 @@ export default class Disaster extends Vue {
         const drLayer = window.localStorage.getItem("drLayer");
         if(drLayer) this.drLayer = drLayer;
 
-        for(let year = 2020; year > 1960; --year) {
+        for(let year = 2021; year > 1960; --year) {
             this.drRanges.push(
                 {value: year.toString(), label: year.toString()},
             );
@@ -305,7 +310,7 @@ export default class Disaster extends Vue {
             );
         }
         this.edaYears.push({value: 'all', label: 'All'});
-        for(let year = 2020; year >= 2012; --year) {
+        for(let year = 2021; year >= 2012; --year) {
             this.edaYears.push({value: year.toString(), label: year.toString()});
         }
     }
@@ -360,6 +365,7 @@ export default class Disaster extends Vue {
         }
     }
     hideEDA2018Layers() {
+        if(!this.edaYear) return; //not loaded yet
         this.map.setLayoutProperty('eda-labels', 'visibility', 'none');
         this.map.setLayoutProperty('eda', 'visibility', 'none');
     }
@@ -639,7 +645,9 @@ export default class Disaster extends Vue {
                             this.edaTypes.push(feature.properties.purpose); 
                         }
                     }
-                    this.updateEda();
+                    //this.updateEda();
+                    console.log("created eda layers.. now settring to all");
+                    this.edaYear = 'all';
                 });
             });
 
@@ -801,14 +809,14 @@ export default class Disaster extends Vue {
 
     edaPrevious() {
         if(this.edaYear == "all") {
-            this.edaYear = "2020";
+            this.edaYear = "2021";
             return;
         }
         this.edaYear = (parseInt(this.edaYear)-1).toString();
     }
 
     edaNext() {
-        if(this.edaYear == "2020") this.edaYear = "all";
+        if(this.edaYear == "2021") this.edaYear = "all";
         else this.edaYear = (parseInt(this.edaYear)+1).toString();
     }
 
