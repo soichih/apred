@@ -109,6 +109,41 @@ for(let rec of medianincome) {
     counties[fips].medianincome = rec.data;
 }
 
+//compute histogram of all medianincome (state and for each state)
+function medianIncomeHistogram(counties) {
+    console.log("creating medianincome histogram");
+    let min = Infinity
+    let max = 0
+    for(let fip in counties) {
+        let income = counties[fip].medianincome;
+        if(income > max) max = income;
+        if(income < min) min = income;
+    }
+    min = Math.floor(min/100)*100;
+    max = Math.floor(max/100)*100;
+    bucket = 5000;
+    let medianIncomeHistogram = {min, max, bucket, hists: {_us: []} }; //hists is a dictionary of statefips and array of histogram. "_us" contains the whole US
+
+    function incHist(fips, b) {
+        if(!medianIncomeHistogram.hists[fips]) medianIncomeHistogram.hists[fips] = [];
+        if(!medianIncomeHistogram.hists[fips][b]) medianIncomeHistogram.hists[fips][b] = 1;
+        else medianIncomeHistogram.hists[fips][b]++;
+    }
+
+    for(let fip in counties) {
+        let county = counties[fip];
+        let income = county.medianincome;
+        let b = Math.floor((income-min)/bucket);
+        incHist(county.statefips, b);
+        incHist("_us", b);
+    }
+    console.dir(medianIncomeHistogram);
+    fs.writeFileSync(config.pubdir+"/medianIncomeHistogram.json", JSON.stringify(medianIncomeHistogram));
+    process.exit(1);
+}
+
+medianIncomeHistogram(counties);
+
 console.log("loading percapita income");
 const pcincome = require(config.pubdir+'/raw/statsamerica.acs.percapitaincome.json');
 for(let rec of pcincome) {
@@ -339,6 +374,7 @@ for(let fips in storm_counts) {
     counties[fips].storms = storms;
 }
 
+/*
 function handlePublicAssistances(cb) {
     console.log("loading PublicAssistanceFundedProjectsDetails");
     fs.createReadStream(config.pubdir+'/raw/PublicAssistanceFundedProjectsDetails.csv').pipe(csvParser({
@@ -381,6 +417,7 @@ function handlePublicAssistances(cb) {
         cb();
     });
 }
+*/
 
 /*
 //deprecated by handleBVINaics
