@@ -28,40 +28,80 @@
         <br>
         <br>
         <el-row :gutter="20">
-            <el-col :span="12">
+            <el-col :span="5">
                 <h4>Population <small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS)</a></small></h4>
                 <span class="primary" v-if="detail.population"> {{detail.population | formatNumber}}</span>
                 <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
+            </el-col>
+            <el-col :span="19">
+                <Plotly v-if="$root.histogramReady" :data="populationHistogramData" :layout="populationHistogramLayout" :display-mode-bar="false"/>
+                <br>
+                <br>
+            </el-col>
+        </el-row>
 
+        <el-row :gutter="20">
+            <el-col :span="5">
                 <h4>Population Density</h4>
                 <span class="primary" v-if="detail.popdensity"> {{detail.popdensity | formatNumber}} people per sq. mile</span>
                 <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
-
-                <br>
-                <br>
-                <Plotly :data="demoGraphData" :layout="demoGraphLayout" :display-mode-bar="false"/>
-
-                 
             </el-col>
-            <el-col :span="12">
+            <el-col :span="19">
+                <Plotly v-if="$root.histogramReady" :data="popdensityHistogramData" :layout="popdensityHistogramLayout" :display-mode-bar="false"/>
+                <br>
+                <br>
+            </el-col>
+        </el-row>
+
+        <el-row :gutter="20">
+            <el-col :span="5">
                 <h4>GDP <small><a href="https://www.bea.gov/" target="bea">(BEA)</a></small></h4>
-                <p>
-                    <span class="primary" v-if="detail.gdp"> ${{(detail.gdp/1000) | formatNumber}} M</span>
-                    <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
-                </p>
+            </el-col>
+            <el-col :span="19">
+                <span class="primary" v-if="detail.gdp"> ${{(detail.gdp/1000) | formatNumber}} M</span>
+                <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
+                <Plotly v-if="$root.histogramReady" :data="gdpHistogramData" :layout="gdpHistogramLayout" :display-mode-bar="false"/>
+                <br>
+                <br>
+            </el-col>
+        </el-row>
 
+        <el-row :gutter="20">
+            <el-col :span="5">
                 <h4>Per Capita Income <small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS)</a></small></h4>
-                <p>
-                    <span class="primary" v-if="detail.percapitaincome"> ${{detail.percapitaincome | formatNumber}}</span>
-                    <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
-                </p>
+            </el-col>
+            <el-col :span="19">
+                <span class="primary" v-if="detail.percapitaincome"> ${{detail.percapitaincome | formatNumber}}</span>
+                <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
+                <!-- similar to medianIncome
+                <Plotly v-if="$root.histogramReady" :data="perCapitaIncomeHistogramData" :layout="perCapitaIncomeHistogramLayout" :display-mode-bar="false"/>
+                -->
+                <br>
+                <br>
+            </el-col>
+        </el-row>
 
+        <el-row :gutter="20">
+            <el-col :span="5">
+                <h4>Population History<small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS)</a></small></h4>
+            </el-col>
+            <el-col :span="19">
+                <Plotly :data="demoGraphData" :layout="demoGraphLayout" :display-mode-bar="false"/>
+                <br>
+                <br>
+            </el-col>
+        </el-row>
 
+        <el-row :gutter="20">
+            <el-col :span="5">
                 <h4>Median Household Income <small title="US Census Bureau"><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS)</a></small></h4>
-                <p>
-                    <span class="primary" v-if="detail.medianincome"> ${{detail.medianincome | formatNumber}}</span>
-                    <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
-                </p>
+            </el-col>
+            <el-col :span="19">
+                <span class="primary" v-if="detail.medianincome"> ${{detail.medianincome | formatNumber}}</span>
+                <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
+                <Plotly v-if="$root.histogramReady" :data="medianIncomeHistogramData" :layout="medianIncomeHistogramLayout" :display-mode-bar="false"/>
+                <br>
+                <br>
             </el-col>
         </el-row>
 
@@ -341,7 +381,7 @@ export default class CountyDetail extends Vue {
             t: 10,
             b: 20,
         },
-        barmode: 'stack',
+        //barmode: 'stack',
         'plot_bgcolor': '#0000',
         'paper_bgcolor': '#0000',
     }
@@ -393,12 +433,6 @@ export default class CountyDetail extends Vue {
         if(!this.detail.bvis2) return;
         for(const naics in this.detail.bvis2) {
             const data = this.detail.bvis2[naics];
-
-            /*
-            console.log("naics", naics);
-            console.dir(data.estab_v);
-            console.dir(data.emp_v);
-            */
 
             //see if there is any non-0 vulnerability values
             let vuln = false;
@@ -545,12 +579,336 @@ export default class CountyDetail extends Vue {
         });
     }
 
+    //computed properties
     get recentHistory() {
         return this.history.filter(h=>(h.date >= new Date("2017-01-01")));
     }
     get pastHistory() {
         return this.history.filter(h=>(h.date < new Date("2017-01-01")));
     }
+
+    get medianIncomeHistogramData() {
+        const histogram = this.$root.perCapitaIncomeHistogram;
+        const us = {
+            x: [],
+            y: [],
+            marker:{ color: [], },
+            name: 'US',
+            type: 'bar'
+        }
+        const usValues = histogram.hists['_us'];
+        const bucketSize = histogram.bucket;
+        let x = histogram.min;
+        usValues.forEach(v=>{
+            us.x.push(x);
+            us.y.push(v);
+            let color = "#ccc"
+            if(this.detail.medianincome > x && this.detail.medianincome <= x+bucketSize) color = "#999";
+            us.marker.color.push(color);
+            x += bucketSize;
+        })
+
+        const statefips = this.fips.substring(0,2);
+        const state = {
+            x: [],
+            y: [],
+            marker:{ color: [], },
+            name: this.detail.state,
+            type: 'bar'
+        }
+        const stateValues = histogram.hists[statefips];
+        x = histogram.min;
+        stateValues.forEach(v=>{
+            state.x.push(x);
+            state.y.push(v);
+            let color = "#66b1ff";
+            if(this.detail.medianincome > x && this.detail.medianincome <= x+bucketSize) color = "#409EFF";
+            state.marker.color.push(color);
+            x += bucketSize;
+        })
+
+        return [ state, us ];
+    }
+
+    medianIncomeHistogramLayout = {
+        height: 180,
+        margin: {
+            l: 50,
+            r: 30,
+            t: 10,
+            b: 30,
+        },
+        barmode: 'stack',
+        xaxis: {
+            title: 'Median Income ($'+this.$root.medianIncomeHistogram.bucket+' for each bar)'
+        },
+        yaxis: {
+            type: 'log',
+            autorange: true,
+            title: '# of Counties'
+        }
+    }
+
+    /*
+    get perCapitaIncomeHistogramData() {
+        const histogram = this.$root.perCapitaIncomeHistogram;
+        console.log("histogram", histogram)
+        const us = {
+            x: [],
+            y: [],
+            marker:{ color: [], },
+            name: 'US',
+            type: 'bar'
+        }
+        const usValues = histogram.hists['_us'];
+        const bucketSize = histogram.bucket;
+        let x = histogram.min;
+        usValues.forEach(v=>{
+            us.x.push(x);
+            us.y.push(v);
+            let color = "#ccc"
+            if(this.detail.percapitaincome > x && this.detail.percapitaincome <= x+bucketSize) color = "#999";
+            us.marker.color.push(color);
+            x += bucketSize;
+        })
+
+        const statefips = this.fips.substring(0,2);
+        const state = {
+            x: [],
+            y: [],
+            marker:{ color: [], },
+            name: this.detail.state,
+            type: 'bar'
+        }
+        const stateValues = histogram.hists[statefips];
+        x = histogram.min;
+        stateValues.forEach(v=>{
+            state.x.push(x);
+            state.y.push(v);
+            let color = "#66b1ff";
+            if(this.detail.percapitaincome > x && this.detail.percapitaincome <= x+bucketSize) color = "#409EFF";
+            state.marker.color.push(color);
+            x += bucketSize;
+        })
+
+        return [ state, us ];
+    }
+ 
+    perCapitaIncomeHistogramLayout = {
+        height: 200,
+        margin: {
+            l: 50,
+            r: 30,
+            t: 10,
+            b: 30,
+        },
+        barmode: 'stack',
+        xaxis: {
+            title: 'Per Capita Income ($'+this.$root.perCapitaIncomeHistogram.bucket+' for each bar)'
+        },
+        yaxis: {
+            type: 'log',
+            autorange: true,
+            title: '# of Counties'
+        }
+    }
+    */
+
+    get gdpHistogramData() {
+        const histogram = this.$root.gdpHistogram;
+        const us = {
+            x: [],
+            y: [],
+            marker:{ color: [], },
+            name: 'US',
+            type: 'bar'
+        }
+        const usValues = histogram.hists['_us'];
+        const bucketSize = histogram.bucket;
+        let x = histogram.min;
+        usValues.forEach(v=>{
+            us.x.push(x);
+            us.y.push(v);
+            let color = "#ccc"
+            if(this.detail.gdp > x && this.detail.gdp <= x+bucketSize) color = "#999";
+            us.marker.color.push(color);
+            x += bucketSize;
+        })
+
+        const statefips = this.fips.substring(0,2);
+        const state = {
+            x: [],
+            y: [],
+            marker:{ color: [], },
+            name: this.detail.state,
+            type: 'bar'
+        }
+        const stateValues = histogram.hists[statefips];
+        x = histogram.min;
+        stateValues.forEach(v=>{
+            state.x.push(x);
+            state.y.push(v);
+            let color = "#66b1ff";
+            if(this.detail.gdp > x && this.detail.gdp <= x+bucketSize) color = "#409EFF";
+            state.marker.color.push(color);
+            x += bucketSize;
+        })
+
+        return [ state, us ];
+    }
+
+    gdpHistogramLayout = {
+        height: 200,
+        margin: {
+            l: 50,
+            r: 30,
+            t: 10,
+            b: 30,
+        },
+        barmode: 'stack',
+        xaxis: {
+            title: 'GDP ($'+this.$root.gdpHistogram.bucket+' for each bar)'
+        },
+        yaxis: {
+            type: 'log',
+            autorange: true,
+            title: '# of Counties'
+        }
+    }
+
+    get populationHistogramData() {
+        return this.createHistogramData(this.$root.populationHistogram, this.detail.population);
+    }
+
+    /*
+    get populationHistogramData() {
+        const histogram = this.$root.populationHistogram;
+        const us = {
+            x: [],
+            y: [],
+            marker:{ color: [], },
+            name: 'US',
+            type: 'bar'
+        }
+        const usValues = histogram.hists['_us'];
+        const bucketSize = histogram.bucket;
+        let x = histogram.min;
+        usValues.forEach(v=>{
+            us.x.push(x);
+            us.y.push(v);
+            let color = "#ccc"
+            if(this.detail.population > x && this.detail.population <= x+bucketSize) color = "#999";
+            us.marker.color.push(color);
+            x += bucketSize;
+        })
+
+        const statefips = this.fips.substring(0,2);
+        const state = {
+            x: [],
+            y: [],
+            marker:{ color: [], },
+            name: this.detail.state,
+            type: 'bar'
+        }
+        const stateValues = histogram.hists[statefips];
+        x = histogram.min;
+        stateValues.forEach(v=>{
+            state.x.push(x);
+            state.y.push(v);
+            let color = "#66b1ff";
+            if(this.detail.population > x && this.detail.population <= x+bucketSize) color = "#409EFF";
+            state.marker.color.push(color);
+            x += bucketSize;
+        })
+
+        return [ state, us ];
+    }
+    */
+
+    populationHistogramLayout = {
+        height: 200,
+        margin: {
+            l: 50,
+            r: 30,
+            t: 10,
+            b: 30,
+        },
+        barmode: 'stack',
+        xaxis: {
+            title: 'Population ('+this.$root.populationHistogram.bucket+' people per sq. mile for each bar)'
+        },
+        yaxis: {
+            type: 'log',
+            autorange: true,
+            title: '# of Counties'
+        }
+    }
+
+    createHistogramData(histogram, value) {
+        const us = {
+            x: [],
+            y: [],
+            marker:{ color: [], },
+            name: 'US',
+            type: 'bar'
+        }
+        const usValues = histogram.hists['_us'];
+        const bucketSize = histogram.bucket;
+        let x = histogram.min;
+        usValues.forEach(v=>{
+            us.x.push(x);
+            us.y.push(v);
+            let color = "#ccc"
+            if(value > x && value <= x+bucketSize) color = "#999";
+            us.marker.color.push(color);
+            x += bucketSize;
+        })
+
+        const statefips = this.fips.substring(0,2);
+        const state = {
+            x: [],
+            y: [],
+            marker:{ color: [], },
+            name: this.detail.state,
+            type: 'bar'
+        }
+        const stateValues = histogram.hists[statefips];
+        x = histogram.min;
+        stateValues.forEach(v=>{
+            state.x.push(x);
+            state.y.push(v);
+            let color = "#66b1ff";
+            if(value > x && value <= x+bucketSize) color = "#409EFF";
+            state.marker.color.push(color);
+            x += bucketSize;
+        })
+
+        return [ state, us ];
+    }
+
+    get popdensityHistogramData() {
+        return this.createHistogramData(this.$root.popdensityHistogram, this.detail.popdensity);
+    }
+
+    popdensityHistogramLayout = {
+        height: 200,
+        margin: {
+            l: 50,
+            r: 30,
+            t: 10,
+            b: 30,
+        },
+        barmode: 'stack',
+        xaxis: {
+            title: 'Population Density ($'+this.$root.popdensityHistogram.bucket+' for each bar)'
+        },
+        yaxis: {
+            type: 'log',
+            autorange: true,
+            title: '# of Counties'
+        }
+    }
+
 
     goback() {
         this.$router.replace("/");
@@ -820,5 +1178,8 @@ clear: both;
         width: 16px; 
         height: 16px; 
     }
+}
+h4 {
+    margin-top: 0;    
 }
 </style>
