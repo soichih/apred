@@ -49,15 +49,38 @@ interface DrMeasures {
     [key: string]: DrMeasure;
 }
 
+interface Histogram {
+    min: number;
+    max: number;
+    bucket: number;
+    hists: {
+        [key: string]: number[];
+    };
+}
+
+interface Histograms {
+    medianIncome: Histogram;
+    perCapitaIncome: Histogram;
+    gdp: Histogram;
+}
+
 new Vue({
     data() {
         return {
             // $root content
 
             //dataUrl: "https://ctil.iu.edu/projects/apred-data/",
-            //dataUrl: "https://gpu1-pestillilab.psych.indiana.edu/apred",
-            dataUrl: "https://api.ctil.iu.edu/pub",
+            dataUrl: "https://gpu1-pestillilab.psych.indiana.edu/apred",
+            //dataUrl: "https://api.ctil.iu.edu/pub",
             drMeasures: {} as DrMeasures, 
+
+            medianIncomeHistogram: {} as Histogram, 
+            perCapitaIncomeHistogram: {} as Histogram, 
+            gdpHistogram: {} as Histogram, 
+            populationHistogram: {} as Histogram, 
+            popdensityHistogram: {} as Histogram, 
+
+            histogramReady: false,
 
             user: null,
             
@@ -140,6 +163,17 @@ new Vue({
                     calcDesc: rec["measure_calculation_desc"],
                 }
             });
+        });
+
+        fetch(this.dataUrl+"/histograms.json").then(res=>res.json()).then((data: Histograms)=>{
+            this.medianIncomeHistogram = data.medianIncome;
+            this.perCapitaIncomeHistogram = data.perCapitaIncome;
+            this.gdpHistogram = data.gdp;
+            this.populationHistogram = data.population;
+            this.popdensityHistogram = data.popdensity;
+
+            this.histogramReady = true;
+            this.$forceUpdate();
         });
 
     },
