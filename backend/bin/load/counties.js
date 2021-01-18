@@ -109,41 +109,6 @@ for(let rec of medianincome) {
     counties[fips].medianincome = rec.data;
 }
 
-//compute histogram of all medianincome (state and for each state)
-function medianIncomeHistogram(counties) {
-    console.log("creating medianincome histogram");
-    let min = Infinity
-    let max = 0
-    for(let fip in counties) {
-        let income = counties[fip].medianincome;
-        if(income > max) max = income;
-        if(income < min) min = income;
-    }
-    min = Math.floor(min/100)*100;
-    max = Math.floor(max/100)*100;
-    bucket = 5000;
-    let medianIncomeHistogram = {min, max, bucket, hists: {_us: []} }; //hists is a dictionary of statefips and array of histogram. "_us" contains the whole US
-
-    function incHist(fips, b) {
-        if(!medianIncomeHistogram.hists[fips]) medianIncomeHistogram.hists[fips] = [];
-        if(!medianIncomeHistogram.hists[fips][b]) medianIncomeHistogram.hists[fips][b] = 1;
-        else medianIncomeHistogram.hists[fips][b]++;
-    }
-
-    for(let fip in counties) {
-        let county = counties[fip];
-        let income = county.medianincome;
-        let b = Math.floor((income-min)/bucket);
-        incHist(county.statefips, b);
-        incHist("_us", b);
-    }
-    console.dir(medianIncomeHistogram);
-    fs.writeFileSync(config.pubdir+"/medianIncomeHistogram.json", JSON.stringify(medianIncomeHistogram));
-    process.exit(1);
-}
-
-medianIncomeHistogram(counties);
-
 console.log("loading percapita income");
 const pcincome = require(config.pubdir+'/raw/statsamerica.acs.percapitaincome.json');
 for(let rec of pcincome) {
@@ -174,6 +139,118 @@ for(let gdp of gdps) {
     }
     counties[fips].gdp = gdp.gcp_c; //GDP in current dollars
 }
+
+//compute histogram of all medianincome (state and for each state)
+function createHistogram(counties, min, max, bucket, field) {
+    /*
+    console.log("creating medianincome histogram");
+    let min = Infinity
+    let max = 0
+    for(let fip in counties) {
+        let income = counties[fip].medianincome;
+        if(income > max) max = income;
+        if(income < min) min = income;
+    }
+    min = Math.floor(min/100)*100;
+    max = Math.floor(max/100)*100;
+    bucket = 5000;
+    */
+    let histogram = {min, max, bucket, hists: {_us: []} }; //hists is a dictionary of statefips and array of histogram. "_us" contains the whole US
+
+    function incHist(fips, b) {
+        if(!histogram.hists[fips]) histogram.hists[fips] = [];
+        if(!histogram.hists[fips][b]) histogram.hists[fips][b] = 1;
+        else histogram.hists[fips][b]++;
+    }
+
+    for(let fip in counties) {
+        let county = counties[fip];
+        let v = county[field];
+        if(v > max) v = max; //clip at the top bucket
+        let b = Math.floor((v-min)/bucket);
+        incHist(county.statefips, b);
+        incHist("_us", b);
+    }
+    return histogram;
+}
+
+//very similar to medianIncomeHistogram.. hiding this on UI for now
+/*
+function perCapitaIncomeHistogram(counties) {
+    console.log("creating perCapita histogram");
+    let min = Infinity
+    let max = 0
+    for(let fip in counties) {
+        let income = counties[fip].percapitaincome;
+        if(income > max) max = income;
+        if(income < min) min = income;
+    }
+    min = Math.floor(min/100)*100;
+    max = Math.floor(max/100)*100;
+    bucket = 5000;
+    let histogram = {min, max, bucket, hists: {_us: []} }; //hists is a dictionary of statefips and array of histogram. "_us" contains the whole US
+
+    function incHist(fips, b) {
+        if(!histogram.hists[fips]) histogram.hists[fips] = [];
+        if(!histogram.hists[fips][b]) histogram.hists[fips][b] = 1;
+        else histogram.hists[fips][b]++;
+    }
+
+    for(let fip in counties) {
+        let county = counties[fip];
+        let income = county.percapitaincome;
+        let b = Math.floor((income-min)/bucket);
+        incHist(county.statefips, b);
+        incHist("_us", b);
+    }
+    return histogram;
+}
+
+function gdpHistogram(counties) {
+    console.log("creating gdp histogram");
+    let min = Infinity
+    let max = 0
+    for(let fip in counties) {
+        let income = counties[fip].gdp;
+        if(income > max) max = income;
+        if(income < min) min = income;
+    }
+    min = Math.floor(min/100)*100;
+    //max = Math.floor(max/100)*100;
+    max = 200000000; //200M
+    bucket = 5000000; //5M
+    let histogram = {min, max, bucket, hists: {_us: []} }; //hists is a dictionary of statefips and array of histogram. "_us" contains the whole US
+
+    function incHist(fips, b) {
+        if(!histogram.hists[fips]) histogram.hists[fips] = [];
+        if(!histogram.hists[fips][b]) histogram.hists[fips][b] = 1;
+        else histogram.hists[fips][b]++;
+    }
+
+    for(let fip in counties) {
+        let county = counties[fip];
+        let income = county.gdp;
+
+        if(income > max) income = max; //clip at the top bucket
+
+        let b = Math.floor((income-min)/bucket);
+        incHist(county.statefips, b);
+        incHist("_us", b);
+    }
+    return histogram;
+}
+*/
+
+let histograms = {};
+histograms.medianIncome = createHistogram(counties, 0, 200000, 5000, 'medianincome');
+histograms.perCapitaIncome = createHistogram(counties, 0, 200000, 5000, 'percapitaincome');
+histograms.gdp = createHistogram(counties, 0, 200000000, 5000000, 'gdp');
+histograms.population = createHistogram(counties, 0, 2000000, 50000, 'population');
+histograms.popdensity = createHistogram(counties, 0, 5000, 100, 'popdensity');
+
+fs.writeFileSync(config.pubdir+"/histograms.json", JSON.stringify(histograms));
+
+process.exit(1);
 
 const years = [];
 for(let year = 2012; year <= 2018; ++year) years.push(year);
