@@ -68,7 +68,7 @@ export default class Histogram extends Vue {
             state.x.push(x);
             state.y.push(v);
             let color = "#66b1ff";
-            if(this.value > x && this.value <= x+bucketSize) color = "#409EFF";
+            if(this.value > x && this.value <= x+bucketSize) color = "#3090f0";
             state.marker.color.push(color);
             x += bucketSize;
         })
@@ -84,7 +84,8 @@ export default class Histogram extends Vue {
             },
             barmode: 'stack',
             xaxis: {
-                title: 'Population ('+this.histogram.bucket+' people per sq. mile for each bar)'
+                title: 'Population ('+this.histogram.bucket+' people per sq. mile for each bar)',
+                range: [this.histogram.min-this.histogram.bucket, this.histogram.max + this.histogram.bucket],
             },
             yaxis: {
                 type: 'log',
