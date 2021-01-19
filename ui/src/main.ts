@@ -71,9 +71,8 @@ new Vue({
         return {
             // $root content
 
-            //dataUrl: "https://ctil.iu.edu/projects/apred-data/",
-            dataUrl: "https://gpu1-pestillilab.psych.indiana.edu/apred",
-            //dataUrl: "https://api.ctil.iu.edu/pub",
+            //dataUrl: "https://gpu1-pestillilab.psych.indiana.edu/apred",
+            dataUrl: "https://api.ctil.iu.edu/pub",
             drMeasures: {} as DrMeasures, 
 
             medianIncomeHistogram: {} as Histogram, 
