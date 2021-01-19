@@ -62,6 +62,8 @@ interface Histograms {
     medianIncome: Histogram;
     perCapitaIncome: Histogram;
     gdp: Histogram;
+    popdensity: Histogram;
+    population: Histogram;
 }
 
 new Vue({
