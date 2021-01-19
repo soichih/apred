@@ -250,8 +250,6 @@ histograms.popdensity = createHistogram(counties, 0, 5000, 100, 'popdensity');
 
 fs.writeFileSync(config.pubdir+"/histograms.json", JSON.stringify(histograms));
 
-process.exit(1);
-
 const years = [];
 for(let year = 2012; year <= 2018; ++year) years.push(year);
 
