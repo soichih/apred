@@ -32,6 +32,7 @@ geo.features.forEach(feature=>{
         medianincome: null, 
         percapitaincome: null, 
 
+        //measure_distress timeseries
         distress_pcm: {years: [], est: [], moe: []}, //percapitamoney
         distress_pcp: {years: [], data: []}, //percapitapersonal
         distress_ur: {date: [], employed: [], unemp: [], rate: []}, //percapitapersonal
@@ -107,7 +108,6 @@ for(let gdp of gdps) {
 
 console.log("loading percapitamoney_ACS time series for each county");
 const distress_pcm = require(config.pubdir+'/raw/measuring_distress_percapitamoney_ACS.json');
-//console.dir(distress_pcm);
 distress_pcm.forEach(rec=>{
     let fips = rec.statefips+rec.countyfips;
     if(!counties[fips]) return;
@@ -127,13 +127,33 @@ distress_pcp.forEach(rec=>{
 
 console.log("loading distress_24month_UR time series for each county");
 const distress_ur = require(config.pubdir+'/raw/measuring_distress_24month_UR.json');
+
+//load us rate
+const unemp_us = {date: [], rate: [], unemp: [], employed: []}
+distress_ur.forEach(rec=>{
+    let fips = rec.statefips+rec.countyfips;
+    if(fips != 0) return; //pull us data
+    
+    //only pull data quaterly
+    //if(rec.month%4 == 1) {
+        unemp_us.date.push(new Date(rec.year+"/"+rec.month));
+        unemp_us.employed.push(rec.employed);
+        unemp_us.unemp.push(rec.unemp);
+        unemp_us.rate.push(rec.rate);
+    //}
+});
+
 distress_ur.forEach(rec=>{
     let fips = rec.statefips+rec.countyfips;
     if(!counties[fips]) return;
-    counties[fips].distress_ur.date.push(new Date(rec.year+"/"+rec.month));
-    counties[fips].distress_ur.employed.push(rec.employed);
-    counties[fips].distress_ur.unemp.push(rec.unemp);
-    counties[fips].distress_ur.rate.push(rec.rate);
+
+    //only pull data quaterly
+    //if(rec.month%4 == 1) {
+        counties[fips].distress_ur.date.push(new Date(rec.year+"/"+rec.month));
+        counties[fips].distress_ur.employed.push(rec.employed);
+        counties[fips].distress_ur.unemp.push(rec.unemp);
+        counties[fips].distress_ur.rate.push(rec.rate);
+    //}
 });
 
 //compute histogram of all medianincome (state and for each state)
@@ -164,7 +184,8 @@ histograms.gdp = createHistogram(counties, 0, 200000000, 5000000, 'gdp');
 histograms.population = createHistogram(counties, 0, 2000000, 50000, 'population');
 histograms.popdensity = createHistogram(counties, 0, 5000, 100, 'popdensity');
 
-fs.writeFileSync(config.pubdir+"/histograms.json", JSON.stringify(histograms));
+//store common data among all states
+fs.writeFileSync(config.pubdir+"/common.json", JSON.stringify({histograms, unemp_us}));
 
 const years = [];
 for(let year = 2012; year <= 2018; ++year) years.push(year);
