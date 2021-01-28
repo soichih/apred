@@ -1,7 +1,5 @@
 #!/usr/bin/env node
 
-console.log("counties----------------------------");
-
 const fs = require('fs');
 const config = require('../../config');
 
@@ -33,30 +31,13 @@ geo.features.forEach(feature=>{
         gdp: null, 
         medianincome: null, 
         percapitaincome: null, 
+
+        //measure_distress timeseries
+        distress_pcm: {years: [], est: [], moe: []}, //percapitamoney
+        distress_pcp: {years: [], data: []}, //percapitapersonal
+        distress_ur: {date: [], employed: [], unemp: [], rate: []}, //percapitapersonal
     } 
 });
-
-//deprecated again.. use acs
-/*  
-console.log("loading demographics2");
-const demo2 = require(config.pubdir+'/raw/statsamerica.demo2.json');
-for(let fips in demo2) {
-    if(!counties[fips]) {
-        continue;
-    }
-
-    for(code in demo2[fips]) {
-        let years = [];
-        let populations = [];
-        demo2[fips][code].forEach(rec=>{
-            years.push(rec.year);
-            populations.push(rec.population);
-        });
-        demo2[fips][code] = {years, populations}; //override..
-    }
-    counties[fips].demo2 = demo2[fips];
-}
-*/
 
 console.log("loading acs");
 const acs = require(config.pubdir+'/raw/statsamerica.acs.json');
@@ -64,9 +45,7 @@ const acs = require(config.pubdir+'/raw/statsamerica.acs.json');
 acs.forEach(rec=>{
     const fips = rec.statefips+rec.countyfips;
 
-    if(!counties[fips]) {
-        return;
-    }
+    if(!counties[fips]) return;
 
     //find the current(2018) info
     if(rec.year == "2018") {
@@ -112,19 +91,6 @@ for(let rec of medianincome) {
 console.log("loading percapita income");
 const pcincome = require(config.pubdir+'/raw/statsamerica.acs.percapitaincome.json');
 for(let rec of pcincome) {
-    /*
-        {
-          statefips: '55',
-          LINECODE: '0030',
-          countyfips: '087',
-          REGION: null,
-          DATA: 51230,
-          YEAR: '2018',
-          DISC: 0,
-          naics: null
-        },
-    */
-    //TODO
     let fips = rec.statefips + rec.countyfips;
     if(!counties[fips]) continue;
     counties[fips].percapitaincome = rec.DATA;
@@ -140,21 +106,58 @@ for(let gdp of gdps) {
     counties[fips].gdp = gdp.gcp_c; //GDP in current dollars
 }
 
+console.log("loading percapitamoney_ACS time series for each county");
+const distress_pcm = require(config.pubdir+'/raw/measuring_distress_percapitamoney_ACS.json');
+distress_pcm.forEach(rec=>{
+    let fips = rec.statefips+rec.countyfips;
+    if(!counties[fips]) return;
+    counties[fips].distress_pcm.years.push(rec.year);
+    counties[fips].distress_pcm.est.push(rec.est);
+    counties[fips].distress_pcm.moe.push(rec.moe);
+});
+
+console.log("loading percapitapersonal_BEA time series for each county");
+const distress_pcp = require(config.pubdir+'/raw/measuring_distress_percapitapersonal_BEA.json');
+distress_pcp.forEach(rec=>{
+    let fips = rec.statefips+rec.countyfips;
+    if(!counties[fips]) return;
+    counties[fips].distress_pcp.years.push(rec.year);
+    counties[fips].distress_pcp.data.push(rec.data);
+});
+
+console.log("loading distress_24month_UR time series for each county");
+const distress_ur = require(config.pubdir+'/raw/measuring_distress_24month_UR.json');
+
+//load us rate
+const unemp_us = {date: [], rate: [], unemp: [], employed: []}
+distress_ur.forEach(rec=>{
+    let fips = rec.statefips+rec.countyfips;
+    if(fips != 0) return; //pull us data
+    
+    //only pull data quaterly
+    //if(rec.month%4 == 1) {
+        unemp_us.date.push(new Date(rec.year+"/"+rec.month));
+        unemp_us.employed.push(rec.employed);
+        unemp_us.unemp.push(rec.unemp);
+        unemp_us.rate.push(rec.rate);
+    //}
+});
+
+distress_ur.forEach(rec=>{
+    let fips = rec.statefips+rec.countyfips;
+    if(!counties[fips]) return;
+
+    //only pull data quaterly
+    //if(rec.month%4 == 1) {
+        counties[fips].distress_ur.date.push(new Date(rec.year+"/"+rec.month));
+        counties[fips].distress_ur.employed.push(rec.employed);
+        counties[fips].distress_ur.unemp.push(rec.unemp);
+        counties[fips].distress_ur.rate.push(rec.rate);
+    //}
+});
+
 //compute histogram of all medianincome (state and for each state)
 function createHistogram(counties, min, max, bucket, field) {
-    /*
-    console.log("creating medianincome histogram");
-    let min = Infinity
-    let max = 0
-    for(let fip in counties) {
-        let income = counties[fip].medianincome;
-        if(income > max) max = income;
-        if(income < min) min = income;
-    }
-    min = Math.floor(min/100)*100;
-    max = Math.floor(max/100)*100;
-    bucket = 5000;
-    */
     let histogram = {min, max, bucket, hists: {_us: []} }; //hists is a dictionary of statefips and array of histogram. "_us" contains the whole US
 
     function incHist(fips, b) {
@@ -174,73 +177,6 @@ function createHistogram(counties, min, max, bucket, field) {
     return histogram;
 }
 
-//very similar to medianIncomeHistogram.. hiding this on UI for now
-/*
-function perCapitaIncomeHistogram(counties) {
-    console.log("creating perCapita histogram");
-    let min = Infinity
-    let max = 0
-    for(let fip in counties) {
-        let income = counties[fip].percapitaincome;
-        if(income > max) max = income;
-        if(income < min) min = income;
-    }
-    min = Math.floor(min/100)*100;
-    max = Math.floor(max/100)*100;
-    bucket = 5000;
-    let histogram = {min, max, bucket, hists: {_us: []} }; //hists is a dictionary of statefips and array of histogram. "_us" contains the whole US
-
-    function incHist(fips, b) {
-        if(!histogram.hists[fips]) histogram.hists[fips] = [];
-        if(!histogram.hists[fips][b]) histogram.hists[fips][b] = 1;
-        else histogram.hists[fips][b]++;
-    }
-
-    for(let fip in counties) {
-        let county = counties[fip];
-        let income = county.percapitaincome;
-        let b = Math.floor((income-min)/bucket);
-        incHist(county.statefips, b);
-        incHist("_us", b);
-    }
-    return histogram;
-}
-
-function gdpHistogram(counties) {
-    console.log("creating gdp histogram");
-    let min = Infinity
-    let max = 0
-    for(let fip in counties) {
-        let income = counties[fip].gdp;
-        if(income > max) max = income;
-        if(income < min) min = income;
-    }
-    min = Math.floor(min/100)*100;
-    //max = Math.floor(max/100)*100;
-    max = 200000000; //200M
-    bucket = 5000000; //5M
-    let histogram = {min, max, bucket, hists: {_us: []} }; //hists is a dictionary of statefips and array of histogram. "_us" contains the whole US
-
-    function incHist(fips, b) {
-        if(!histogram.hists[fips]) histogram.hists[fips] = [];
-        if(!histogram.hists[fips][b]) histogram.hists[fips][b] = 1;
-        else histogram.hists[fips][b]++;
-    }
-
-    for(let fip in counties) {
-        let county = counties[fip];
-        let income = county.gdp;
-
-        if(income > max) income = max; //clip at the top bucket
-
-        let b = Math.floor((income-min)/bucket);
-        incHist(county.statefips, b);
-        incHist("_us", b);
-    }
-    return histogram;
-}
-*/
-
 let histograms = {};
 histograms.medianIncome = createHistogram(counties, 0, 200000, 5000, 'medianincome');
 histograms.perCapitaIncome = createHistogram(counties, 0, 200000, 5000, 'percapitaincome');
@@ -248,7 +184,8 @@ histograms.gdp = createHistogram(counties, 0, 200000000, 5000000, 'gdp');
 histograms.population = createHistogram(counties, 0, 2000000, 50000, 'population');
 histograms.popdensity = createHistogram(counties, 0, 5000, 100, 'popdensity');
 
-fs.writeFileSync(config.pubdir+"/histograms.json", JSON.stringify(histograms));
+//store common data among all states
+fs.writeFileSync(config.pubdir+"/common.json", JSON.stringify({histograms, unemp_us}));
 
 const years = [];
 for(let year = 2012; year <= 2018; ++year) years.push(year);
@@ -286,45 +223,6 @@ for(let fips in cutter2.counties) {
 
             //re-org into years
             const stats = source.stats;
-            /*stats
-            {
-  '2012': {
-    states: { avg: 0.3786224802071696, sdev: 0.10973644025302756 },
-    us: { avg: 0.48328084458313736, sdev: 0.1780448461403503 },
-    county: 0.4614524554490938
-  },
-  '2013': {
-    states: { avg: 0.37894686056400473, sdev: 0.10607603424959099 },
-    us: { avg: 0.48355035592928164, sdev: 0.1766194754559502 },
-    county: 0.45216770106871246
-  },
-  '2014': {
-    states: { avg: 0.37570583687682724, sdev: 0.10564649192899263 },
-    us: { avg: 0.4832299157937624, sdev: 0.18050912773821673 },
-    county: 0.4597928599195731
-  },
-  '2015': {
-    states: { avg: 0.3774499951981477, sdev: 0.1048616141994905 },
-    us: { avg: 0.4834068475670536, sdev: 0.17878160940265264 },
-    county: 0.4780337145349125
-  },
-  '2016': {
-    states: { avg: 0.37629561726360133, sdev: 0.10574324860479793 },
-    us: { avg: 0.4833447287224145, sdev: 0.1807313315677278 },
-    county: 0.4873908753443335
-  },
-  '2017': {
-    states: { avg: 0.3818032969715156, sdev: 0.10004956412267825 },
-    us: { avg: 0.48408485605239177, sdev: 0.17596926328700668 },
-    county: 0.4802867977541863
-  },
-  '2018': {
-    states: { avg: 0.3819676194082908, sdev: 0.09898967807773418 },
-    us: { avg: 0.4839368892124046, sdev: 0.1761433699241664 },
-    county: 0.5130122679379003
-  }
-}
-            */
             const data = {
                 states: {
                     avg: [],
@@ -445,88 +343,8 @@ for(let fips in storm_counts) {
         console.error("odd fips in storm counts?", fips);
         continue;
     }
-    //console.log(fips, storms);
     counties[fips].storms = storms;
 }
-
-/*
-function handlePublicAssistances(cb) {
-    console.log("loading PublicAssistanceFundedProjectsDetails");
-    fs.createReadStream(config.pubdir+'/raw/PublicAssistanceFundedProjectsDetails.csv').pipe(csvParser({
-        mapValues({header, index, value}) {
-            if(header.match("declarationDate")) return new Date(value);
-            if(header.match("projectAmount")) return Number(value);
-            if(header.match("federalShareObligated")) return Number(value);
-            if(header.match("totalObligated")) return Number(value);
-            return value;
-        },
-    })).on('data', async rec=>{
-        let fips = rec.stateNumberCode.padStart(2, '0')+rec.countyCode.padStart(3, '0');
-     
-        //look for county
-        let county = counties[fips];
-        if(!county) {
-            return;
-        }
-
-        //look for disaster
-        let disaster = county.disasters.find(disaster=>disaster.disasterNumber == rec.disasterNumber);
-        if(!disaster) {
-            return;
-        }
-        if(!disaster.pa) disaster.pa = [];
-        disaster.pa.push({
-            pwNumber: rec.pwNumber, 
-            //damageCategoryCode: rec.damageCategoryCode,
-            dcc: rec.dcc,
-            damageCategory: rec.damageCategory,
-            projectSize: rec.projectSize,
-            projectAmount: rec.projectAmount,
-            totalObligated: rec.totalObligated,
-            federalShareObligated: rec.federalShareObligated,
-            obligatedDate: rec.obligatedDate,
-        });
-        
-    }).on('end', ()=>{
-        //console.log(JSON.stringify(data.cutter.indicators, null, 4));
-        cb();
-    });
-}
-*/
-
-/*
-//deprecated by handleBVINaics
-function handleBVI(cb) {
-    console.log("loading bvi.csv");
-    fs.createReadStream(config.pubdir+'/raw/bvi.csv').pipe(csvParser({
-        headers: [ 
-            "year","county","estab_total","estab_vuln_total","estab_vuln_pct","mm_employees","emp_vuln_total","emp_vuln_pct"
-        ],
-        mapValues({header, index, value}) {
-            if(header.match("_date")) return new Date(value);
-            if(header.match("county")) return value;
-            let i = parseInt(value);
-            let f = parseFloat(value);
-            if(i == value) return i;
-            if(f == value) return f;
-            return value;
-        },
-    })).on('data', rec=>{
-        delete rec.estab_vuln_pct;
-        delete rec.emp_vuln_pct;
-        let fips = rec.county.toString()
-        if(!counties[fips]) {
-            console.error("odd fips in bvi (rec.county)", fips);
-            console.dir(rec);
-            return;
-        }
-        if(!counties[fips].bvis) counties[fips].bvis = [];
-        counties[fips].bvis.push(rec);
-    }).on('end', ()=>{
-          cb();
-    });
-}
-*/
 
 function handleBVINaics(cb) {
     console.log("loading bvi.json");
@@ -583,44 +401,8 @@ handleBVINaics(err=>{
         if(counties[fips].bvis) counties[fips].bvis.sort((a,b)=>a.year - b.year);
         if(counties[fips].disasters) counties[fips].disasters.sort((a,b)=>new Date(a.declarationDate) - new Date(b.declarationDate));
     }
-  //create county/state summary json for each year
-/*
-statefips: '10',
-countyfips: '001',
-county: 'Kent',
-state: 'Delaware',
-area: 586.179,
-_dd: undefined,
-eda2018: [],
-disasters: [
-{
-  femaDeclarationString: 'DR-126-DE',
-  disasterNumber: '126',
-  state: 'DE',
-  declarationType: 'DR',
-  declarationDate: '1962-03-09T05:00:00.000Z',
-  fyDeclared: '1962',
-  incidentType: 'Flood',
-  declarationTitle: 'SEVERE STORMS, HIGH TIDES & FLOODING',
-  ihProgramDeclared: '0',
-  iaProgramDeclared: '1',
-  paProgramDeclared: '1',
-  hmProgramDeclared: '1',
-  incidentBeginDate: '1962-03-09T05:00:00.000Z',
-  incidentEndDate: '1962-03-09T05:00:00.000Z',
-  disasterCloseoutDate: null,
-  fipsStateCode: '10',
-  fipsCountyCode: '000',
-  placeCode: '0',
-  designatedArea: 'Statewide',
-  declarationRequestNumber: '62011',
-  hash: '00ba0f29d46437cbe75fcfdb67925ce3',
-  lastRefresh: '2019-07-26T18:49:32.222Z',
-  id: '5d1bceafd5b39c032f260362',
-  statewide: true
-},
-*/
-
+    
+    //create county/state summary json for each year
     let years = {
         //keyed by year, then by disaster type, and array of county fips and state fips
     }; 
@@ -636,6 +418,11 @@ disasters: [
                 if(!years[year][dr.incidentType].includes(_fips)) years[year][dr.incidentType].push(_fips); 
         });
     }
+
+    //debug break
+    //console.dir(counties["47003"]);
+    //process.exit(1);
+
     console.log("saving years.json");
     fs.writeFileSync(config.pubdir+"/years.json", JSON.stringify(years));
 
@@ -645,4 +432,6 @@ disasters: [
     }
     console.log("all done");
 });
+
+
 
