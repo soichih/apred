@@ -29,12 +29,14 @@
         <br>
         <el-row :gutter="20">
             <el-col :span="5">
-                <h4>Population <small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS)</a></small></h4>
+                <h4>Population<br>
+                    <small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS 2018)</a></small>
+                </h4>
                 <span class="primary" v-if="detail.population"> {{detail.population | formatNumber}}</span>
                 <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
             </el-col>
             <el-col :span="19">
-                <Histogram v-if="$root.histogramReady" :value="detail.population" :histogram="$root.populationHistogram" :fips="fips" :state="detail.state"/>
+                <Histogram v-if="$root.commonReady" :value="detail.population" :histogram="$root.populationHistogram" :fips="fips" :state="detail.state"/>
                 <br>
                 <br>
             </el-col>
@@ -47,7 +49,7 @@
                 <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
             </el-col>
             <el-col :span="19">
-                <Histogram v-if="$root.histogramReady" :value="detail.popdensity" :histogram="$root.popdensityHistogram" :fips="fips" :state="detail.state"/>
+                <Histogram v-if="$root.commonReady" :value="detail.popdensity" :histogram="$root.popdensityHistogram" :fips="fips" :state="detail.state"/>
                 <br>
                 <br>
             </el-col>
@@ -55,20 +57,9 @@
 
         <el-row :gutter="20">
             <el-col :span="5">
-                <h4>GDP <small><a href="https://www.bea.gov/" target="bea">(BEA)</a></small></h4>
-            </el-col>
-            <el-col :span="19">
-                <span class="primary" v-if="detail.gdp"> ${{(detail.gdp/1000) | formatNumber}} M</span>
-                <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
-                <Histogram v-if="$root.histogramReady" :value="detail.gdp" :histogram="$root.gdpHistogram" :fips="fips" :state="detail.state"/>
-                <br>
-                <br>
-            </el-col>
-        </el-row>
-
-        <el-row :gutter="20">
-            <el-col :span="5">
-                <h4>Population History<small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS)</a></small></h4>
+                <h4>Population History<br>
+                    <small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS 2018)</a></small>
+                </h4>
             </el-col>
             <el-col :span="19">
                 <Plotly :data="demoGraphData" :layout="demoGraphLayout" :display-mode-bar="false"/>
@@ -77,14 +68,35 @@
             </el-col>
         </el-row>
 
+        <hr>
+
         <el-row :gutter="20">
             <el-col :span="5">
-                <h4>Per Capita Income <small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS)</a></small></h4>
+                <h4>GDP<br>
+                    <small><a href="https://www.bea.gov/" target="bea">(BEA)</a></small>
+                </h4>
+                <span class="primary" v-if="detail.gdp"> ${{(detail.gdp/1000) | formatNumber}} M</span>
+                <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
+                <br>
             </el-col>
             <el-col :span="19">
+                <Histogram v-if="$root.commonReady" :value="detail.gdp" :histogram="$root.gdpHistogram" :fips="fips" :state="detail.state"/>
+                <br>
+                <br>
+            </el-col>
+        </el-row>
+
+
+        <el-row :gutter="20">
+            <el-col :span="5">
+                <h4>Per Capita Income<br>
+                    <small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS 2018)</a></small>
+                </h4>
                 <span class="primary" v-if="detail.percapitaincome"> ${{detail.percapitaincome | formatNumber}}</span>
                 <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
-                <Histogram v-if="$root.histogramReady" :value="detail.percapitaincome" :histogram="$root.perCapitaIncomeHistogram" :fips="fips" :state="detail.state"/>
+            </el-col>
+            <el-col :span="19">
+                <Histogram v-if="$root.commonReady" :value="detail.percapitaincome" :histogram="$root.perCapitaIncomeHistogram" :fips="fips" :state="detail.state"/>
                 <br>
                 <br>
             </el-col>
@@ -92,18 +104,99 @@
 
         <el-row :gutter="20">
             <el-col :span="5">
-                <h4>Median Household Income <small title="US Census Bureau"><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS)</a></small></h4>
-            </el-col>
-            <el-col :span="19">
+                <h4>Median Household Income<br>
+                    <small title="US Census Bureau"><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS 2018)</a></small>
+                </h4>
                 <span class="primary" v-if="detail.medianincome"> ${{detail.medianincome | formatNumber}}</span>
                 <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
-                <Histogram v-if="$root.histogramReady" :value="detail.medianincome" :histogram="$root.medianIncomeHistogram" :fips="fips" :state="detail.state"/>
+            </el-col>
+            <el-col :span="19">
+                <Histogram v-if="$root.commonReady" :value="detail.medianincome" :histogram="$root.medianIncomeHistogram" :fips="fips" :state="detail.state"/>
                 <br>
                 <br>
             </el-col>
         </el-row>
 
-        <div style="border-top: 1px solid #ddd; margin: 20px; padding: 20px;">
+        <hr>
+
+        <el-row :gutter="20">
+            <el-col :span="5">
+                <h4>Per Capita Money Income<br>
+                    <small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(5-year ACS)</a></small>
+                </h4>
+            </el-col>
+            <el-col :span="19">
+                <p>
+                    <Plotly :data="pcmGraphData" :layout="pcmGraphLayout" :display-mode-bar="false"/>
+                    <small>The amount of money (only cash sources) earned per person. Released annually in December.</small>
+                </p>
+                <br>
+                <br>
+            </el-col>
+        </el-row>
+
+        <el-row :gutter="20">
+            <el-col :span="5">
+                <h4>Per Capita Personal Income<small><a href="https://www.bea.gov/" target="bea">(BEA)</a></small></h4>
+            </el-col>
+            <el-col :span="19">
+                <p>
+                    <Plotly :data="pcpGraphData" :layout="pcpGraphLayout" :display-mode-bar="false"/>
+                    <small>An estimate of income per person that includes not only cash sources of income, but also insurance, transfer payments, dividends, interest, and rent. Released annually in the spring.</small>
+                </p>
+                <br>
+            </el-col>
+        </el-row>
+
+        <el-row :gutter="20">
+            <el-col :span="5">
+                <h4>
+                    Unemployment Rate<br>
+                    <small>(24-month avg. BLS)</small>
+                </h4>
+
+                <div>
+                    <h5>US Average</h5>
+                    <span class="primary" style="color: gray;"> {{unempRateUS}}%</span>
+                </div>
+
+                <div>
+                    <h5><b>{{detail.county}}</b> County</h5>
+                    <span class="primary"> {{unempRateCounty}}%</span>
+                    <br>
+                    <el-tag type="danger" size="mini" v-if="unempRateUS < unempRateCounty">Above US Rate</el-tag>
+                </div>
+
+                <div style="opacity: 0.6">
+                    <h5>Report Date</h5>
+                    {{new Date(unempRateDate).toLocaleDateString()}}
+                </div>
+
+            </el-col>
+            <el-col :span="19">
+                <p v-if="$root.commonReady">
+                    <Plotly :data="urGraphData" :layout="urGraphLayout" :display-mode-bar="false"/>
+                    <small>Calculated by taking the sum of unemployed persons for one geography for the previous 24 months divided by the sum of the labor force for that geography for the previous 24 months. Released monthly as part of the Local Area Unemployment Statistics (LAUS) program.</small>
+                </p>
+
+                <p>
+                    <el-button round @click="showEmploymentHistory = !showEmploymentHistory" size="small">
+                        <i class="el-icon-caret-right" v-if="!showEmploymentHistory"/> 
+                        <i class="el-icon-caret-bottom" v-if="showEmploymentHistory"/> 
+                        Show Employment History
+                    </el-button>
+
+                    <Plotly v-if="$root.commonReady && showEmploymentHistory" :data="uGraphData" :layout="uGraphLayout" :display-mode-bar="false"/>
+                </p>
+                <br>
+            </el-col>
+        </el-row>
+
+        <br>
+
+        <hr>
+
+        <div style="margin: 20px; padding: 20px;">
             <el-link type="primary" :target="'json.'+fips" :href="$root.dataUrl+'/counties/county.'+fips+'.json'">Download County Detail (.json)</el-link>
         </div>
 
@@ -375,7 +468,7 @@ export default class CountyDetail extends Vue {
     demoGraphLayout = {
         height: 200,
         margin: {
-            l: 30,
+            //l: 50,
             r: 30,
             t: 10,
             b: 20,
@@ -384,6 +477,68 @@ export default class CountyDetail extends Vue {
         'plot_bgcolor': '#0000',
         'paper_bgcolor': '#0000',
     }
+
+    pcmGraphData = [];
+    pcmGraphLayout = {
+        height: 150,
+        margin: {
+            //l: 30,
+            //r: 30,
+            t: 10,
+            b: 30,
+        },
+        //'plot_bgcolor': '#0000',
+        //'paper_bgcolor': '#0000',
+    }
+
+    pcpGraphData = [];
+    pcpGraphLayout = {
+        height: 150,
+        margin: {
+            //l: 30,
+            //r: 30,
+            t: 10,
+            b: 30,
+        },
+        //'plot_bgcolor': '#0000',
+        //'paper_bgcolor': '#0000',
+    }
+
+    urGraphLayout = {
+        height: 200,
+        margin: {
+            //l: 30,
+            //r: 30,
+            t: 10,
+            b: 20,
+        },
+        //'plot_bgcolor': '#0000',
+        //'paper_bgcolor': '#0000',
+        legend: {orientation: 'h', side: 'bottom'},
+        yaxis: {title: 'Unemployment Rate'},
+    }
+
+    uGraphLayout = {
+        height: 200,
+        margin: {
+            //l: 30,
+            //r: 30,
+            t: 10,
+            b: 20,
+        },
+        //'plot_bgcolor': '#0000',
+        //'paper_bgcolor': '#0000',
+        legend: {orientation: 'h', side: 'bottom'},
+        yaxis: {title: 'Employment'},
+        yaxis2: {
+            title: 'US Employment',
+            //titlefont: {color: 'rgb(148, 103, 189)'},
+            //tickfont: {color: 'rgb(148, 103, 189)'},
+            overlaying: 'y',
+            side: 'right'
+        }
+    }
+    showEmploymentHistory = false;
 
     cuttersData = {}; //group by incode then {states: {avg, sdev}, us: {avg, sdev}, county} 
 
@@ -535,6 +690,127 @@ export default class CountyDetail extends Vue {
         }
     }
 
+    processDistress() {
+        this.pcmGraphData = [
+        {
+            x: this.detail.distress_pcm.years,
+            y: this.detail.distress_pcm.est,
+            'error_y': {
+                type: 'data',
+                array: this.detail.distress_pcm.moe,
+                visible: true,
+            },
+            name: 'EST'
+        },
+        /*
+        {
+            x: this.detail.distress_pcm.years,
+            y: this.detail.distress_pcm.moe,
+            name: 'MOE'
+        }
+        */
+        ];
+        
+        this.pcpGraphData = [
+        {
+            x: this.detail.distress_pcp.years,
+            y: this.detail.distress_pcp.data,
+            title: 'MOE'
+        }];
+    }
+
+    get urGraphData() {
+        return [
+            //county 
+            /*
+            */
+            {
+                x: this.detail.distress_ur.date,
+                y: this.detail.distress_ur.rate,
+                //yaxis: 'y2',
+                name: 'County Unempl. Rate',
+                line: {
+                    color: '#409EFF',
+                },
+            },
+
+            {
+                x: this.$root.unempUS.date,
+                y: this.$root.unempUS.rate,
+                //yaxis: 'y2',
+                name: 'US Unempl. Rate',
+                line: {
+                    color: '#999',
+                },
+            }
+        ];
+    }
+
+    get uGraphData() {
+        return [
+            //county
+            {
+                x: this.detail.distress_ur.date,
+                y: this.detail.distress_ur.employed,
+                stackgroup: 'county',
+                name: 'Employed',
+                fillcolor: 'rgba(0,0,0,0.1)',
+                line: {
+                    width: 0,
+                },
+            },
+            {
+                x: this.detail.distress_ur.date,
+                y: this.detail.distress_ur.unemp,
+                stackgroup: 'county',
+                name: 'Unemployed',
+                fillcolor: 'rgba(153, 30, 30, 0.4)',
+                line: {
+                    width: 0,
+                },
+            },
+
+            /*
+            //US
+            {
+                x: this.$root.unempUS.date,
+                y: this.$root.unempUS.employed,
+                stackgroup: 'us',
+                yaxis: 'y2',
+                name: 'US Employed',
+                fillcolor: 'rgba(0, 0, 0, 0.1)',
+                line: {
+                    width: 0,
+                },
+            },
+            {
+                x: this.$root.unempUS.date,
+                y: this.$root.unempUS.unemp,
+                stackgroup: 'us',
+                yaxis: 'y2',
+                name: 'US Unemployed',
+                fillcolor: 'rgba(153, 30, 30, 0.2)',
+                line: {
+                    width: 0,
+                },
+            },
+            */
+        ];
+    }
+
+    get unempRateDate() {
+        const l = this.detail.distress_ur.date.length;
+        return this.detail.distress_ur.date[l-1];
+    }
+    get unempRateCounty() {
+        const l = this.detail.distress_ur.rate.length;
+        return this.detail.distress_ur.rate[l-1];
+    }
+    get unempRateUS() {
+        const l = this.$root.unempUS.rate.length;
+        return this.$root.unempUS.rate[l-1];
+    }
+
     mounted() {
         if(this.fips) this.load();
     }
@@ -554,6 +830,7 @@ export default class CountyDetail extends Vue {
             this.processBVI2();
             this.processStorms();
             this.processDemo();
+            this.processDistress();
         });
     }
 
@@ -719,6 +996,9 @@ h4 {
     opacity: 0.7;
     margin-bottom: 10px;
 }
+h5 {
+    margin-bottom: 5px;
+}
 
 .sub-heading {
     opacity: 0.6;
@@ -857,5 +1137,9 @@ clear: both;
 }
 h4 {
     margin-top: 0;    
+}
+hr {
+    opacity: 0.3;
+    margin-bottom: 30px;
 }
 </style>
