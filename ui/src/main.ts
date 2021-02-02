@@ -58,21 +58,37 @@ interface Histogram {
     };
 }
 
-interface Histograms {
-    medianIncome: Histogram;
-    perCapitaIncome: Histogram;
-    gdp: Histogram;
-    popdensity: Histogram;
-    population: Histogram;
+interface UnempUS {
+    date: number[];
+    rate: number[];
+    unemp: number[];
+    employed: number[];
+}
+
+interface Common {
+    histograms: {
+        medianIncome: Histogram;
+        perCapitaIncome: Histogram;
+        gdp: Histogram;
+        popdensity: Histogram;
+        population: Histogram;
+    };
+    unemp_us: UnempUS;
 }
 
 new Vue({
     data() {
+
+        //use gpu1 for localhost
+        let dataUrl = "https://api.ctil.iu.edu/pub";
+        if(location.hostname == "localhost") {
+            dataUrl = "https://gpu1-pestillilab.psych.indiana.edu/apred";
+        }
+
         return {
             // $root content
 
-            //dataUrl: "https://gpu1-pestillilab.psych.indiana.edu/apred",
-            dataUrl: "https://api.ctil.iu.edu/pub",
+            dataUrl,
             drMeasures: {} as DrMeasures, 
 
             medianIncomeHistogram: {} as Histogram, 
@@ -81,7 +97,9 @@ new Vue({
             populationHistogram: {} as Histogram, 
             popdensityHistogram: {} as Histogram, 
 
-            histogramReady: false,
+            unempUS: {} as UnempUS,
+
+            commonReady: false,
 
             user: null,
             
@@ -166,14 +184,16 @@ new Vue({
             });
         });
 
-        fetch(this.dataUrl+"/histograms.json").then(res=>res.json()).then((data: Histograms)=>{
-            this.medianIncomeHistogram = data.medianIncome;
-            this.perCapitaIncomeHistogram = data.perCapitaIncome;
-            this.gdpHistogram = data.gdp;
-            this.populationHistogram = data.population;
-            this.popdensityHistogram = data.popdensity;
+        fetch(this.dataUrl+"/common.json").then(res=>res.json()).then((data: Common)=>{
+            this.medianIncomeHistogram = data.histograms.medianIncome;
+            this.perCapitaIncomeHistogram = data.histograms.perCapitaIncome;
+            this.gdpHistogram = data.histograms.gdp;
+            this.populationHistogram = data.histograms.population;
+            this.popdensityHistogram = data.histograms.popdensity;
 
-            this.histogramReady = true;
+            this.unempUS = data.unemp_us;
+
+            this.commonReady = true;
             this.$forceUpdate();
         });
 

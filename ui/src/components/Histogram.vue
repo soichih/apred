@@ -36,9 +36,12 @@ export default class Histogram extends Vue {
     mounted() {
         
         const us = {
-            x: [],
-            y: [],
-            marker:{ color: [], },
+
+            //plotly uses the first marker color for legend, so I have to add some bogus value
+            x: [0],
+            y: [-1],
+            marker:{ color: ['#ccc'], },
+
             name: 'US',
             type: 'bar'
         }
@@ -49,18 +52,20 @@ export default class Histogram extends Vue {
             us.x.push(x);
             us.y.push(v);
             let color = "#ccc"
-            if(this.value > x && this.value <= x+bucketSize) color = "#999";
+            if(this.value > x && this.value <= x+bucketSize) color = "#666";
             us.marker.color.push(color);
             x += bucketSize;
         })
 
         const statefips = this.fips.substring(0,2);
         const state = {
-            x: [],
-            y: [],
-            marker:{ color: [], },
+            //plotly uses the first marker color for legend, so I have to add some bogus value
+            x: [0],
+            y: [-1],
+            marker:{ color: ['#66b1ff'], },
+
             name: this.state,
-            type: 'bar'
+            type: 'bar',
         }
         const stateValues = this.histogram.hists[statefips];
         x = this.histogram.min;
@@ -68,7 +73,7 @@ export default class Histogram extends Vue {
             state.x.push(x);
             state.y.push(v);
             let color = "#66b1ff";
-            if(this.value > x && this.value <= x+bucketSize) color = "#3090f0";
+            if(this.value > x && this.value <= x+bucketSize) color = "#26c";
             state.marker.color.push(color);
             x += bucketSize;
         })
