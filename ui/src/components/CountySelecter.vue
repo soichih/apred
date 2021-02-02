@@ -7,7 +7,7 @@
     remote
     :remote-method="searchCounty"
     :loading="loading"
-    placeholder="Search county to show detail" 
+    :placeholder="placeholder"
     @change="change" style="width: 100%;" size="large">
     <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
         <span style="float: left">{{ item.label }}</span>
@@ -20,6 +20,7 @@
 export default {
     props: {
         fips: String,
+        placeholder: {type: String, default: "Search county"},
     },
     data() {
         return {
