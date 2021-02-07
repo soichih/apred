@@ -205,7 +205,7 @@
         <br>
         <!--<h3>Storm History</h3>-->
         <div v-if="stormData && stormData.length > 0">
-            <p>This graph shows the counts of storm event published by NOAA since 1950s.</p>
+            <p>This graph shows the counts of storm events published by NOAA since 1950s.</p>
             <p>Storm data has gone through many changes and versions over the years. The source data ingested into the database are widely varied and leads to many questions about the precision and accuracy of the location data. Please see <a href="https://www.ncdc.noaa.gov/stormevents/details.jsp" target="noaa">https://www.ncdc.noaa.gov/stormevents/faq.jsp</a> for more detail.</p>
             <p>You can click on the chart legend to select or deselect which storm events to show on the graph.</p>
             <Plotly :data="stormData" :layout="stormLayout" :display-mode-bar="false"></Plotly>
