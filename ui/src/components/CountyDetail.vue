@@ -26,7 +26,7 @@
     <div class="page" v-if="tab == 'info'">
         <br>
         <h1>Overview</h1>
-        <p>This page presents information on the measuring distress indicators, economic, and demographic data of <b>{{detail.county}} county, {{detail.state}}</b>.</p>
+        <p>This page presents information on measuring distress indicators, economic, and demographic data of <b>{{detail.county}} county, {{detail.state}}</b>.</p>
         <br>
         <el-row :gutter="20">
             <el-col :span="12">
