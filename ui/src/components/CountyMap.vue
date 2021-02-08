@@ -2,20 +2,31 @@
 <div>
     <div id="map"/>
 
-    <div class="page">
-        <div style="float: right; width: 300px;">
-            <CountySelecter @select="countySelected"/>
-        </div>
+    <div class="side">
+        <CountySelecter @select="countySelected"/>
         <div class="legend" v-if="mode">
             <p>
-                <el-select v-model="mode" placeholder="Select" size="mini" style="width: 100%;">
+                <el-select v-model="mode" placeholder="Select" size="small" style="width: 100%;">
                     <el-option v-for="item in modes" :key="item.value" :label="item.label" :value="item.value"> </el-option>
                 </el-select>
             </p>
+            <div v-if="mode" class="map-description">
+                <p v-if="mode == 'dr'">
+                    This map shows counties with FEMA declared disasters within specified time range. Please visit <a href="https://www.fema.gov/disasters/disaster-declarations">FEMA Disasters</a> page for more detail.
+                </p>
+                <p v-if="mode == 'eda'">
+                    This map shows locations and amounts of EDA (U.S. Economic Development Administration) fundings awarded in the specified time range. EDA assists communities experiencing economic distress or harm resulting from federally-declared natural disasters.
+                </p>
+                <p v-if="mode == 'resilience'">
+                    This map shows disaster resilience score for each counties in the specified year aggregated into 4 major categories (Social, Economic, Infrastructure, and Community Capital).  Disaster resilience scores are calculated using data from U.S. Census using formulas defined by [Cuter et al. 2020].
+                </p>
+            </div>
 
             <div v-if="mode == 'dr'">
                 <p>
                     <b>Date Range</b>
+                </p>
+                <p>
                     <el-row :gutter="5">
                         <el-col :span="4">
                              <el-button icon="el-icon-back" size="mini" @click="drPrevious" :disabled="drRange == '1961'"></el-button>
@@ -39,7 +50,7 @@
                 </div>
                 <div v-for="(info, layer) in $root.layers" :key="layer" class="legend-item" :class="{hidden: hiddenLayers.includes(layer)}" @click.stop="toggleLayer(layer)" style="clear: right;" :title="info.types.join(', ')">
                     <input type="checkbox" :checked="!hiddenLayers.includes(layer)"/>
-                    <span class="legend-color" :style="{backgroundColor: info.color}">&nbsp;</span>&nbsp;{{layer}}
+                    <span class="legend-color" :style="{backgroundColor: info.color}">&nbsp;</span>&nbsp;{{layer.toUpperCase()}}
                 </div>
             </div>
 
@@ -56,14 +67,18 @@
                             </el-select>
                         </el-col>
                         <el-col :span="4">
-                             <el-button icon="el-icon-right" size="mini" @click="edaNext" :disabled="edaYear == '2020' || edaYear == 'all'"></el-button>
+                             <el-button icon="el-icon-right" size="mini" @click="edaNext" :disabled="edaYear == 'all'"></el-button>
                         </el-col>
                     </el-row>
                 </p>
+                <p class="legend-item">
+                    <b>Grant Purpose</b>
+                    <br>
+                    <el-radio v-for="type in edaTypes" :key="type" v-model="edaType" :label="type">{{type.split(" ").slice(0, 2).join(" ")}}</el-radio>
+                </p>
                 <div class="legend-item">
                     <span class="legend-color" style="background-color: #00ff00">&nbsp;</span>&nbsp;Statewide Awards
-                </div>
-                <div class="legend-item">
+                    <br>
                     <span class="legend-color" style="background-color: #0066ff">&nbsp;</span>&nbsp;County Awards
                 </div>
             </div>
@@ -95,24 +110,13 @@
                 <div style="background-image: linear-gradient(to right, red, yellow, green); width: 100%; height: 5px;">&nbsp;</div>
                 <span style="float: left;">Low</span>
                 <span style="float: right">High</span>
+                <br>
             </div>
-            <br>
         </div>
     </div>
 
     <div class="contextmenu" ref="contextmenu">
-        <p class="menu-item" @click="openContextMenuCounty">Open this county ({{contextMenuCounty}}) in a new tab</p>
-    </div>
-    <div class="map-description" v-if="mode">
-        <p v-if="mode == 'dr'">
-            This map shows counties with FEMA declared disasters within specified time range. Please visit <a href="https://www.fema.gov/disasters/disaster-declarations">FEMA Disasters</a> page for more detail.
-        </p>
-        <p v-if="mode == 'eda'">
-            This map shows locations and amounts of EDA (U.S. Economic Development Administration) fundings awarded in the specified time range. EDA assists communities experiencing economic distress or harm resulting from federally-declared natural disasters.
-        </p>
-        <p v-if="mode == 'resilience'">
-            This map shows disaster resilience score for each counties in the specified year aggregated into 4 major categories (Social, Economic, Infrastructure, and Community Capital).  Disaster resilience scores are calculated using data from U.S. Census using formulas defined by [Cuter et al. 2020].
-        </p>
+        <p class="menu-item" @click="openContextMenuCounty">Open ({{contextMenuCounty}}) in a new tab</p>
     </div>
 </div>
 </template>
@@ -152,6 +156,7 @@ export default class Disaster extends Vue {
     layersAll = true;
 
     contextMenuCounty = null;
+    contextMenuFips = null;
 
     updatedDate = null;
 
@@ -166,8 +171,10 @@ export default class Disaster extends Vue {
     resYear = null; //will be set to "2018" once cutter info is loaded
     resYears = [];
 
-    edaYear = 'all';
+    edaYear = null; //will be set to "all" once eda layers area loaded
     edaYears = [];
+    edaType = 'Infrastructure';
+    edaTypes = [];
 
     cutterIndicators = {
         "SOC": {
@@ -211,7 +218,7 @@ export default class Disaster extends Vue {
 
             years.forEach(year=>{ 
                 types.forEach(type=>{
-                    if(this.yearsDR[year][type]) {
+                    if(this.yearsDR[year] && this.yearsDR[year][type]) {
                         filter = filter.concat(this.yearsDR[year][type].filter(fip=>fip.length == 5));
                         stateFilter = stateFilter.concat(this.yearsDR[year][type].filter(fip=>fip.length == 2));
                     }
@@ -231,12 +238,15 @@ export default class Disaster extends Vue {
             const values = {};
             for(const fip in this.cutters) {
                 const cutter = this.cutters[fip];
-                if(cutter[cid]) values[fip] = cutter[cid][year-2012];
+                //fip contains .(dot) between state and county
+                //to make it compatible with albers.geojson, let's remove it
+                const numfip = fip.replace(".", "");
+                if(cutter[cid]) values[numfip] = cutter[cid][year-2012];
             }   
 
             //apply to geojson 
             this.geojson.features.forEach(feature=>{
-                const fips = feature.properties["statefips"]+"."+feature.properties["countyfips"];
+                const fips = feature.properties["fips"];
                 feature.properties["resilience"] = values[fips]||0;
             });
 
@@ -247,17 +257,31 @@ export default class Disaster extends Vue {
     @Watch('edaYear')
     onEdaYearChange(v) {
         if(!v) return;
-        if(this.edaYear == "all") {
-            this.map.setFilter('eda', null); //reset filter
-            return;
+        this.updateEda();
+    }
+
+    @Watch('edaType')
+    onEdaTypeChange(v) {
+        if(!v) return;
+        this.updateEda();
+    }
+
+    updateEda() {
+        const filters = ["all"];
+        
+        //apply purpose filter
+        filters.push(["==", ['get', 'purpose'], this.edaType]);
+
+        //apply year filter
+        if(this.edaYear != "all") {
+            const startDate = new Date(this.edaYear+"-01-01").getTime();
+            const endDate = new Date(this.edaYear+"-12-31").getTime();
+            filters.push([">=", ['get', 'date'], startDate]);
+            filters.push(["<=", ['get', 'date'], endDate]);
         }
-        const startDate = new Date(this.edaYear+"-01-01").getTime();
-        const endDate = new Date(this.edaYear+"-12-31").getTime();
-        this.map.setFilter('eda', [
-            "all",     
-            [">=", ['get', 'date'], startDate],
-            ["<=", ['get', 'date'], endDate]
-        ]);
+
+        this.map.setFilter('eda', filters);
+        this.map.setFilter('eda-labels', filters);
     }
  
     created() {
@@ -270,7 +294,7 @@ export default class Disaster extends Vue {
         const drLayer = window.localStorage.getItem("drLayer");
         if(drLayer) this.drLayer = drLayer;
 
-        for(let year = 2020; year > 1960; --year) {
+        for(let year = 2021; year > 1960; --year) {
             this.drRanges.push(
                 {value: year.toString(), label: year.toString()},
             );
@@ -281,7 +305,7 @@ export default class Disaster extends Vue {
             );
         }
         this.edaYears.push({value: 'all', label: 'All'});
-        for(let year = 2020; year >= 2012; --year) {
+        for(let year = 2021; year >= 2012; --year) {
             this.edaYears.push({value: year.toString(), label: year.toString()});
         }
     }
@@ -336,6 +360,7 @@ export default class Disaster extends Vue {
         }
     }
     hideEDA2018Layers() {
+        if(!this.edaYear) return; //not loaded yet
         this.map.setLayoutProperty('eda-labels', 'visibility', 'none');
         this.map.setLayoutProperty('eda', 'visibility', 'none');
     }
@@ -370,7 +395,7 @@ export default class Disaster extends Vue {
             layout: {
                 visibility: 'none',
             }
-        }, 'counties');
+        }, 'map');
 
         this.resYear = '2018';
     }
@@ -378,9 +403,25 @@ export default class Disaster extends Vue {
     mounted() {
         this.map = new mapboxgl.Map({
             container: 'map', // HTML container id
-            style: 'mapbox://styles/mapbox/light-v10', // style URL
-            center: [-100, 41.5], // starting position as [lng, lat]
-            minZoom: 2,
+
+            //style: 'mapbox://styles/mapbox/light-v10', // style URL
+            //center: [-100, 41.5], // starting position as [lng, lat]
+            //minZoom: 2,
+
+            //https://www.mapbox.com/elections/albers-usa-projection-style
+            //https://studio.mapbox.com/styles/soichih/ckig6p3ph51e719pcdusqyd1o/edit/#4.71/-0.86/-2.94
+            style: 'mapbox://styles/soichih/ckig6p3ph51e719pcdusqyd1o', 
+            center: [0, 0], // starting position as [lng, lat]
+            minZoom: 4,
+            /* properties
+            county_fips: "20017"
+            county_name: "Chase"
+            state_abbrev: "KS"
+            state_fips: "20"
+            state_name: "Kansas"
+            type: "county"
+            */
+
             pitch: 30, // pitch in degrees
             //bearing: 10, // bearing in degrees
             zoom: 1,
@@ -408,20 +449,31 @@ export default class Disaster extends Vue {
 
             //TODO - I should separate DR information from counties_geo.. so we can load data for each year ranges
             //counties_geo should just contain counties_geo
-            fetch(this.$root.dataUrl+"/counties_geo.json").then(res=>{ 
+            fetch(this.$root.dataUrl+"/counties_geo.albers.geojson").then(res=>{ 
                 this.updatedDate = res.headers.get("last-modified")
                 return res.json()
             }).then(data=>{
                 this.geojson = data;
+                /* features[].properties = {
+                    CENSUSAREA: 27.887
+                    county: "Gurabo"
+                    countyfips: "063"
+                    fips: "72063"
+                    resilience: 0
+                    stabb: "PR"
+                    state: "Puerto Rico"
+                    statefips: "72"
+                }
+                */
 
                 //all counties
                 this.map.addSource('counties', { type: "geojson", data });
                 this.map.addLayer({
-                    "id": "counties",
-                    "type": "fill",
-                    "source": "counties",
-                    "paint": {
-                        "fill-color": "rgba(0,0,0,0.1)"
+                    id: "map",
+                    type: "fill",
+                    source: "counties",
+                    paint: {
+                        "fill-color": "rgba(255,255,255,0.1)"
                     }
                 });
 
@@ -436,7 +488,6 @@ export default class Disaster extends Vue {
                 });
 
                 layers.forEach(layer=>{
-
                     this.map.addLayer({
                         id: 'county_disaster_'+layer.id,
                         type: 'fill',
@@ -449,21 +500,21 @@ export default class Disaster extends Vue {
                         layout: {
                             visibility: 'none',
                         }
-                    }, 'counties');
+                    }, 'map');
 
                     this.map.addLayer({
-                        'id': 'state_disaster_'+layer.id,
-                        'type': 'fill',
-                        'source': 'counties',
-                        'paint': {
+                        id: 'state_disaster_'+layer.id,
+                        type: 'fill',
+                        source: 'counties',
+                        paint: {
                             'fill-color': layer.color,
                             'fill-opacity': (layer.opacity||1)*0.2,
                         },
-                        filter: ['in', 'statefips', ''],
+                        filter: ['in', 'fips', ''],
                         layout: {
                             visibility: 'none',
                         }
-                    }, 'counties');
+                    }, 'map');
                 });
 
                 fetch(this.$root.dataUrl+"/years.json").then(res=>{ 
@@ -484,88 +535,106 @@ export default class Disaster extends Vue {
                         this.loadCutters(2018, cid);
                     }
                 });
-            });
 
-            fetch(this.$root.dataUrl+"/eda2018.json").then(res=>{ 
-                return res.json()
-            }).then(data=>{
-                const geojson = {type: "FeatureCollection", features: []};
-                for(const recid in data) {
-                    const rec = data[recid];
-                    const ep = 0.15;
-                    geojson.features.push({
-                        type: "Feature",
-                        geometry: {
-                            type: "Polygon",
-                            coordinates: [ 
-                            [    [ rec.lon-ep, rec.lat-ep ],
-                                [ rec.lon-ep, rec.lat+ep ],
-                                [ rec.lon+ep, rec.lat+ep ],
-                                [ rec.lon+ep, rec.lat-ep ],
-                                [ rec.lon-ep, rec.lat-ep ], ]
+                fetch(this.$root.dataUrl+"/eda2018.albers.geojson").then(res=>{ 
+                    return res.json()
+                }).then(data=>{
+
+                    //amount labels
+                    /*
+                    const geojsonPoint = {type: "FeatureCollection", features: []};
+                    for(const recid in data) {
+                        const rec = data[recid];
+                        geojsonPoint.features.push({
+                            type: "Feature",
+                            geometry: {
+                                type: "Point",
+                                coordinates: [ rec.lon, rec.lat ],
+                            },
+                            properties: {
+                                awardStr: "$"+this.$options.filters.formatNumber(rec.award_amount/1000)+"k",
+                                //type: rec.statewide?'state':'county',
+                                date: new Date(rec.grant_award_date).getTime(),
+                                purpose: rec.grant_purpose, //Infrastructure / Construction / Non-Construction / Technical.. / Disaster.. Revolving
+
+                            }
+                        });
+                    }
+                    */
+                    this.map.addSource('eda2018', { type: "geojson", data });
+                    this.map.addLayer({
+                        id: 'eda-labels',
+                        type: 'symbol',
+                        source: "eda2018",
+                        layout: {
+                            visibility: 'none', 
+                            'text-field': ['get', 'awardStr'],
+                            'text-size': [
+                                "interpolate", 
+                                [ "linear" ],
+                                [ "zoom" ], 
+                                2,
+                                [ "interpolate", [ "linear" ], [ "get", "award" ], 500, 3, 5000, 6 ],
+                                9,
+                                [ "interpolate", [ "linear" ], [ "get", "award" ], 500, 10, 5000, 30 ]
                             ]
                         },
-                        properties: {
-                            height: rec.award_amount/20,
-                            date: new Date(rec.grant_award_date).getTime(),
-                            color: rec.statewide?'#00ff00':'#0066ff',
+                        paint: {
+                            'text-color': 'rgba(0,0,0,1)'
                         }
                     });
-                }
-                this.map.addSource('eda', { type: "geojson", data: geojson });
-                this.map.addLayer({
-                    'id': 'eda',
-                    'type': 'fill-extrusion',
-                    "source": "eda",
-                    "paint": {
-                        "fill-extrusion-color": ['get', 'color'],
-                        "fill-extrusion-height": ['get', 'height'],
-                    },
-                    layout: {
-                        visibility: 'none', 
-                    }
-                });
-                //}, 'counties');
 
-                const geojsonPoint = {type: "FeatureCollection", features: []};
-                for(const recid in data) {
-                    const rec = data[recid];
-                    geojsonPoint.features.push({
-                        type: "Feature",
-                        geometry: {
-                            type: "Point",
-                            coordinates: [ rec.lon, rec.lat ],
+                    //bar graphs
+                    /*
+                    const geojson = {type: "FeatureCollection", features: []};
+                    for(const recid in data) {
+                        const rec = data[recid];
+                        const ep = 0.15;
+                        geojson.features.push({
+                            type: "Feature",
+                            geometry: {
+                                type: "Polygon",
+                                coordinates: [ 
+                                    [   [ rec.lon-ep, rec.lat-ep ],
+                                        [ rec.lon-ep, rec.lat+ep ],
+                                        [ rec.lon+ep, rec.lat+ep ],
+                                        [ rec.lon+ep, rec.lat-ep ],
+                                        [ rec.lon-ep, rec.lat-ep ], ]
+                                ]
+                            },
+                            properties: {
+                                height: Math.max(25000, rec.award_amount/10),
+                                date: new Date(rec.grant_award_date).getTime(),
+                                color: rec.statewide?'#00ff00':'#0066ff',
+                                purpose: rec.grant_purpose, //Infrastructure / Construction / Non-Construction / Technical.. / Disaster.. Revolving
+                            }
+                        });
+                        if(!this.edaTypes.includes(rec.grant_purpose)) this.edaTypes.push(rec.grant_purpose);
+                    }
+                    */
+
+                    //this.map.addSource('eda', { type: "geojson", data });
+                    this.map.addLayer({
+                        id: 'eda',
+                        type: 'fill-extrusion',
+                        source: "eda2018",
+                        paint: {
+                            "fill-extrusion-color": ['get', 'color'],
+                            "fill-extrusion-height": ['get', 'height'],
                         },
-                        properties: {
-                            awardStr: "$"+this.$options.filters.formatNumber(rec.award_amount/1000)+"k",
-                            type: rec.statewide?'state':'county',
+                        layout: {
+                            visibility: 'none', 
                         }
                     });
-                }
-                this.map.addSource('eda-point', { type: "geojson", data: geojsonPoint });
 
-                this.map.addLayer({
-                    'id': 'eda-labels',
-                    'type': 'symbol',
-                    "source": "eda-point",
-                    layout: {
-                        visibility: 'none', 
-                        'text-field': ['get', 'awardStr'],
-                        'text-size': [
-                            "interpolate", 
-                            [ "linear" ],
-                            [ "zoom" ], 
-                            2,
-                            [ "interpolate", [ "linear" ], [ "get", "award" ], 500, 3, 5000, 6 ],
-                            9,
-                            [ "interpolate", [ "linear" ], [ "get", "award" ], 500, 10, 5000, 30 ]
-                        ]
-                    },
-                    'paint': {
-                        'text-color': 'rgba(0,0,0,1)'
+                    //create edatype catalog
+                    for(const feature of data.features) {
+                        if(!this.edaTypes.includes(feature.properties.purpose)) {
+                            this.edaTypes.push(feature.properties.purpose); 
+                        }
                     }
+                    this.edaYear = 'all';
                 });
-
             });
 
             this.map.on('click', e=>{
@@ -573,7 +642,8 @@ export default class Disaster extends Vue {
                     layers: ['counties']
                 });
                 if(features.length > 0) {
-                    this.countySelected(features[0].properties.statefips+features[0].properties.countyfips);
+                    //this.countySelected(features[0].properties.state_fips+features[0].properties.county_fips);
+                    this.countySelected(features[0].properties.county_fips);
                 }
             });
             this.map.on('contextmenu', e=>{
@@ -586,7 +656,8 @@ export default class Disaster extends Vue {
                     this.$refs["contextmenu"].style.display = "block";
                     this.$refs["contextmenu"].style.left = (e.point.x-20)+"px";
                     this.$refs["contextmenu"].style.top = (mapel.offsetTop + e.point.y - 10)+"px";
-                    this.contextMenuCounty = features[0].properties.statefips+features[0].properties.countyfips;
+                    this.contextMenuCounty = features[0].properties.county_name+", "+features[0].properties.state_name;
+                    this.contextMenuFips = features[0].properties.county_fips;
                 }
             });
 
@@ -603,7 +674,7 @@ export default class Disaster extends Vue {
                 const feature = e.features[0];
                 
                 // Display a popup with the name of the county
-                let text = feature.properties.county+", "+feature.properties.state;
+                let text = feature.properties.county_name+", "+feature.properties.state_name;
                 for(const key in feature.properties) {
                     if(key.startsWith("is")) {
                         text += " | "+key.substring(2);
@@ -682,7 +753,7 @@ export default class Disaster extends Vue {
         this.$emit("select", fips);
     }
     openContextMenuCounty() {
-        window.open("#/county/"+this.contextMenuCounty, "apred-"+this.contextMenuCounty);
+        window.open("#/county/"+this.contextMenuFips, "apred-"+this.contextMenuFips);
     }
 
     toggleLayer(layer) {
@@ -724,14 +795,15 @@ export default class Disaster extends Vue {
 
     edaPrevious() {
         if(this.edaYear == "all") {
-            this.edaYear = "2020";
+            this.edaYear = "2021";
             return;
         }
         this.edaYear = (parseInt(this.edaYear)-1).toString();
     }
 
     edaNext() {
-        this.edaYear = (parseInt(this.edaYear)+1).toString();
+        if(this.edaYear == "2021") this.edaYear = "all";
+        else this.edaYear = (parseInt(this.edaYear)+1).toString();
     }
 
     findIndexDrRange(range) {
@@ -778,9 +850,11 @@ h4 {
 
 #map {
     position: fixed;
-    width: 100%;
+    left: 250px;
+    right: 0;
     top: 50px;
     bottom: 0;
+    box-shadow: inset 0 0 3px #eee;
 }
 
 .map-overlay {
@@ -794,6 +868,16 @@ h4 {
     padding: 10px;
     display: none;
 }
+
+.side {
+    position: fixed;
+    top: 50px;
+    left: 0;
+    width: 250px;
+    bottom: 0;
+    background-color: #f9f9f9;
+}
+
 .sub-heading {
     opacity: 0.8;
     font-weight: bold;
@@ -806,17 +890,25 @@ h4 {
     color: #409EFF;
 }
 .legend {
-    background-color: #fff9;
     padding: 10px;
-    text-transform: uppercase;
-    font-size: 80%;
+    font-size: 90%;
+    margin: 0;
+    /*
+    background-color: #fff9;
+    text-transform: capitalize;
     border-radius: 5px;
     margin-top: 20px;
     margin-right: 40px;
     
     z-index: 1; 
     position: relative; 
-    width: 200px;
+    width: 100%;
+    */
+
+    .map-description {
+        font-size: 85%;
+        opacity: 0.7;
+    }
     .legend-color {
         display: inline-block;
         width: 10px;
@@ -832,10 +924,9 @@ h4 {
     }
 
     .legend-item {
-        width: 190px;
-        height: 20px;
         margin-right: 10px;
         cursor: pointer;
+        font-size: 10pt;
         &.hidden {
             color: #999;
         }
@@ -845,13 +936,14 @@ h4 {
             height: 15px;
             top: -5px;
         }
+        line-height: 175%;
     }    
 }
 
+/*
 .map-description {
     position: fixed;
     bottom: 0;
-    height: 100px;
     padding: 10px;
     box-sizing: border-box;
     background-color: #000;
@@ -860,6 +952,7 @@ h4 {
     font-size: 85%;
     p {
         color: white;
+        margin-bottom: 0;
     }
 }
 
@@ -868,6 +961,8 @@ h4 {
         display: none;
     }
 }
+*/
+
 .tutorial {
     display: none;
     opacity: 0;
