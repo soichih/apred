@@ -114,7 +114,7 @@ export default class Compare extends Vue {
     }
     
     selectRegion({fips, id}) {
-        console.log("selected region", fips, id);
+        //console.log("selected region", fips, id);
     }
 }
 </script>
