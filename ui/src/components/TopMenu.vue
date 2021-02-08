@@ -64,10 +64,12 @@ export default class TopMenu extends Vue {
     right: 0;
     top: 0;
     height: 50px;
+    padding: 0;
     margin: 0;
     box-shadow: 0 0 2px #0003;
     background-color: white;
     min-width: 400px;
+    overflow: hidden;
 }
 #topmenu .page {
     height: 50px;

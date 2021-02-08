@@ -23,8 +23,7 @@ yarn-error.log*
 backend/bin/scraper/COVID2019StateTrackingChart.pdf
 backend/bin/scraper/COVID2019StateTrackingChart.csv
 
-raw
-data
+pub
 
 #loaded in ctil webserver
 data/COVID2019StateTrackingChart.csv

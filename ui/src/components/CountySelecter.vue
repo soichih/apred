@@ -1,12 +1,13 @@
 <template>
 <el-select 
+    class="county-selecter"
     v-model="myfips" 
     filterable 
     clearable 
     remote
     :remote-method="searchCounty"
     :loading="loading"
-    placeholder="Search county to show detail" 
+    :placeholder="placeholder"
     @change="change" style="width: 100%;" size="large">
     <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
         <span style="float: left">{{ item.label }}</span>
@@ -19,6 +20,7 @@
 export default {
     props: {
         fips: String,
+        placeholder: {type: String, default: "Search county"},
     },
     data() {
         return {
@@ -70,8 +72,11 @@ export default {
 }
 </script>
 
-<style scoped>
-.county-selecter {
-padding: 20px;
+<style>
+.county-selecter .el-input__inner {
+border: none;
+border-radius: 0;
+border-bottom: 1px solid #ddd;
+background: white;
 }
 </style>

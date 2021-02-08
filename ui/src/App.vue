@@ -38,24 +38,23 @@ export default {
 
 <style lang="scss">
 html, body {
-padding: 0;
-margin: 0;
-font-family: Avenir, Helvetica, Arial, sans-serif;
--webkit-font-smoothing: antialiased;
--moz-osx-font-smoothing: grayscale;
-/*background-color: #f0f0f0;*/
-color: #555;
-scroll-behavior: smooth;
-min-width: 400px;
-height: 100%;
+    padding: 0;
+    margin: 0;
+    font-family: Avenir, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    color: #555;
+    scroll-behavior: smooth;
+    min-width: 400px;
+    height: 100%;
 }
 a {
-  text-decoration: none;
-  color: #409EFF;
+    text-decoration: none;
+    color: #409EFF;
 }
 
 #app {
-padding-top: 50px;
+    padding-top: 50px;
 }
 
 p.small {
@@ -63,8 +62,8 @@ p.small {
     opacity: 0.8;
 }
 .page {
-width: 1000px;
-margin: auto;
+    width: 1000px;
+    margin: auto;
 }
 @media only screen and (max-width: 1100px) {
     .page {
@@ -72,10 +71,12 @@ margin: auto;
         margin: auto;
     }
 }
+
 .el-tabs__header {
     background-color: white;
     margin: 0;
 }
+
 .contextmenu {
     z-index: 10;
     position: fixed;
