@@ -23,20 +23,22 @@
             <path :d="fillPath(data.total, lineCommand)" fill="rgba(0, 0, 0, 0.2)" stroke="none"/>
             <path :d="linePath(data.total, lineCommand)" fill="none" stroke="#666" stroke-width="3"/>
 
-            <path :d="fillPath(data.vul, lineCommand)" fill="#f403" stroke="none"/>
-            <path :d="linePath(data.vul, lineCommand)" fill="none" stroke="#c00" stroke-width="3"/>
-
-            <g v-for="(p, idx) in data.vul" :key="'v-'+idx" class="with-tooltip">
-                <circle :cx="itox(idx)" :cy="ptoy(p)" r="10" stroke="#900" stroke-width="4" fill="white"/>
+            <g v-if="data.vul">
+                <path :d="fillPath(data.vul, lineCommand)" fill="#f403" stroke="none"/>
+                <path :d="linePath(data.vul, lineCommand)" fill="none" stroke="#c00" stroke-width="3"/>
+                <g v-for="(p, idx) in data.vul" :key="'v-'+idx" class="with-tooltip">
+                    <circle :cx="itox(idx)" :cy="ptoy(p)" r="7" stroke="#900" stroke-width="4" fill="white"/>
+                </g>
             </g>
 
             <g v-for="(p, idx) in data.total" :key="'t-'+idx" class="with-tooltip">
-                <circle :cx="itox(idx)" :cy="ptoy(p)" r="10" stroke="#666" stroke-width="4" fill="white"/>
-      
+                <circle :cx="itox(idx)" :cy="ptoy(p)" r="7" stroke="#666" stroke-width="4" fill="white"/>
             </g>
 
-            <g v-for="(p, idx) in data.vul" :key="'vt-'+idx" class="with-tooltip">
-                <text :x="itox(idx)" :y="ptoy(p)-20" class="tooltip" text-anchor="middle" fill="#900">{{p|formatNumber}}</text>
+            <g v-if="data.vul">
+                <g v-for="(p, idx) in data.vul" :key="'vt-'+idx" class="with-tooltip">
+                    <text :x="itox(idx)" :y="ptoy(p)+35" class="tooltip" text-anchor="middle" fill="#900">{{p|formatNumber}}</text>
+                </g>
             </g>
 
             <g v-for="(p, idx) in data.total" :key="'tt-'+idx" class="with-tooltip">
@@ -65,8 +67,14 @@ export default class BviPlot extends Vue {
     mounted() {
         this.ymax = this.data.total.reduce((a: number,v: number)=>Math.max(a,v));
 
-        //round to the next nearest 50
-        if(this.ymax) this.ymax = Math.floor(this.ymax / 50) * 50 + 50;
+        if(this.ymax) {
+            if(this.ymax > 100) {
+                //round to the next nearest 50
+                this.ymax = Math.floor(this.ymax / 100) * 100 + 100;
+            } else {
+                //if max is less than 50, then use that instead
+            }
+        }
         this.ymin = 0;
     }
 
@@ -128,10 +136,7 @@ export default class BviPlot extends Vue {
 
         //compute optimal min/max step
         const range = this.ymax - this.ymin;
-
         const step = range/2.5;
-        //if(range < 0.025) this.fixed = 2;
-
         const min = Math.round(this.ymin/step)*step;
         const max = this.ymax;
         for(let p = min;p <= max;p+=step) {
@@ -149,7 +154,7 @@ svg {
 }
 .legend,
 .ticks {
-    color: gray;
+    fill: #000;
     font-size: 25px;
     text-align: right;
 }
