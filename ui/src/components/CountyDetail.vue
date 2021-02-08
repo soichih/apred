@@ -29,44 +29,175 @@
         <p>This page presents information on measuring distress indicators, economic, and demographic data for <b>{{detail.county}} County, {{detail.state}}</b>.</p>
         <br>
         <el-row :gutter="20">
-            <el-col :span="12">
-                <h4>Population <small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS)</a></small></h4>
+            <el-col :span="5">
+                <h4>Population<br>
+                    <small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS 2018)</a></small>
+                </h4>
                 <span class="primary" v-if="detail.population"> {{detail.population | formatNumber}}</span>
                 <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
-
-                <h4>Population Density</h4>
-                <span class="primary" v-if="detail.popdensity"> {{detail.popdensity | formatNumber}} people per mile^2</span>
-                <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
-
-                <br>
-                <br>
-                <Plotly :data="demoGraphData" :layout="demoGraphLayout" :display-mode-bar="false"/>
-
-                 
             </el-col>
-            <el-col :span="12">
-                <h4>GDP <small><a href="https://www.bea.gov/" target="bea">(BEA)</a></small></h4>
-                <p>
-                    <span class="primary" v-if="detail.gdp"> ${{(detail.gdp/1000) | formatNumber}} M</span>
-                    <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
-                </p>
-
-                <h4>Per Capita Income <small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS)</a></small></h4>
-                <p>
-                    <span class="primary" v-if="detail.percapitaincome"> ${{detail.percapitaincome | formatNumber}}</span>
-                    <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
-                </p>
-
-
-                <h4>Median Household Income <small title="US Census Bureau"><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS)</a></small></h4>
-                <p>
-                    <span class="primary" v-if="detail.medianincome"> ${{detail.medianincome | formatNumber}}</span>
-                    <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
-                </p>
+            <el-col :span="19">
+                <Histogram v-if="$root.commonReady" :value="detail.population" :histogram="$root.populationHistogram" :fips="fips" :state="detail.state"/>
+                <br>
+                <br>
             </el-col>
         </el-row>
 
-        <div style="border-top: 1px solid #ddd; margin: 20px; padding: 20px;">
+        <el-row :gutter="20">
+            <el-col :span="5">
+                <h4>Population Density</h4>
+                <span class="primary" v-if="detail.popdensity"> {{detail.popdensity | formatNumber}} people per sq. mile</span>
+                <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
+            </el-col>
+            <el-col :span="19">
+                <Histogram v-if="$root.commonReady" :value="detail.popdensity" :histogram="$root.popdensityHistogram" :fips="fips" :state="detail.state"/>
+                <br>
+                <br>
+            </el-col>
+        </el-row>
+
+        <el-row :gutter="20">
+            <el-col :span="5">
+                <h4>Population History<br>
+                    <small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS 2018)</a></small>
+                </h4>
+            </el-col>
+            <el-col :span="19">
+                <Plotly :data="demoGraphData" :layout="demoGraphLayout" :display-mode-bar="false"/>
+                <br>
+                <br>
+            </el-col>
+        </el-row>
+
+        <hr>
+
+        <el-row :gutter="20">
+            <el-col :span="5">
+                <h4>GDP<br>
+                    <small><a href="https://www.bea.gov/" target="bea">(BEA)</a></small>
+                </h4>
+                <span class="primary" v-if="detail.gdp"> ${{(detail.gdp/1000) | formatNumber}} M</span>
+                <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
+                <br>
+            </el-col>
+            <el-col :span="19">
+                <Histogram v-if="$root.commonReady" :value="detail.gdp" :histogram="$root.gdpHistogram" :fips="fips" :state="detail.state"/>
+                <br>
+                <br>
+            </el-col>
+        </el-row>
+
+
+        <el-row :gutter="20">
+            <el-col :span="5">
+                <h4>Per Capita Income<br>
+                    <small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS 2018)</a></small>
+                </h4>
+                <span class="primary" v-if="detail.percapitaincome"> ${{detail.percapitaincome | formatNumber}}</span>
+                <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
+            </el-col>
+            <el-col :span="19">
+                <Histogram v-if="$root.commonReady" :value="detail.percapitaincome" :histogram="$root.perCapitaIncomeHistogram" :fips="fips" :state="detail.state"/>
+                <br>
+                <br>
+            </el-col>
+        </el-row>
+
+        <el-row :gutter="20">
+            <el-col :span="5">
+                <h4>Median Household Income<br>
+                    <small title="US Census Bureau"><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS 2018)</a></small>
+                </h4>
+                <span class="primary" v-if="detail.medianincome"> ${{detail.medianincome | formatNumber}}</span>
+                <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
+            </el-col>
+            <el-col :span="19">
+                <Histogram v-if="$root.commonReady" :value="detail.medianincome" :histogram="$root.medianIncomeHistogram" :fips="fips" :state="detail.state"/>
+                <br>
+                <br>
+            </el-col>
+        </el-row>
+
+        <hr>
+
+        <el-row :gutter="20">
+            <el-col :span="5">
+                <h4>Per Capita Money Income<br>
+                    <small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(5-year ACS)</a></small>
+                </h4>
+            </el-col>
+            <el-col :span="19">
+                <p>
+                    <Plotly :data="pcmGraphData" :layout="pcmGraphLayout" :display-mode-bar="false"/>
+                    <small>The amount of money (only cash sources) earned per person. Released annually in December.</small>
+                </p>
+                <br>
+                <br>
+            </el-col>
+        </el-row>
+
+        <el-row :gutter="20">
+            <el-col :span="5">
+                <h4>Per Capita Personal Income<small><a href="https://www.bea.gov/" target="bea">(BEA)</a></small></h4>
+            </el-col>
+            <el-col :span="19">
+                <p>
+                    <Plotly :data="pcpGraphData" :layout="pcpGraphLayout" :display-mode-bar="false"/>
+                    <small>An estimate of income per person that includes not only cash sources of income, but also insurance, transfer payments, dividends, interest, and rent. Released annually in the spring.</small>
+                </p>
+                <br>
+            </el-col>
+        </el-row>
+
+        <el-row :gutter="20">
+            <el-col :span="5">
+                <h4>
+                    Unemployment Rate<br>
+                    <small>(24-month avg. BLS)</small>
+                </h4>
+
+                <div>
+                    <h5>US Average</h5>
+                    <span class="primary" style="color: gray;"> {{unempRateUS}}%</span>
+                </div>
+
+                <div>
+                    <h5><b>{{detail.county}}</b> County</h5>
+                    <span class="primary"> {{unempRateCounty}}%</span>
+                    <br>
+                    <el-tag type="danger" size="mini" v-if="unempRateUS < unempRateCounty">Above US Rate</el-tag>
+                </div>
+
+                <div style="opacity: 0.6">
+                    <h5>Report Date</h5>
+                    {{new Date(unempRateDate).toLocaleDateString()}}
+                </div>
+
+            </el-col>
+            <el-col :span="19">
+                <p v-if="$root.commonReady">
+                    <Plotly :data="urGraphData" :layout="urGraphLayout" :display-mode-bar="false"/>
+                    <small>Calculated by taking the sum of unemployed persons for one geography for the previous 24 months divided by the sum of the labor force for that geography for the previous 24 months. Released monthly as part of the Local Area Unemployment Statistics (LAUS) program.</small>
+                </p>
+
+                <p>
+                    <el-button round @click="showEmploymentHistory = !showEmploymentHistory" size="small">
+                        <i class="el-icon-caret-right" v-if="!showEmploymentHistory"/> 
+                        <i class="el-icon-caret-bottom" v-if="showEmploymentHistory"/> 
+                        Show Employment History
+                    </el-button>
+
+                    <Plotly v-if="$root.commonReady && showEmploymentHistory" :data="uGraphData" :layout="uGraphLayout" :display-mode-bar="false"/>
+                </p>
+                <br>
+            </el-col>
+        </el-row>
+
+        <br>
+
+        <hr>
+
+        <div style="margin: 20px; padding: 20px;">
             <el-link type="primary" :target="'json.'+fips" :href="$root.dataUrl+'/counties/county.'+fips+'.json'">Download County Detail (.json)</el-link>
         </div>
         <h1>Data Sources</h1>
@@ -82,7 +213,6 @@
 
     <div class="page" v-if="tab == 'disaster'">
         <br>
-        <!-- <h3>Disaster Declarations / EDA Awards</h3> -->
         <h1>Overview</h1>
         <p>
         This page provides information on FEMA Disaster Declarations for <b>{{detail.county}} County</b> from 1954 to 2020. It also presents information on EDA Disaster Supplemental Awards provided to eligible counties from 2012 to 2020.
@@ -121,7 +251,6 @@
 
     <div v-if="tab == 'bvi'" class="page">
         <br>
-        <!-- <h3>Business Vulnerability</h3>-->
         <h1>Overview</h1>
         <p>
         The Business Vulnerability Index (BVI) presents information on the <b>percentage of businesses in {{detail.county}} County</b> that is believed to be most 
@@ -140,8 +269,8 @@
         </p>
         <br>
         <div class="plot-legend">
-            <div class="color-box" style="height: 4px; background-color: #49f"/> Total
-            <div class="color-box" style="height: 4px; background-color: #f00"/> Vulnerable
+            <div class="color-box" style="height: 4px; background-color: #999"/> Total
+            <div class="color-box" style="height: 4px; background-color: #900"/> Vulnerable
         </div>
         <br clear="both">
 
@@ -149,19 +278,49 @@
         <br>
         <div v-for="(data, naics) in bvi2" :key="naics">
             <p>
-                <!--<small style="float: right;">{{naics}}</small>-->
                 <b><NaicsInfo :id="naics"/></b>
             </p>
             <el-row>
                 <el-col :span="12">
-                    <h4 style="margin: 0">Establishments</h4>
-                    <BVIPlot :data="data.est"/>
+                    <h4 style="margin: 0"><small>Establishments</small></h4>
+                    <!--<BVIPlot :data="data.est"/>-->
+                    <Plotly :data="data.estPlotly" :layout="bviLayout" :display-mode-bar="false"></Plotly>
                 </el-col>
                 <el-col :span="12">
                     <h4 style="margin: 0">Employment</h4>
-                    <BVIPlot :data="data.emp"/>
+                    <!-- <BVIPlot :data="data.emp"/> -->
+                    <Plotly :data="data.empPlotly" :layout="bviLayout" :display-mode-bar="false"></Plotly>
                 </el-col>
             </el-row>
+        </div>
+
+        <div v-if="!showNonvBVI && Object.keys(bvi2_nonv).length > 0" style="border-top: 2px solid #f3f3f3;">
+            <br>
+            <el-button round @click="showNonvBVI = !showNonvBVI">
+                <i class="el-icon-caret-right"/> Show Non-vulnerable Sectors ({{Object.keys(bvi2_nonv).length}})
+            </el-button>
+        </div>
+
+        <!-- don't use slide-down.. it will be slow :active="showPastHistory" :duration="1000"-->
+        <div v-if="showNonvBVI" style="border-top: 2px solid #f3f3f3;">
+            <br>
+            <div v-for="(data, naics) in bvi2_nonv" :key="naics">
+                <p>
+                    <b><NaicsInfo :id="naics"/></b>
+                </p>
+                <el-row>
+                    <el-col :span="12">
+                        <h4 style="margin: 0"><small>Establishments</small></h4>
+                        <!--<BVIPlot :data="data.est"/>-->
+                        <Plotly :data="data.estPlotly" :layout="bviLayout" :display-mode-bar="false"></Plotly>
+                    </el-col>
+                    <el-col :span="12">
+                        <h4 style="margin: 0"><small>Employment</small></h4>
+                        <!--<BVIPlot :data="data.emp"/>-->
+                        <Plotly :data="data.empPlotly" :layout="bviLayout" :display-mode-bar="false"></Plotly>
+                    </el-col>
+                </el-row>
+            </div>
         </div>
         <br clear="both">
     </div>
@@ -196,7 +355,6 @@
             <div class="measure-info" v-for="source in detail.cutter2[incode].sources.filter(s=>s.stats)" :key="source.id">
                 <p style="margin: 0">
                     <b>{{source.name}}</b>
-                    <!--<small style="float: right">{{source.id}}</small>-->
                 </p>
 
                 <p style="min-height: 50px; margin: 0">
@@ -225,7 +383,6 @@
     <div v-if="tab == 'storms'" class="page">
         <br>
         <h1>Overview</h1>
-        <!--<h3>Storm History</h3>-->
         <div v-if="stormData && stormData.length > 0">
             <p>This graph shows the counts of storm events for <b>{{detail.county}} County</b> published by NOAA since 1950s.</p>
             <p>Storm data has gone through many changes and versions over the years. The source data ingested into the database are widely varied and leads to many questions about the precision and accuracy of the location data. Please see <a href="https://www.ncdc.noaa.gov/stormevents/details.jsp" target="noaa">https://www.ncdc.noaa.gov/stormevents/faq.jsp</a> for more detail.</p>
@@ -239,12 +396,6 @@
     </div>
 
     <Footer/>
-
-    <!--
-    <div class="contextmenu" ref="contextmenu">
-        <p class="menu-item" @click="openContextMenuCounty">Open this county ({{contextMenuCounty}}) in a new tab</p>
-    </div>
-    -->
 </div>
 </template>
 
@@ -262,11 +413,9 @@ import CountySelecter from '@/components/CountySelecter.vue'
 
 import Eligibility2018 from '@/components/Eligibility2018.vue'
 import Eligibility2019 from '@/components/Eligibility2019.vue'
+import Histogram from '@/components/Histogram.vue'
 
 import SlideUpDown from 'vue-slide-up-down'
-
-//import mapboxgl from 'mapbox-gl';
-//import "mapbox-gl/dist/mapbox-gl.css";
 
 import { Plotly } from 'vue-plotly'
 
@@ -294,14 +443,12 @@ Vue.directive('scroll', {
         BVIPlot,
         NaicsInfo,
         CountySelecter,
+        Histogram,
     },
 })
-
 export default class CountyDetail extends Vue {
 
-    //@Prop() detail;
     @Prop() fips;
-    //@Prop() geojson;
 
     popup;
     statemap;
@@ -323,7 +470,11 @@ export default class CountyDetail extends Vue {
         'paper_bgcolor': '#0000',
         'plot_bgcolor': '#0000',
     }
+
     bvi2 = {}; //keyed by naics code, then {years, estab, estab_v, emp, emp_v} 
+    bvi2_nonv = {}; //bvi2 with all-0 vulnerablility
+    showNonvBVI = false;
+    bviLayout = null;
 
     stormLayout = null;
     stormData = null;
@@ -335,15 +486,80 @@ export default class CountyDetail extends Vue {
     demoGraphLayout = {
         height: 200,
         margin: {
-            l: 30,
+            //l: 50,
             r: 30,
             t: 10,
             b: 20,
         },
-        barmode: 'stack',
+        //barmode: 'stack',
         'plot_bgcolor': '#0000',
         'paper_bgcolor': '#0000',
     }
+
+    pcmGraphData = [];
+    pcmGraphLayout = {
+        height: 150,
+        margin: {
+            //l: 30,
+            //r: 30,
+            t: 10,
+            b: 30,
+        },
+        //'plot_bgcolor': '#0000',
+        //'paper_bgcolor': '#0000',
+        
+        //TODO - I should add annotation like this > https://plotly.com/javascript/line-charts/#labelling-lines-with-annotations
+        annotations: [],
+    }
+
+    pcpGraphData = [];
+    pcpGraphLayout = {
+        height: 150,
+        margin: {
+            //l: 30,
+            //r: 30,
+            t: 10,
+            b: 30,
+        },
+        //'plot_bgcolor': '#0000',
+        //'paper_bgcolor': '#0000',
+    }
+
+    urGraphLayout = {
+        height: 200,
+        margin: {
+            //l: 30,
+            //r: 30,
+            t: 10,
+            b: 20,
+        },
+        //'plot_bgcolor': '#0000',
+        //'paper_bgcolor': '#0000',
+        legend: {orientation: 'h', side: 'bottom'},
+        yaxis: {title: 'Unemployment Rate'},
+    }
+
+    uGraphLayout = {
+        height: 200,
+        margin: {
+            //l: 30,
+            //r: 30,
+            t: 10,
+            b: 20,
+        },
+        //'plot_bgcolor': '#0000',
+        //'paper_bgcolor': '#0000',
+        legend: {orientation: 'h', side: 'bottom'},
+        yaxis: {title: 'Employment'},
+        yaxis2: {
+            title: 'US Employment',
+            //titlefont: {color: 'rgb(148, 103, 189)'},
+            //tickfont: {color: 'rgb(148, 103, 189)'},
+            overlaying: 'y',
+            side: 'right'
+        }
+    }
+    showEmploymentHistory = false;
 
     cuttersData = {}; //group by incode then {states: {avg, sdev}, us: {avg, sdev}, county} 
 
@@ -389,21 +605,96 @@ export default class CountyDetail extends Vue {
     }
 
     processBVI2() {
+        this.bviLayout = {
+            height: 150,
+            margin: {
+                l: 30,
+                r: 30,
+                t: 10,
+                b: 30,
+            },
+            legend: {
+                y: 1.15,
+                bgcolor: 'rgba(255, 255, 255, 0)',
+                bordercolor: 'rgba(255, 255, 255, 0)',
+                orientation: 'h',
+            },
+            barmode: 'stack',
+            xaxis: {
+                type: 'category', //show all years
+            },
+        }
+
         if(!this.detail.bvis2) return;
         for(const naics in this.detail.bvis2) {
             const data = this.detail.bvis2[naics];
-            this.bvi2[naics] = {
-                est: {
-                    years: data.years,
-                    total: data.estab,
-                    vul: data.estab_v,
-                },
-                emp: {
-                    years: data.years,
-                    total: data.emp,
-                    vul: data.emp_v,
-                },
+
+            //see if there is any non-0 vulnerability values
+            let vuln = false;
+            data.estab_v.forEach(v=>{
+                if(v != 0) vuln = true;
+            });
+            data.emp_v.forEach(v=>{
+                if(v != 0) vuln = true;
+            });
+
+            const traces = {
+                estPlotly: [
+                    //non vulnerable
+                    {
+                        x: data.years,
+                        y: data.estab.map((nv, i)=>nv - data.estab_v[i]),
+                        name: 'Non Vulnerable',
+                        showlegend: false,
+                        type: 'bar',
+                        marker: {
+                            color: '#0004',
+                        },
+                        
+                    },
+
+                    //vul
+                    {
+                        x: data.years,
+                        y: data.estab_v,
+                        name: 'Vulnerable',
+                        showlegend: false,
+                        type: 'bar',
+                        marker: {
+                            color: '#6008',
+                        },
+                    }
+                ],
+
+                empPlotly: [
+                    //non vulnerable
+                    {
+                        x: data.years,
+                        y: data.emp.map((nv, i)=>nv - data.emp_v[i]),
+                        name: 'Non Vulnerable',
+                        showlegend: false,
+                        type: 'bar',
+                        marker: {
+                            color: '#0004',
+                        },
+                    },
+
+                    //vul
+                    {
+                        x: data.years,
+                        y: data.emp_v,
+                        name: 'Vulnerable',
+                        showlegend: false,
+                        type: 'bar',
+                        marker: {
+                            color: '#6008',
+                        },
+                    }
+                ]
             }
+
+            if(vuln) this.bvi2[naics] = traces;
+            else this.bvi2_nonv[naics] = traces;
         }
     }
 
@@ -414,10 +705,8 @@ export default class CountyDetail extends Vue {
                 r: 30,
                 t: 10,
                 b: 30,
-                //pad: 10,
             },
             legend: {
-                //x: 0,
                 y: 1.15,
                 bgcolor: 'rgba(255, 255, 255, 0)',
                 bordercolor: 'rgba(255, 255, 255, 0)',
@@ -438,19 +727,7 @@ export default class CountyDetail extends Vue {
                 x,
                 y,
                 name: type,
-
-                //for bar graph
                 type: 'bar',
-
-                //for line chart
-                /*
-                stackgroup: 'one',
-                line: {
-                    width: 0,
-                    shape: 'spline',
-                    smoothing: 0.8,
-                },
-                */
             });
         }
     }
@@ -488,124 +765,135 @@ export default class CountyDetail extends Vue {
         }
     }
 
-    /*
-    initStateMap() {
-        this.map = new mapboxgl.Map({container: 'statemap'});
-        this.map.scrollZoom.disable();
-        this.map.addSource('counties', { type: "geojson", data: this.geojson });
-
-        //calculate mapbound
-        const bounds = {};
-        this.geojson.features.forEach(feature=>{
-            if(feature.properties.statefips == this.detail.statefips) {
-                feature.geometry.coordinates.forEach(coordinates=>{
-                    coordinates.forEach(points=>{
-                        if(feature.geometry.type == "Polygon") {
-                            points = [points]; 
-                        } else if(feature.geometry.type == "MultiPolygon") {
-                            //nothing to do..
-                        } else {
-                            //console.error("unknown feature geometry type", feature.geometry.type);
-                        }
-                        points.forEach(point=>{
-                            const longitude = point[0];
-                            const latitude = point[1];
-                            bounds.xMin = bounds.xMin < longitude ? bounds.xMin : longitude;
-                            bounds.xMax = bounds.xMax > longitude ? bounds.xMax : longitude;
-                            bounds.yMin = bounds.yMin < latitude ? bounds.yMin : latitude;
-                            bounds.yMax = bounds.yMax > latitude ? bounds.yMax : latitude;
-                        });
-                    });
-                });
-            }
-        });
-        this.map.fitBounds([[bounds.xMin, bounds.yMin-0.2], [bounds.xMax, bounds.yMax+0.2]]);
-
-        this.map.addLayer({
-            "id": "counties",
-            "type": "fill",
-            "source": "counties",
-            "paint": {
-                "fill-color": "rgba(100,100,100,0.3)"
+    processDistress() {
+        this.pcmGraphData = [
+        {
+            x: this.detail.distress_pcm.years,
+            y: this.detail.distress_pcm.est,
+            'error_y': {
+                type: 'data',
+                array: this.detail.distress_pcm.moe,
+                visible: true,
             },
-            filter: ['==', 'statefips', this.detail.statefips], 
-        });
-
-        this.map.addLayer({
-            "id": "selected-county",
-            "type": "fill",
-            "source": "counties",
-            "paint": {
-                "fill-color": "#409EFF",
-                "fill-outline-color": "white",
-            },
-            filter: ['==', 'statefips', 'tbd'],
-        });
-
-        this.map.on('click', e=>{
-            const features = this.map.queryRenderedFeatures(e.point, {
-                layers: ['counties']
-            });
-            if(features.length > 0) {
-                const fips = features[0].properties.statefips+features[0].properties.countyfips;
-                this.$router.push('/county/'+fips);
-            }
-        });
-
-        this.popup = new mapboxgl.Popup({
-            closeButton: false,
-            //offset: [0, -20],
-        });
-
-        this.map.on('mousemove', 'counties', (e)=> {
-            this.map.getCanvas().style.cursor = 'pointer';
-            const feature = e.features[0];
-            let text = feature.properties.county+", "+feature.properties.state;
-            for(const key in feature.properties) {
-                if(key.startsWith("is")) {
-                    text += " | "+key.substring(2);
-                }
-            }
-            this.popup.setLngLat(e.lngLat).setText(text).addTo(this.map);
-        });
-
-        this.map.on('mouseleave', 'counties', ()=>{
-            this.popup.remove();
-        });
-        this.map.on('contextmenu', e=>{
-            const features = this.map.queryRenderedFeatures(e.point, {
-                layers: ['counties']
-            });
-            if(features.length > 0) {
-                e.preventDefault();
-                const mapel = document.getElementById("map");
-                this.$refs["contextmenu"].style.display = "block";
-                this.$refs["contextmenu"].style.left = (e.point.x-20)+"px";
-                this.$refs["contextmenu"].style.top = (mapel.offsetTop + e.point.y - 10)+"px";
-                this.contextMenuCounty = features[0].properties.statefips+features[0].properties.countyfips;
-            }
-        });
-
-        //close context menu as soon as user leaves it
-        this.$refs["contextmenu"].addEventListener("mouseleave", ()=>{
-            this.$refs["contextmenu"].style.display = "none";
-        });
+            name: 'EST'
+        },
+        /*
+        {
+            x: this.detail.distress_pcm.years,
+            y: this.detail.distress_pcm.moe,
+            name: 'MOE'
+        }
+        */
+        ];
+        
+        this.pcpGraphData = [
+        {
+            x: this.detail.distress_pcp.years,
+            y: this.detail.distress_pcp.data,
+            title: 'MOE'
+        }];
     }
 
-    processMap() {
-        this.map.setFilter('selected-county', ['all',
-            ['==', 'statefips', this.detail.statefips],
-            ['==', 'countyfips', this.detail.countyfips],
-        ]);
+    get urGraphData() {
+        return [
+            //county 
+            /*
+            */
+            {
+                x: this.detail.distress_ur.date,
+                y: this.detail.distress_ur.rate,
+                //yaxis: 'y2',
+                name: 'County Unempl. Rate',
+                line: {
+                    color: '#409EFF',
+                },
+            },
+
+            {
+                x: this.$root.unempUS.date,
+                y: this.$root.unempUS.rate,
+                //yaxis: 'y2',
+                name: 'US Unempl. Rate',
+                line: {
+                    color: '#999',
+                },
+            }
+        ];
     }
-    */
+
+    get uGraphData() {
+        return [
+            //county
+            {
+                x: this.detail.distress_ur.date,
+                y: this.detail.distress_ur.employed,
+                stackgroup: 'county',
+                name: 'Employed',
+                fillcolor: 'rgba(0,0,0,0.1)',
+                line: {
+                    width: 0,
+                },
+            },
+            {
+                x: this.detail.distress_ur.date,
+                y: this.detail.distress_ur.unemp,
+                stackgroup: 'county',
+                name: 'Unemployed',
+                fillcolor: 'rgba(153, 30, 30, 0.4)',
+                line: {
+                    width: 0,
+                },
+            },
+
+            /*
+            //US
+            {
+                x: this.$root.unempUS.date,
+                y: this.$root.unempUS.employed,
+                stackgroup: 'us',
+                yaxis: 'y2',
+                name: 'US Employed',
+                fillcolor: 'rgba(0, 0, 0, 0.1)',
+                line: {
+                    width: 0,
+                },
+            },
+            {
+                x: this.$root.unempUS.date,
+                y: this.$root.unempUS.unemp,
+                stackgroup: 'us',
+                yaxis: 'y2',
+                name: 'US Unemployed',
+                fillcolor: 'rgba(153, 30, 30, 0.2)',
+                line: {
+                    width: 0,
+                },
+            },
+            */
+        ];
+    }
+
+    get unempRateDate() {
+        const l = this.detail.distress_ur.date.length;
+        return this.detail.distress_ur.date[l-1];
+    }
+    get unempRateCounty() {
+        const l = this.detail.distress_ur.rate.length;
+        return this.detail.distress_ur.rate[l-1];
+    }
+    get unempRateUS() {
+        const l = this.$root.unempUS.rate.length;
+        return this.$root.unempUS.rate[l-1];
+    }
 
     mounted() {
-        //this.initStateMap();
         if(this.fips) this.load();
     }
 
     load() {
+        this.showPastHistory = false;
+        this.showNonvBVI = false;
+
         fetch(this.$root.dataUrl+"/counties/county."+this.fips+".json").then(res=>res.json()).then(data=>{
             this.detail = data;
 
@@ -617,6 +905,7 @@ export default class CountyDetail extends Vue {
             this.processBVI2();
             this.processStorms();
             this.processDemo();
+            this.processDistress();
         });
     }
 
@@ -641,6 +930,7 @@ export default class CountyDetail extends Vue {
         });
     }
 
+    //computed properties
     get recentHistory() {
         return this.history.filter(h=>(h.date >= new Date("2017-01-01")));
     }
@@ -781,6 +1071,9 @@ h4 {
     opacity: 0.7;
     margin-bottom: 10px;
 }
+h5 {
+    margin-bottom: 5px;
+}
 
 .sub-heading {
     opacity: 0.6;
@@ -916,5 +1209,12 @@ clear: both;
         width: 16px; 
         height: 16px; 
     }
+}
+h4 {
+    margin-top: 0;    
+}
+hr {
+    opacity: 0.3;
+    margin-bottom: 30px;
 }
 </style>
