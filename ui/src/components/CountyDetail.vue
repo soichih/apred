@@ -257,7 +257,7 @@
         </p>
         <div class="plot-legend">
             <div class="color-box" style="height: 4px; background-color: #999"/> Total
-            <div class="color-box" style="height: 4px; background-color: #f00"/> Vulnerable
+            <div class="color-box" style="height: 4px; background-color: #900"/> Vulnerable
         </div>
         <br clear="both">
 
@@ -270,11 +270,13 @@
             <el-row>
                 <el-col :span="12">
                     <h4 style="margin: 0"><small>Establishments</small></h4>
-                    <BVIPlot :data="data.est"/>
+                    <!--<BVIPlot :data="data.est"/>-->
+                    <Plotly :data="data.estPlotly" :layout="bviLayout" :display-mode-bar="false"></Plotly>
                 </el-col>
                 <el-col :span="12">
                     <h4 style="margin: 0"><small>Employment</small></h4>
-                    <BVIPlot :data="data.emp"/>
+                    <!-- <BVIPlot :data="data.emp"/> -->
+                    <Plotly :data="data.empPlotly" :layout="bviLayout" :display-mode-bar="false"></Plotly>
                 </el-col>
             </el-row>
         </div>
@@ -296,11 +298,13 @@
                 <el-row>
                     <el-col :span="12">
                         <h4 style="margin: 0"><small>Establishments</small></h4>
-                        <BVIPlot :data="data.est"/>
+                        <!--<BVIPlot :data="data.est"/>-->
+                        <Plotly :data="data.estPlotly" :layout="bviLayout" :display-mode-bar="false"></Plotly>
                     </el-col>
                     <el-col :span="12">
                         <h4 style="margin: 0"><small>Employment</small></h4>
-                        <BVIPlot :data="data.emp"/>
+                        <!--<BVIPlot :data="data.emp"/>-->
+                        <Plotly :data="data.empPlotly" :layout="bviLayout" :display-mode-bar="false"></Plotly>
                     </el-col>
                 </el-row>
             </div>
@@ -457,6 +461,7 @@ export default class CountyDetail extends Vue {
     bvi2 = {}; //keyed by naics code, then {years, estab, estab_v, emp, emp_v} 
     bvi2_nonv = {}; //bvi2 with all-0 vulnerablility
     showNonvBVI = false;
+    bviLayout = null;
 
     stormLayout = null;
     stormData = null;
@@ -489,6 +494,9 @@ export default class CountyDetail extends Vue {
         },
         //'plot_bgcolor': '#0000',
         //'paper_bgcolor': '#0000',
+        
+        //TODO - I should add annotation like this > https://plotly.com/javascript/line-charts/#labelling-lines-with-annotations
+        annotations: [],
     }
 
     pcpGraphData = [];
@@ -584,6 +592,26 @@ export default class CountyDetail extends Vue {
     }
 
     processBVI2() {
+        this.bviLayout = {
+            height: 150,
+            margin: {
+                l: 30,
+                r: 30,
+                t: 10,
+                b: 30,
+            },
+            legend: {
+                y: 1.15,
+                bgcolor: 'rgba(255, 255, 255, 0)',
+                bordercolor: 'rgba(255, 255, 255, 0)',
+                orientation: 'h',
+            },
+            barmode: 'stack',
+            xaxis: {
+                type: 'category', //show all years
+            },
+        }
+
         if(!this.detail.bvis2) return;
         for(const naics in this.detail.bvis2) {
             const data = this.detail.bvis2[naics];
@@ -597,29 +625,63 @@ export default class CountyDetail extends Vue {
                 if(v != 0) vuln = true;
             });
 
-            if(vuln) this.bvi2[naics] = {
-                est: {
-                    years: data.years,
-                    total: data.estab,
-                    vul: data.estab_v,
-                },
-                emp: {
-                    years: data.years,
-                    total: data.emp,
-                    vul: data.emp_v,
-                },
+            const traces = {
+                estPlotly: [
+                    //non vulnerable
+                    {
+                        x: data.years,
+                        y: data.estab.map((nv, i)=>nv - data.estab_v[i]),
+                        name: 'Non Vulnerable',
+                        showlegend: false,
+                        type: 'bar',
+                        marker: {
+                            color: '#0004',
+                        },
+                        
+                    },
 
+                    //vul
+                    {
+                        x: data.years,
+                        y: data.estab_v,
+                        name: 'Vulnerable',
+                        showlegend: false,
+                        type: 'bar',
+                        marker: {
+                            color: '#6008',
+                        },
+                    }
+                ],
+
+                empPlotly: [
+                    //non vulnerable
+                    {
+                        x: data.years,
+                        y: data.emp.map((nv, i)=>nv - data.emp_v[i]),
+                        name: 'Non Vulnerable',
+                        showlegend: false,
+                        type: 'bar',
+                        marker: {
+                            color: '#0004',
+                        },
+                    },
+
+                    //vul
+                    {
+                        x: data.years,
+                        y: data.emp_v,
+                        name: 'Vulnerable',
+                        showlegend: false,
+                        type: 'bar',
+                        marker: {
+                            color: '#6008',
+                        },
+                    }
+                ]
             }
-            else this.bvi2_nonv[naics] = {
-                est: {
-                    years: data.years,
-                    total: data.estab,
-                },
-                emp: {
-                    years: data.years,
-                    total: data.emp,
-                },
-            }
+
+            if(vuln) this.bvi2[naics] = traces;
+            else this.bvi2_nonv[naics] = traces;
         }
     }
 

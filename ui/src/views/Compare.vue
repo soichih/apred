@@ -21,6 +21,9 @@
             <br>
         </div>
 
+        Test..
+        <RegionSelecter @select="selectRegion($event)" placeholder="Add Region to compare to"/>
+
         <br>
         <el-row :gutter="10">
             <el-col v-for="county in counties" :key="county.fips" :span="8">
@@ -66,13 +69,13 @@
 <script>
 
 import { Component, /*Prop,*/ Vue, Watch } from 'vue-property-decorator';
-//import SlideUpDown from 'vue-slide-up-down'
 
 import TopMenu from '@/components/TopMenu.vue'
 import CountySelecter from '@/components/CountySelecter.vue'
+import RegionSelecter from '@/components/RegionSelecter.vue'
 
 @Component({
-    components: { TopMenu, CountySelecter }
+    components: { TopMenu, CountySelecter, RegionSelecter }
 })
 export default class Compare extends Vue {
 
@@ -108,6 +111,10 @@ export default class Compare extends Vue {
         //console.log("initial selection from params", this.$route.params.fips)
         const fips = this.$route.params.fips.split(",");
         this.init(fips);
+    }
+    
+    selectRegion({fips, id}) {
+        console.log("selected region", fips, id);
     }
 }
 </script>
