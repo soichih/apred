@@ -1,7 +1,6 @@
 <template>
 <div style="position: relative;">
     <TopMenu/>
-    <!--<CountySelecter :fips="fips" @select="changeFips"/>-->
     <CountyDetail v-if="fips" :fips="fips"/>
     <CountyMap v-if="mountmap" v-show="showmap" @select="changeFips"/>
 </div>
