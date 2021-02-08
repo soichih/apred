@@ -23,9 +23,10 @@
             </el-tabs>
         </div>
     </div>
-
     <div class="page" v-if="tab == 'info'">
         <br>
+        <h1>Overview</h1>
+        <p>This page presents information on measuring distress indicators, economic, and demographic data of <b>{{detail.county}} county, {{detail.state}}</b>.</p>
         <br>
         <el-row :gutter="20">
             <el-col :span="5">
@@ -199,20 +200,25 @@
         <div style="margin: 20px; padding: 20px;">
             <el-link type="primary" :target="'json.'+fips" :href="$root.dataUrl+'/counties/county.'+fips+'.json'">Download County Detail (.json)</el-link>
         </div>
-
+        <h1>Data Sources</h1>
+        <p>
+            <ol>
+                <li>Data for population estimate, population density, per capita income, and median household income were generated from the 
+                    American Community Survey (ACS) platform.</li>
+                <li>GDP data was generated from the Business Economic Analysis (BEA) website.</li>
+            </ol>
+        </p>
+        <br>
     </div>
 
     <div class="page" v-if="tab == 'disaster'">
         <br>
+        <h1>Overview</h1>
         <p>
-        Major Disaster Declarations declared under the Robert T. Stafford Disaster Relief and Emergency Assistance Act that may support eligibility for 
-        investment assistance from <a href="https://www.eda.gov/">EDA</a> (the U.S. Economic Development Administration) under the agency’s Public Works 
-        and Economic Adjustment Assistance Programs.
-        Through these programs, EDA provides investment assistance to communities and regions to devise and implement long-term economic recovery 
-        strategies through a variety of non-construction and construction projects. Only the FEMA Disaster Declarations (not Emergency Declarations) are 
-        displayed. 
+        This page provides information on FEMA Disaster Declarations for <b>{{detail.county}} County</b> from 1954 to 2020. It also presents information on EDA Disaster Supplemental Awards provided to eligible counties from 2012 to 2020.
+        Only FEMA Disaster Declarations (not Emergency Declarations) are displayed.        
         </p>
-
+        <br>
         <p v-if="recentHistory.length == 0" style="opacity: 0.8;">No disaster declared since 2017</p>
         <div v-for="(event, idx) in recentHistory" :key="idx" class="history">
             <Event :event="event">
@@ -235,26 +241,33 @@
             <Event :event="event" v-for="(event, idx) in pastHistory" :key="idx" class="history"/>
         </div>
         <br>
+        <h1>Data Sources</h1>
+        <p>
+         Data for the disaster declaration was generated from the FEMA website and is updated daily. Data for the EDA award was obtained from
+         the EDA and is updated as the data becomes available.
+         </p>
         <br>
     </div>
 
     <div v-if="tab == 'bvi'" class="page">
         <br>
+        <h1>Overview</h1>
         <p>
-            <b>Business Vulnerability Index (BVI)</b> is a percentage of businesses in a county that are believed to be <i>vulnerable</i> to various natural disasters. 
+        The Business Vulnerability Index (BVI) presents information on the <b>percentage of businesses in {{detail.county}} County</b> that is believed to be most 
+        vulnerable to various natural disasters. Businesses that we identified to be especially vulnerable to a disaster have the following 
+        characteristics:
         </p>
         <p>
-            To calculate the BVI, we isolated businesses by NAICS code from the U.S. Census' most recent <a href="https://www.census.gov/econ/overview/mu0800.html">County Business Patterns</a> 
-            based on their vulnerability to natural disaster (farmers, transportation companies, etc.).
-        </p>
-        <p>
-            Businesses that were identified to be especially vulnerable to a disater are..
-            <ul>
-                <li>dependent on supply chains</li>
-                <li>have a high reliance on public utilities like water and electricity</li>
+            <ol>
+                <li>dependent on supply chains.</li>
+                <li>have a high reliance on public utilities like water and electricity.</li>
                 <li>or have a large infrastructure footprint and low infrastructure mobility.</li>
-            </ul>
+            </ol>
         </p>
+        <p>This information will <b>help practioners and policymakers</b> in {{detail.county}} County to know the business sectors that <b>deserve more attention</b> in 
+        terms of disaster resiliency planning.
+        </p>
+        <br>
         <div class="plot-legend">
             <div class="color-box" style="height: 4px; background-color: #999"/> Total
             <div class="color-box" style="height: 4px; background-color: #900"/> Vulnerable
@@ -274,7 +287,7 @@
                     <Plotly :data="data.estPlotly" :layout="bviLayout" :display-mode-bar="false"></Plotly>
                 </el-col>
                 <el-col :span="12">
-                    <h4 style="margin: 0"><small>Employment</small></h4>
+                    <h4 style="margin: 0">Employment</h4>
                     <!-- <BVIPlot :data="data.emp"/> -->
                     <Plotly :data="data.empPlotly" :layout="bviLayout" :display-mode-bar="false"></Plotly>
                 </el-col>
@@ -314,17 +327,16 @@
 
     <div class="page" v-if="tab == 'resilience'">
         <br>
+        <h1>Overview</h1>
         <p>
-            Disaster resilience measures the capacity of a community to recover from disaster events without losing their socioeconomic and 
-            infrastructural viability <a href="https://gsdrc.org/topic-guides/disaster-resilience/concepts/what-is-disaster-resilience/">[Combaz, 2015]</a> 
-            <a href="https://www.unisdr.org/2005/wcdr/intergover/official-doc/L-docs/Hyogo-framework-for-action-english.pdf">[UNISDR, 2005]</a> (the higher, the better). 
-            Using the framework provided by <a href="http://resiliencesystem.com/sites/default/files/Cutter_jhsem.2010.7.1.1732.pdf">[Cutter et al. 2010]</a>, 
-            this section merges the resilient and vulnerable variables of a county into a unified set of indices - to produce aggregated 
-            information on disaster resilience levels. Expand each measure to show more detail.
+        The Disaster Resilience Index <b>measures the capacity of {{detail.county}} county to recover from disaster events</b> without losing its socioeconomic 
+        capacity. This information will help practioners and policymakers to see where there are strengths and weaknesses within {{detail.county}} 
+        in the context of vulnerability to disaster events. These insights are also useful for performing a <b>SWOT Analysis for economic recovery</b>.
         </p>
         <p>
-        The resilience scores are calculated using information collected by the <a href="https://data.census.gov/cedsci/">U.S. Census</a> using formulas defined by Cutters, et all.
-        </p>        
+        The resilience scores are calculated using information collected by the <a href="https://data.census.gov/cedsci/">U.S. Census</a> and the framework provided by <a href="http://resiliencesystem.com/sites/default/files/Cutter_jhsem.2010.7.1.1732.pdf">[Cutter et al. 2010]</a>.
+        </p>    
+        <br>    
         <div v-for="(indicator, incode) in detail.cutter2" :key="incode" style="margin-bottom: 15px; clear: both;">
             <div class="indicator-header">
                 <b class="indicator-name">{{indicator.name}}</b>
@@ -370,6 +382,7 @@
 
     <div v-if="tab == 'storms'" class="page">
         <br>
+        <h1>Overview</h1>
         <div v-if="stormData && stormData.length > 0">
             <p>This graph shows the counts of storm events published by NOAA since 1950s.</p>
             <p>Storm data has gone through many changes and versions over the years. The source data ingested into the database are widely varied and leads to many questions about the precision and accuracy of the location data. Please see <a href="https://www.ncdc.noaa.gov/stormevents/details.jsp" target="noaa">https://www.ncdc.noaa.gov/stormevents/faq.jsp</a> for more detail.</p>
