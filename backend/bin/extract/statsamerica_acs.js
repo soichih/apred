@@ -74,6 +74,7 @@ function load_population(pool) {
             FROM [stats4].[dbo].[poparo_uscnty] p 
             LEFT JOIN [stats4].[dbo].[c2k_uscnty_acs] c 
                 ON c.statefips = p.statefips and c.countyfips = p.countyfips and c.year = p.year
+            ORDER BY p.year
         `).then(res=>{
         /* poparo_uscnty (new)
         {
