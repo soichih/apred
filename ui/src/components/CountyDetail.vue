@@ -25,9 +25,8 @@
     </div>
     <div class="page" v-if="tab == 'info'">
         <br>
-        <!--<h1>Overview</h1>-->
         <div class="overview">
-            <p>This page presents information on measuring distress indicators, economic, and demographic data of <b>{{detail.county}} county, {{detail.state}}</b>.</p>
+            <p>This page presents information on measuring distress indicators, economic, and demographic data for <b>{{detail.county}} County, {{detail.state}}</b>.</p>
         </div>
         <el-row :gutter="20">
             <el-col :span="5">
@@ -229,11 +228,10 @@
 
     <div class="page" v-if="tab == 'disaster'">
         <br>
-        <!--<h1>Overview</h1>-->
         <div class="overview">
             <p>
                 This page provides information on FEMA Disaster Declarations for <b>{{detail.county}} County</b> from 1954 to 2020. It also presents information on EDA Disaster Supplemental Awards provided to eligible counties from 2012 to 2020.
-                Only FEMA Disaster Declarations (not Emergency Declarations) are displayed.        
+                Only FEMA Disaster Declarations are displayed (not Emergency Declarations).        
             </p>
         </div>
         <p v-if="recentHistory.length == 0" style="opacity: 0.8;">No disaster declared since 2017</p>
@@ -268,7 +266,6 @@
 
     <div v-if="tab == 'bvi'" class="page">
         <br>
-        <!--<h1>Overview</h1>-->
         <div class="overview">
             <p>
             The Business Vulnerability Index (BVI) presents information on the <b>percentage of businesses in {{detail.county}} County</b> that is believed to be most 
@@ -282,9 +279,8 @@
                     <li>or have a large infrastructure footprint and low infrastructure mobility.</li>
                 </ol>
             </p>
-            <p>
-                This information will <b>help practioners and policymakers</b> in {{detail.county}} County to know the business sectors that <b>deserve more attention</b> in 
-                terms of disaster resiliency planning.
+            <p>This information will <b>help practitioners and policymakers</b> in {{detail.county}} County to know the business sectors that <b>deserve more attention</b> in 
+            terms of disaster resiliency planning.
             </p>
         </div>
 
@@ -345,15 +341,14 @@
 
     <div class="page" v-if="tab == 'resilience'">
         <br>
-        <!--<h1>Overview</h1>-->
         <div class="overview">
             <p>
-                The Disaster Resilience Index <b>measures the capacity of {{detail.county}} county to recover from disaster events</b> without losing its socioeconomic 
-                capacity. This information will help practioners and policymakers to see where there are strengths and weaknesses within {{detail.county}} 
-                in the context of vulnerability to disaster events. These insights are also useful for performing a <b>SWOT Analysis for economic recovery</b>.
+            The Disaster Resilience Index <b>measures the capacity of {{detail.county}} County to recover from disaster events</b> without losing its socioeconomic 
+            capacity. This information will help practitioners and policymakers to see where there are strengths and weaknesses within {{detail.county}} 
+            in the context of vulnerability to disaster events. These insights are also useful for performing a <b>SWOT Analysis for economic recovery</b>.
             </p>
             <p>
-                The resilience scores are calculated using information collected by the <a href="https://data.census.gov/cedsci/">U.S. Census</a> and the framework provided by <a href="http://resiliencesystem.com/sites/default/files/Cutter_jhsem.2010.7.1.1732.pdf">[Cutter et al. 2010]</a>.
+            The resilience scores are calculated using information collected by the <a href="https://data.census.gov/cedsci/">U.S. Census</a> and the framework provided by <a href="http://resiliencesystem.com/sites/default/files/Cutter_jhsem.2010.7.1.1732.pdf">[Cutter et al. 2010]</a>.
             </p>    
         </div>
 
@@ -402,9 +397,8 @@
     <div v-if="tab == 'storms'" class="page">
         <br>
         <div v-if="stormData && stormData.length > 0">
-            <!--<h1>Overview</h1>-->
             <div class="overview">
-                <p>This graph shows the counts of storm events published by NOAA since 1950s.</p>
+                <p>This graph shows the counts of storm events for <b>{{detail.county}} County</b> published by NOAA since 1950s.</p>
                 <p>Storm data has gone through many changes and versions over the years. The source data ingested into the database are widely varied and leads to many questions about the precision and accuracy of the location data. Please see <a href="https://www.ncdc.noaa.gov/stormevents/details.jsp" target="noaa">https://www.ncdc.noaa.gov/stormevents/faq.jsp</a> for more detail.</p>
                 <p>You can click on the chart legend to select or deselect which storm events to show on the graph.</p>
             </div>
