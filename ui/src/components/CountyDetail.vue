@@ -1,10 +1,10 @@
 <template>
 <div ref="scrolled-area" @scroll="handleScroll" v-if="detail">
-
     <div class="header">
         <div class="page">
-            <div style="float: right; width: 300px; padding-top: 15px;">
-                <CountySelecter @select="fips = $event"/>
+            <div class="toolset">
+                <CountySelecter @select="fips = $event" placeholder="Search another county to show" style="width: 240px;"/>
+                or <el-button @click="compare" style="margin-left: 10px;" >Compare</el-button>
             </div>
             <h3 style="font-weight: normal; margin-right: 300px;">
                 <el-button type="primary" circle icon="el-icon-back" @click="goback()" class="back-button"/>
@@ -14,7 +14,7 @@
                 {{detail.state}}
             </h3>
             <br clear="both">
-            <el-tabs v-model="tab">
+            <el-tabs v-model="tab" @tab-click="scroll2top">
                 <el-tab-pane name="info" label="County Detail"></el-tab-pane>
                 <el-tab-pane name="disaster" :label="'Disaster Declarations/EDA Awards ('+history.length+')'"></el-tab-pane>
                 <el-tab-pane v-if="detail.bvis2" name="bvi" label="Business Vulnerability"></el-tab-pane>
@@ -25,9 +25,10 @@
     </div>
     <div class="page" v-if="tab == 'info'">
         <br>
-        <h1>Overview</h1>
-        <p>This page presents information on measuring distress indicators, economic, and demographic data of <b>{{detail.county}} county, {{detail.state}}</b>.</p>
-        <br>
+        <!--<h1>Overview</h1>-->
+        <div class="overview">
+            <p>This page presents information on measuring distress indicators, economic, and demographic data of <b>{{detail.county}} county, {{detail.state}}</b>.</p>
+        </div>
         <el-row :gutter="20">
             <el-col :span="5">
                 <h4>Population<br>
@@ -63,11 +64,25 @@
                 </h4>
             </el-col>
             <el-col :span="19">
-                <Plotly :data="demoGraphData" :layout="demoGraphLayout" :display-mode-bar="false"/>
+                <ExportablePlotly :data="demoGraphData" :layout="demoGraphLayout"/>
                 <br>
                 <br>
             </el-col>
         </el-row>
+
+        <el-row :gutter="20">
+            <el-col :span="5">
+                <h4>Racial Makeup History<br>
+                    <small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS 2018)</a></small>
+                </h4>
+            </el-col>
+            <el-col :span="19">
+                <ExportablePlotly :data="orGraphData" :layout="orGraphLayout"/>
+                <br>
+                <br>
+            </el-col>
+        </el-row>
+
 
         <hr>
 
@@ -128,7 +143,7 @@
             </el-col>
             <el-col :span="19">
                 <p>
-                    <Plotly :data="pcmGraphData" :layout="pcmGraphLayout" :display-mode-bar="false"/>
+                    <ExportablePlotly :data="pcmGraphData" :layout="pcmGraphLayout"/>
                     <small>The amount of money (only cash sources) earned per person. Released annually in December.</small>
                 </p>
                 <br>
@@ -138,11 +153,12 @@
 
         <el-row :gutter="20">
             <el-col :span="5">
-                <h4>Per Capita Personal Income<small><a href="https://www.bea.gov/" target="bea">(BEA)</a></small></h4>
+                <h4>Per Capita Personal Income<br>
+                    <small><a href="https://www.bea.gov/" target="bea">(BEA)</a></small></h4>
             </el-col>
             <el-col :span="19">
                 <p>
-                    <Plotly :data="pcpGraphData" :layout="pcpGraphLayout" :display-mode-bar="false"/>
+                    <ExportablePlotly :data="pcpGraphData" :layout="pcpGraphLayout"/>
                     <small>An estimate of income per person that includes not only cash sources of income, but also insurance, transfer payments, dividends, interest, and rent. Released annually in the spring.</small>
                 </p>
                 <br>
@@ -176,7 +192,7 @@
             </el-col>
             <el-col :span="19">
                 <p v-if="$root.commonReady">
-                    <Plotly :data="urGraphData" :layout="urGraphLayout" :display-mode-bar="false"/>
+                    <ExportablePlotly :data="urGraphData" :layout="urGraphLayout"/>
                     <small>Calculated by taking the sum of unemployed persons for one geography for the previous 24 months divided by the sum of the labor force for that geography for the previous 24 months. Released monthly as part of the Local Area Unemployment Statistics (LAUS) program.</small>
                 </p>
 
@@ -187,7 +203,7 @@
                         Show Employment History
                     </el-button>
 
-                    <Plotly v-if="$root.commonReady && showEmploymentHistory" :data="uGraphData" :layout="uGraphLayout" :display-mode-bar="false"/>
+                    <ExportablePlotly v-if="$root.commonReady && showEmploymentHistory" :data="uGraphData" :layout="uGraphLayout"/>
                 </p>
                 <br>
             </el-col>
@@ -197,10 +213,10 @@
 
         <hr>
 
-        <div style="margin: 20px; padding: 20px;">
+        <div>
             <el-link type="primary" :target="'json.'+fips" :href="$root.dataUrl+'/counties/county.'+fips+'.json'">Download County Detail (.json)</el-link>
         </div>
-        <h1>Data Sources</h1>
+        <h3>Data Sources</h3>
         <p>
             <ol>
                 <li>Data for population estimate, population density, per capita income, and median household income were generated from the 
@@ -213,12 +229,13 @@
 
     <div class="page" v-if="tab == 'disaster'">
         <br>
-        <h1>Overview</h1>
-        <p>
-        This page provides information on FEMA Disaster Declarations for <b>{{detail.county}} County</b> from 1954 to 2020. It also presents information on EDA Disaster Supplemental Awards provided to eligible counties from 2012 to 2020.
-        Only FEMA Disaster Declarations (not Emergency Declarations) are displayed.        
-        </p>
-        <br>
+        <!--<h1>Overview</h1>-->
+        <div class="overview">
+            <p>
+                This page provides information on FEMA Disaster Declarations for <b>{{detail.county}} County</b> from 1954 to 2020. It also presents information on EDA Disaster Supplemental Awards provided to eligible counties from 2012 to 2020.
+                Only FEMA Disaster Declarations (not Emergency Declarations) are displayed.        
+            </p>
+        </div>
         <p v-if="recentHistory.length == 0" style="opacity: 0.8;">No disaster declared since 2017</p>
         <div v-for="(event, idx) in recentHistory" :key="idx" class="history">
             <Event :event="event">
@@ -241,7 +258,7 @@
             <Event :event="event" v-for="(event, idx) in pastHistory" :key="idx" class="history"/>
         </div>
         <br>
-        <h1>Data Sources</h1>
+        <h3>Data Sources</h3>
         <p>
          Data for the disaster declaration was generated from the FEMA website and is updated daily. Data for the EDA award was obtained from
          the EDA and is updated as the data becomes available.
@@ -251,23 +268,26 @@
 
     <div v-if="tab == 'bvi'" class="page">
         <br>
-        <h1>Overview</h1>
-        <p>
-        The Business Vulnerability Index (BVI) presents information on the <b>percentage of businesses in {{detail.county}} County</b> that is believed to be most 
-        vulnerable to various natural disasters. Businesses that we identified to be especially vulnerable to a disaster have the following 
-        characteristics:
-        </p>
-        <p>
-            <ol>
-                <li>dependent on supply chains.</li>
-                <li>have a high reliance on public utilities like water and electricity.</li>
-                <li>or have a large infrastructure footprint and low infrastructure mobility.</li>
-            </ol>
-        </p>
-        <p>This information will <b>help practioners and policymakers</b> in {{detail.county}} County to know the business sectors that <b>deserve more attention</b> in 
-        terms of disaster resiliency planning.
-        </p>
-        <br>
+        <!--<h1>Overview</h1>-->
+        <div class="overview">
+            <p>
+            The Business Vulnerability Index (BVI) presents information on the <b>percentage of businesses in {{detail.county}} County</b> that is believed to be most 
+            vulnerable to various natural disasters. Businesses that we identified to be especially vulnerable to a disaster have the following 
+            characteristics:
+            </p>
+            <p>
+                <ol>
+                    <li>dependent on supply chains.</li>
+                    <li>have a high reliance on public utilities like water and electricity.</li>
+                    <li>or have a large infrastructure footprint and low infrastructure mobility.</li>
+                </ol>
+            </p>
+            <p>
+                This information will <b>help practioners and policymakers</b> in {{detail.county}} County to know the business sectors that <b>deserve more attention</b> in 
+                terms of disaster resiliency planning.
+            </p>
+        </div>
+
         <div class="plot-legend">
             <div class="color-box" style="height: 4px; background-color: #999"/> Total
             <div class="color-box" style="height: 4px; background-color: #900"/> Vulnerable
@@ -283,13 +303,11 @@
             <el-row>
                 <el-col :span="12">
                     <h4 style="margin: 0"><small>Establishments</small></h4>
-                    <!--<BVIPlot :data="data.est"/>-->
-                    <Plotly :data="data.estPlotly" :layout="bviLayout" :display-mode-bar="false"></Plotly>
+                    <ExportablePlotly :data="data.estPlotly" :layout="bviLayout"/>
                 </el-col>
                 <el-col :span="12">
-                    <h4 style="margin: 0">Employment</h4>
-                    <!-- <BVIPlot :data="data.emp"/> -->
-                    <Plotly :data="data.empPlotly" :layout="bviLayout" :display-mode-bar="false"></Plotly>
+                    <h4 style="margin: 0"><small>Employment</small></h4>
+                    <ExportablePlotly :data="data.empPlotly" :layout="bviLayout"/>
                 </el-col>
             </el-row>
         </div>
@@ -312,12 +330,12 @@
                     <el-col :span="12">
                         <h4 style="margin: 0"><small>Establishments</small></h4>
                         <!--<BVIPlot :data="data.est"/>-->
-                        <Plotly :data="data.estPlotly" :layout="bviLayout" :display-mode-bar="false"></Plotly>
+                        <ExportablePlotly :data="data.estPlotly" :layout="bviLayout"/>
                     </el-col>
                     <el-col :span="12">
                         <h4 style="margin: 0"><small>Employment</small></h4>
                         <!--<BVIPlot :data="data.emp"/>-->
-                        <Plotly :data="data.empPlotly" :layout="bviLayout" :display-mode-bar="false"></Plotly>
+                        <ExportablePlotly :data="data.empPlotly" :layout="bviLayout"/>
                     </el-col>
                 </el-row>
             </div>
@@ -327,30 +345,31 @@
 
     <div class="page" v-if="tab == 'resilience'">
         <br>
-        <h1>Overview</h1>
-        <p>
-        The Disaster Resilience Index <b>measures the capacity of {{detail.county}} county to recover from disaster events</b> without losing its socioeconomic 
-        capacity. This information will help practioners and policymakers to see where there are strengths and weaknesses within {{detail.county}} 
-        in the context of vulnerability to disaster events. These insights are also useful for performing a <b>SWOT Analysis for economic recovery</b>.
-        </p>
-        <p>
-        The resilience scores are calculated using information collected by the <a href="https://data.census.gov/cedsci/">U.S. Census</a> and the framework provided by <a href="http://resiliencesystem.com/sites/default/files/Cutter_jhsem.2010.7.1.1732.pdf">[Cutter et al. 2010]</a>.
-        </p>    
-        <br>    
-        <div v-for="(indicator, incode) in detail.cutter2" :key="incode" style="margin-bottom: 15px; clear: both;">
+        <!--<h1>Overview</h1>-->
+        <div class="overview">
+            <p>
+                The Disaster Resilience Index <b>measures the capacity of {{detail.county}} county to recover from disaster events</b> without losing its socioeconomic 
+                capacity. This information will help practioners and policymakers to see where there are strengths and weaknesses within {{detail.county}} 
+                in the context of vulnerability to disaster events. These insights are also useful for performing a <b>SWOT Analysis for economic recovery</b>.
+            </p>
+            <p>
+                The resilience scores are calculated using information collected by the <a href="https://data.census.gov/cedsci/">U.S. Census</a> and the framework provided by <a href="http://resiliencesystem.com/sites/default/files/Cutter_jhsem.2010.7.1.1732.pdf">[Cutter et al. 2010]</a>.
+            </p>    
+        </div>
+
+        <div class="plot-legend">
+            <div class="color-box" style="height: 4px; background-color: #409eff"/> This County
+            <div class="color-box" style="background-color: #09f5"/> State Average(+standard deviation) 
+            <div class="color-box" style="background-color: #0003"/> US Average(+standard deviation) 
+        </div>
+
+        <div v-for="(indicator, incode) in detail.cutter2" :key="incode" style="margin-bottom: 15px; clear: both;" class="indicator">
             <div class="indicator-header">
                 <b class="indicator-name">{{indicator.name}}</b>
                 <p class="indicator-detail">
                     <IndicatorInfo :id="incode"/>
                 </p>
             </div>
-
-            <div class="plot-legend">
-                <div class="color-box" style="height: 4px; background-color: #409eff"/> This County
-                <div class="color-box" style="background-color: #09f5"/> State Average(+standard deviation) 
-                <div class="color-box" style="background-color: #0003"/> US Average(+standard deviation) 
-            </div>
-            <br clear="both">
 
             <div class="measure-info" v-for="source in detail.cutter2[incode].sources.filter(s=>s.stats)" :key="source.id">
                 <p style="margin: 0">
@@ -382,18 +401,26 @@
 
     <div v-if="tab == 'storms'" class="page">
         <br>
-        <h1>Overview</h1>
         <div v-if="stormData && stormData.length > 0">
-            <p>This graph shows the counts of storm events published by NOAA since 1950s.</p>
-            <p>Storm data has gone through many changes and versions over the years. The source data ingested into the database are widely varied and leads to many questions about the precision and accuracy of the location data. Please see <a href="https://www.ncdc.noaa.gov/stormevents/details.jsp" target="noaa">https://www.ncdc.noaa.gov/stormevents/faq.jsp</a> for more detail.</p>
-            <p>You can click on the chart legend to select or deselect which storm events to show on the graph.</p>
-            <Plotly :data="stormData" :layout="stormLayout" :display-mode-bar="false"></Plotly>
+            <!--<h1>Overview</h1>-->
+            <div class="overview">
+                <p>This graph shows the counts of storm events published by NOAA since 1950s.</p>
+                <p>Storm data has gone through many changes and versions over the years. The source data ingested into the database are widely varied and leads to many questions about the precision and accuracy of the location data. Please see <a href="https://www.ncdc.noaa.gov/stormevents/details.jsp" target="noaa">https://www.ncdc.noaa.gov/stormevents/faq.jsp</a> for more detail.</p>
+                <p>You can click on the chart legend to select or deselect which storm events to show on the graph.</p>
+            </div>
+            <ExportablePlotly :data="stormData" :layout="stormLayout"/>
         </div>
         <p v-else>No storm data</p>
         <br>
         <br>
         <br>
     </div>
+
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
 
     <Footer/>
 </div>
@@ -414,10 +441,11 @@ import CountySelecter from '@/components/CountySelecter.vue'
 import Eligibility2018 from '@/components/Eligibility2018.vue'
 import Eligibility2019 from '@/components/Eligibility2019.vue'
 import Histogram from '@/components/Histogram.vue'
+import ExportablePlotly from '@/components/ExportablePlotly.vue'
 
 import SlideUpDown from 'vue-slide-up-down'
 
-import { Plotly } from 'vue-plotly'
+//import util from '@/util'
 
 Vue.directive('scroll', {
   inserted: function (el, binding) {
@@ -432,7 +460,7 @@ Vue.directive('scroll', {
 
 @Component({
     components: { 
-        Plotly, 
+        ExportablePlotly, 
         Event, 
         Eligibility2018, 
         Eligibility2019,
@@ -458,6 +486,19 @@ export default class CountyDetail extends Vue {
 
     history = [];
 
+    /*
+    plotlyButtons(p) {
+        console.dir(p);
+        return [{
+            name: 'Save as SVG',
+            icon: util.svgIcon,
+            click: ()=>{
+                util.createSVG(p);
+            },
+        }]
+    }
+    */
+
     bvi2Layout = {
         height: 100,
         margin: {
@@ -467,8 +508,8 @@ export default class CountyDetail extends Vue {
             b: 30,
             pad: 10,
         },
-        'paper_bgcolor': '#0000',
-        'plot_bgcolor': '#0000',
+        //'paper_bgcolor': '#0000',
+        //'plot_bgcolor': '#0000',
     }
 
     bvi2 = {}; //keyed by naics code, then {years, estab, estab_v, emp, emp_v} 
@@ -492,16 +533,31 @@ export default class CountyDetail extends Vue {
             b: 20,
         },
         //barmode: 'stack',
-        'plot_bgcolor': '#0000',
-        'paper_bgcolor': '#0000',
+        //'plot_bgcolor': '#0000',
+        //'paper_bgcolor': '#0000',
     }
+
+    orGraphData = [];
+    orGraphLayout = {
+        height: 200,
+        margin: {
+            //l: 50,
+            r: 30,
+            t: 10,
+            b: 20,
+        },
+        //barmode: 'stack',
+        //'plot_bgcolor': '#0000',
+        //'paper_bgcolor': '#0000',
+    }
+
 
     pcmGraphData = [];
     pcmGraphLayout = {
         height: 150,
         margin: {
-            //l: 30,
-            //r: 30,
+            l: 30,
+            r: 30,
             t: 10,
             b: 30,
         },
@@ -509,6 +565,7 @@ export default class CountyDetail extends Vue {
         //'paper_bgcolor': '#0000',
         
         //TODO - I should add annotation like this > https://plotly.com/javascript/line-charts/#labelling-lines-with-annotations
+        yaxis: {/*title: 'Unemployment Rate',*/ ticksuffix: "$"},
         annotations: [],
     }
 
@@ -516,11 +573,12 @@ export default class CountyDetail extends Vue {
     pcpGraphLayout = {
         height: 150,
         margin: {
-            //l: 30,
-            //r: 30,
+            l: 30,
+            r: 30,
             t: 10,
             b: 30,
         },
+        yaxis: {/*title: 'Unemployment Rate',*/ ticksuffix: "$"},
         //'plot_bgcolor': '#0000',
         //'paper_bgcolor': '#0000',
     }
@@ -528,29 +586,30 @@ export default class CountyDetail extends Vue {
     urGraphLayout = {
         height: 200,
         margin: {
-            //l: 30,
-            //r: 30,
+            l: 30,
+            r: 30,
             t: 10,
             b: 20,
         },
         //'plot_bgcolor': '#0000',
         //'paper_bgcolor': '#0000',
         legend: {orientation: 'h', side: 'bottom'},
-        yaxis: {title: 'Unemployment Rate'},
+        yaxis: {/*title: 'Unemployment Rate',*/ ticksuffix: "%"},
     }
 
     uGraphLayout = {
         height: 200,
         margin: {
-            //l: 30,
-            //r: 30,
+            l: 30,
+            r: 30,
             t: 10,
             b: 20,
         },
         //'plot_bgcolor': '#0000',
         //'paper_bgcolor': '#0000',
         legend: {orientation: 'h', side: 'bottom'},
-        yaxis: {title: 'Employment'},
+        //yaxis: {title: 'Employment'},
+        /*
         yaxis2: {
             title: 'US Employment',
             //titlefont: {color: 'rgb(148, 103, 189)'},
@@ -558,6 +617,7 @@ export default class CountyDetail extends Vue {
             overlaying: 'y',
             side: 'right'
         }
+        */
     }
     showEmploymentHistory = false;
 
@@ -729,6 +789,32 @@ export default class CountyDetail extends Vue {
                 name: type,
                 type: 'bar',
             });
+        }
+    }
+
+    processOR() {
+        this.orGraphData = [];
+        const template = {
+            x: this.detail.or.years,
+            stackgroup: 'one',
+            line: {
+                width: 0,
+                shape: 'spline',
+                smoothing: 0.8,
+            },
+            mode: 'lines',
+        }
+        for(const key in this.detail.or.groups) {
+
+            //let's ignore these for now
+            if(key == "hispanic") continue;
+            if(key == "non_hisp") continue;
+
+            this.orGraphData.push(Object.assign({ 
+                y: this.detail.or.groups[key],
+                name: key,
+                hoverinfo: 'y+text',
+            }, template));
         }
     }
 
@@ -905,6 +991,7 @@ export default class CountyDetail extends Vue {
             this.processBVI2();
             this.processStorms();
             this.processDemo();
+            this.processOR();
             this.processDistress();
         });
     }
@@ -1028,13 +1115,23 @@ export default class CountyDetail extends Vue {
     openContextMenuCounty() {
         window.open("#/county/"+this.contextMenuCounty, "apred-"+this.contextMenuCounty);
     }
+
+    scroll2top() {
+        window.scrollTo(0, 0);
+    }
+
+    compare() {
+        window.open("#/compare/what/"+this.fips, "compare-what-"+this.fips);
+    }
 }
 
 </script>
 
 <style lang="scss" scoped> 
-.indicator-header {
+.indicator + .indicator {
     border-top: 1px solid #0002;
+}
+.indicator-header {
     position: relative; 
 
     margin-top: 20px;
@@ -1120,7 +1217,6 @@ h5 {
     width: 100%;
     background-color: white;
     z-index: 3;
-    box-shadow: 0 0 3px #ddd;
 }
 
 /*
@@ -1216,5 +1312,20 @@ h4 {
 hr {
     opacity: 0.3;
     margin-bottom: 30px;
+}
+.overview {
+    background-color: #eee;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    font-size: 95%;
+    p:last-child {
+        margin-bottom: 0;
+    }
+}
+.toolset {
+    float: right; 
+    width: 375px; 
+    padding-top: 15px;
 }
 </style>

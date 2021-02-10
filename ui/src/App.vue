@@ -9,7 +9,7 @@
 
 import numeral from "numeral";
 
-import { Component, Watch, Vue, State } from 'vue-property-decorator';
+import { Vue} from 'vue-property-decorator';
 
 Vue.filter("formatNumber", (value)=>{
     return numeral(value).format("0,0"); // displaying other groupings/separators is possible, look at the docs
@@ -72,6 +72,18 @@ p.small {
     }
 }
 
+@media print {
+    body {
+        margin: 40px;
+    }
+    #topmenu, .toolset {
+       display: none; 
+    }
+    #app {
+        padding-top: 0;
+    }
+}
+
 .el-tabs__header {
     background-color: white;
     margin: 0;
@@ -98,5 +110,4 @@ p.small {
         background-color: #eee;
     }
 }
-
 </style>
