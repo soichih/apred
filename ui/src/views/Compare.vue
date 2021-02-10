@@ -22,7 +22,7 @@
         <thead>
         <tr>
             <th v-for="fip in fips" :key="fip">
-                <h3>
+                <h3 v-if="counties[fip] && !counties[fip].loading">
                     {{counties[fip].county}}, {{counties[fip].state}}
                 </h3>
             </th>
@@ -68,11 +68,11 @@
             </p>
             <el-row>
                 <el-col :span="12">
-                    <h4 style="margin: 0"><small>Establishments</small></h4>
+                    <h4 style="margin: 0"><small>Vulnerable Establishments</small></h4>
                     <ExportablePlotly :data="bvi.estTraces" :layout="bviLayout"/>
                 </el-col>
                 <el-col :span="12">
-                    <h4 style="margin: 0"><small>Employment</small></h4>
+                    <h4 style="margin: 0"><small>Vulnerable Employment</small></h4>
                     <ExportablePlotly :data="bvi.empTraces" :layout="bviLayout"/>
                 </el-col>
             </el-row>
@@ -149,6 +149,7 @@ export default class Compare extends Vue {
                 x: detail.distress_ur.date,
                 y: detail.distress_ur.rate,
                 name: detail.county+","+detail.state,
+                line: { width: 1, },
             })
         });
         return traces;
@@ -201,6 +202,7 @@ export default class Compare extends Vue {
                 x: detail.pops.years,
                 y,
                 name: detail.county+","+detail.state,
+                line: { width: 1, },
             });
         });
         return traces;
@@ -258,7 +260,7 @@ export default class Compare extends Vue {
     }
 
     bviLayout = {
-        height: 150,
+        height: 175,
         margin: {
             l: 30,
             r: 30,
@@ -270,11 +272,13 @@ export default class Compare extends Vue {
             bgcolor: 'rgba(255, 255, 255, 0)',
             bordercolor: 'rgba(255, 255, 255, 0)',
             orientation: 'h',
+            font: { size: 10 },
         },
         //barmode: 'stack',
         xaxis: {
             type: 'category', //show all years
         },
+        yaxis: {rangemode: 'tozero'},
     }
 
     get bvis() {
@@ -320,12 +324,20 @@ export default class Compare extends Vue {
                 if(!this.counties[fip]) return; //not yet loaded?
                 const detail = this.counties[fip];
                 if(detail.loading) return;
-
                 const data = detail.bvis2[naics];
+                if(!data) {
+                    this.errors.bvis.push("No BVI information for "+detail.county+","+detail.state);
+                    return;
+                }
                 estTraces.push({
                     x: data.years,
                     y: data.estab_v,
                     name: detail.county+","+detail.state,
+                    mode: 'lines',
+                    line: { width: 1, },
+                    fill: "tozeroy",
+                    fillcolor: 'rgba(0,0,0,0.02)',
+                    //opacity: 0.1,
                     //type: 'bar',
                     //marker: { color: '#6008', },
                 });
@@ -333,6 +345,10 @@ export default class Compare extends Vue {
                     x: data.years,
                     y: data.emp_v,
                     name: detail.county+","+detail.state,
+                    mode: 'lines',
+                    line: { width: 1, },
+                    fill: "tozeroy",
+                    fillcolor: 'rgba(0,0,0,0.02)'
                     //type: 'bar',
                     //marker: { color: '#6008', },
                 });
@@ -357,7 +373,7 @@ h3 {
 }
 h4 {
     opacity: 0.7;
-    margin: 10px 0;
+    margin: 20px 0 5px 0;
 }
 h5 {
     margin-bottom: 5px;
@@ -373,6 +389,7 @@ h5 {
 .table {
     width: 100%;
     border-collapse: collapse;
+    margin-bottom: 30px;
 }
 thead {
     border-bottom: 1px solid #eee;
@@ -386,7 +403,7 @@ tbody th {
     padding-right: 10px;
 }
 .county-selecter {
-    background-color: #eee;
+    border: 3px solid #eee;
     padding: 20px;
     margin-bottom: 20px;
     border-radius: 10px;
