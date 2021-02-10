@@ -2,67 +2,91 @@
 <div>
     <TopMenu/>
     <div class="page">
-        <div class="header">
-            <el-row :gutter="10">
-                <el-col v-for="county in counties" :key="county.fips" :span="8">
-                    <div v-if="county.detail">
-                        <br>
-                        <h4>{{county.detail.county}}, {{county.detail.state}}
-                        <el-button type="info-circle" icon="el-icon-delete" size="mini" circle 
-                            @click="removeCounty(county)"></el-button>
-                        </h4>
-                    </div>
-                    <div v-else style="padding: 10px;"><small>Loading...</small></div>
-                </el-col>
-                <el-col :span="8" v-if="counties.length < 3">
-                    <CountySelecter @select="addCounty($event)" placeholder="Add County to compare"/>
-                </el-col>
-            </el-row>
-            <br>
+        <br>
+        <div class="county-selecter">
+            <p>
+                List counties you'd like to compare<br>
+                <MultipleCountySelecter v-model="fips" placeholder="Enter counties to compare"/>
+            </p>
+            <p>
+                Or.. select multiple counties from an EDA region<br>
+                <RegionSelecter @select="regionSelected"/>
+            </p>
         </div>
 
-        Test..
-        <RegionSelecter @select="selectRegion($event)" placeholder="Add Region to compare to"/>
+        <el-alert type="info" v-for="(error, idx) in errors.bvis" :key="idx">{{error}}</el-alert>
 
+        <!-- when fips number are low, show some detail number side by side in table-->
         <br>
-        <el-row :gutter="10">
-            <el-col v-for="county in counties" :key="county.fips" :span="8">
-                <div v-if="county.detail">
-                    <h4>Population</h4>
-                    <p>
-                        <span class="primary">{{county.detail.population | formatNumber}}</span>
-                    </p>
+        <table class="table" v-if="fips.length > 0 && fips.length <= 3">
+        <thead>
+        <tr>
+            <th v-for="fip in fips" :key="fip">
+                <h3>
+                    {{counties[fip].county}}, {{counties[fip].state}}
+                </h3>
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td v-for="fip in fips" :key="fip">
+                <div v-if="counties[fip] && !counties[fip].loading">
+                    <h4>Population</h4> 
+                    <span class="primary">{{counties[fip].population | formatNumber}}</span>
 
                     <h4>Population Density</h4>
-                    <p>
-                        <span class="primary">{{county.detail.popdensity | formatNumber}}</span> people per sq. mile.
-                    </p>
-
-                    <h4>Area</h4>
-                    <p>
-                        <span class="primary">{{county.detail.area}}</span> sq. miles
-                    </p>
-
+                    <span class="primary">{{counties[fip].popdensity | formatNumber}}</span> 
+                    people per sq. mile.
+                    
                     <h4>GDP</h4>
-                    <p>
-                        <span class="primary">${{county.detail.gdp/1000 | formatNumber}}</span> M
-                    </p>
+                    <span class="primary">${{counties[fip].gdp/1000 | formatNumber}}</span> M
 
-                    <h4>Per Capita Income</h4>
-                    <p>
-                        <span class="primary">${{county.detail.percapitaincome | formatNumber}}</span>
-                    </p>
+                    <h4>Per Capita Income</h4> 
+                    <span class="primary">${{counties[fip].percapitaincome | formatNumber}}</span>
 
-                    <h4>Median Household Income</h4>
-                    <p>
-                        <span class="primary">${{county.detail.medianincome | formatNumber}}</span>
-                    </p>
+                    <h4>Median Household Income</h4> 
+                    <span class="primary">${{counties[fip].medianincome | formatNumber}}</span>
                 </div>
-                <div v-else style="padding: 10px;"><small>Loading...</small></div>
-            </el-col>
-            <el-col :span="8" v-if="counties.length < 2"><!--placeholder--></el-col>
-        </el-row>
+            </td>
+        </tr>
+        </tbody>
+        </table>
+
+        <hr>
+
+        <h4>Unemployment Rate</h4>
+        <ExportablePlotly :data="uGraphData" :layout="uGraphLayout"/>
+
+        <h4>Population</h4>
+        <ExportablePlotly :data="popGraphData" :layout="popGraphLayout"/>
+
+        <h4>Business Vulnerability</h4>
+        <div v-for="bvi in bvis" :key="bvi.naics">
+            <p>
+                <b><NaicsInfo :id="bvi.naics"/></b>
+            </p>
+            <el-row>
+                <el-col :span="12">
+                    <h4 style="margin: 0"><small>Establishments</small></h4>
+                    <ExportablePlotly :data="bvi.estTraces" :layout="bviLayout"/>
+                </el-col>
+                <el-col :span="12">
+                    <h4 style="margin: 0"><small>Employment</small></h4>
+                    <ExportablePlotly :data="bvi.empTraces" :layout="bviLayout"/>
+                </el-col>
+            </el-row>
+        </div>
+
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
     </div>
+    <Footer/>
 </div>
 </template>
 
@@ -72,26 +96,142 @@ import { Component, /*Prop,*/ Vue, Watch } from 'vue-property-decorator';
 
 import TopMenu from '@/components/TopMenu.vue'
 import CountySelecter from '@/components/CountySelecter.vue'
+import MultipleCountySelecter from '@/components/MultipleCountySelecter.vue'
 import RegionSelecter from '@/components/RegionSelecter.vue'
+import ExportablePlotly from '@/components/ExportablePlotly.vue'
+import NaicsInfo from '@/components/NaicsInfo.vue'
+
+import Footer from '@/components/Footer.vue'
 
 @Component({
-    components: { TopMenu, CountySelecter, RegionSelecter }
+    components: { 
+        TopMenu, 
+        CountySelecter, 
+        RegionSelecter, 
+        ExportablePlotly, 
+        MultipleCountySelecter,
+        NaicsInfo,
+        Footer,
+    }
 })
 export default class Compare extends Vue {
 
-    counties = []; 
+    fips = []; //list of fips selected
+
+    counties = {};//county details loaded for comparision
+
+    maxNum = 3;
+
+    //list of aggregation errors
+    errors = {
+        bvis: [],
+    }
+
+    uGraphLayout = {
+        height: 200,
+        margin: {
+            l: 30,
+            r: 20,
+            t: 10,
+            b: 20,
+        },
+        legend: {orientation: 'h', side: 'bottom'},
+        yaxis: {rangemode: 'tozero', ticksuffix: "%"},
+    }
+
+    get uGraphData() {
+        const traces = [];
+        this.fips.forEach(fip=>{
+            if(!this.counties[fip]) return; //not yet loaded?
+            const detail = this.counties[fip];
+            if(detail.loading) return;
+            traces.push({
+                x: detail.distress_ur.date,
+                y: detail.distress_ur.rate,
+                name: detail.county+","+detail.state,
+            })
+        });
+        return traces;
+    }
+
+    popGraphLayout = {
+        height: 200,
+        margin: {
+            l: 30,
+            r: 20,
+            t: 10,
+            b: 20,
+        },
+        legend: {orientation: 'h', side: 'bottom'},
+        yaxis: {rangemode: 'tozero',/*ticksuffix: "%"*/},
+    }
+
+    get popGraphData() {
+
+        /*
+        const template = {
+            x: this.detail.pops.years,
+            stackgroup: 'one',
+            line: {
+                width: 0,
+                shape: 'spline',
+                smoothing: 0.8,
+            },
+            mode: 'lines',
+        }
+        */
+
+        const traces = [];
+        this.fips.forEach(fip=>{
+            if(!this.counties[fip]) return; //not yet loaded?
+            const detail = this.counties[fip];
+            if(detail.loading) return;
+
+            //aggreage all groups into total..
+            const y = [];
+            detail.pops.groups.forEach(group=>{
+                group.y.forEach((v,idx)=>{
+                    if(!y[idx]) y[idx] = 0;
+                    y[idx] += v;
+                });
+            });
+
+            //then create a graph for each county
+            traces.push({
+                x: detail.pops.years,
+                y,
+                name: detail.county+","+detail.state,
+            });
+        });
+        return traces;
+    }
 
     @Watch('$route')
     onRouteChange(nv, ov) {
         if(ov == nv) return;
     }
 
-    init(fips) {
-        fips.forEach(fip=>{
-            this.addCounty(fip);
+    @Watch('fips')
+    onFipsChange() {
+        //load fips that we haven't loaded yet
+        this.fips.forEach(fip=>{
+            if(!this.counties[fip]) {
+                Vue.set(this.counties, fip, {loading: true});
+                fetch(this.$root.dataUrl+"/counties/county."+fip+".json").then(res=>res.json()).then(data=>{
+                    Vue.set(this.counties, fip, data);
+                });
+            }
         });
     }
 
+    regionSelected({id, fips}) {
+        this.fips = fips;
+    }
+
+    /*
+    init(fips) {
+        this.fips = fips;
+    }
     removeCounty(county) {
         this.counties.splice(this.counties.indexOf(county), 1);
     }
@@ -106,16 +246,102 @@ export default class Compare extends Vue {
         });
         this.counties.push(entry);
     }
+    */
 
     mounted() {
         //console.log("initial selection from params", this.$route.params.fips)
-        const fips = this.$route.params.fips.split(",");
-        this.init(fips);
+        this.fips = this.$route.params.fips.split(",");
     }
     
     selectRegion({fips, id}) {
         //console.log("selected region", fips, id);
     }
+
+    bviLayout = {
+        height: 150,
+        margin: {
+            l: 30,
+            r: 30,
+            t: 10,
+            b: 30,
+        },
+        legend: {
+            y: 1.15,
+            bgcolor: 'rgba(255, 255, 255, 0)',
+            bordercolor: 'rgba(255, 255, 255, 0)',
+            orientation: 'h',
+        },
+        //barmode: 'stack',
+        xaxis: {
+            type: 'category', //show all years
+        },
+    }
+
+    get bvis() {
+        this.errors.bvis = [];
+
+        //find sectors that has non-0 vulnerability in any counties
+        const vulnNaics = []
+        this.fips.forEach(fip=>{
+            if(!this.counties[fip]) return; //not yet loaded?
+            const detail = this.counties[fip];
+            if(detail.loading) return;
+
+            for(const naics in detail.bvis2) {
+                const data = detail.bvis2[naics];
+                if(!data) {
+                    this.errors.bvis.push("No BVI information for ",detail.county);
+                    return;
+                }
+                let vuln = false;
+                data.estab_v.forEach(v=>{
+                    if(v != 0) vuln = true;
+                });
+                data.emp_v.forEach(v=>{
+                    if(v != 0) vuln = true;
+                });
+                if(vuln && !vulnNaics.includes(naics)) vulnNaics.push(naics);
+            }
+        });
+
+        const bvis = [];
+        /*
+            {
+                naics: "20",
+                data: "todo",
+            }    
+        */
+
+        //now create graphs for naics code with vulnerable businesses
+        vulnNaics.forEach(naics=>{
+            const estTraces = []; //for each county
+            const empTraces = []; //for each county
+            this.fips.forEach(fip=>{
+                if(!this.counties[fip]) return; //not yet loaded?
+                const detail = this.counties[fip];
+                if(detail.loading) return;
+
+                const data = detail.bvis2[naics];
+                estTraces.push({
+                    x: data.years,
+                    y: data.estab_v,
+                    name: detail.county+","+detail.state,
+                    //type: 'bar',
+                    //marker: { color: '#6008', },
+                });
+                empTraces.push({
+                    x: data.years,
+                    y: data.emp_v,
+                    name: detail.county+","+detail.state,
+                    //type: 'bar',
+                    //marker: { color: '#6008', },
+                });
+            });
+            bvis.push({naics, estTraces, empTraces})
+        });
+        return bvis;
+    }
+
 }
 </script>
 
@@ -124,12 +350,14 @@ export default class Compare extends Vue {
 position: sticky;
 top: 50px;
 box-shadow: none;
-border-bottom: 1px solid #ddd;
 background-color: white;
+}
+h3 {
+    margin: 0;
 }
 h4 {
     opacity: 0.7;
-    margin-bottom: 10px;
+    margin: 10px 0;
 }
 h5 {
     margin-bottom: 5px;
@@ -138,5 +366,34 @@ h5 {
     color: #409EFF;
     font-weight: bold;
     font-size: 150%;
+}
+.county {
+    border-left: 1px solid #ddd;
+}
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+thead {
+    border-bottom: 1px solid #eee;
+}
+thead th {
+    text-align: left;
+    padding-bottom: 10px;
+}
+tbody th {
+    text-align: right;
+    padding-right: 10px;
+}
+.county-selecter {
+    background-color: #eee;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    p {
+        margin: 5px 0;
+        margin-bottom: 10px;
+        line-height: 200%;
+    }
 }
 </style>
