@@ -14,7 +14,6 @@
             </p>
         </div>
 
-        <el-alert type="info" v-for="(error, idx) in errors.bvis" :key="idx">{{error}}</el-alert>
 
         <!-- when fips number are low, show some detail number side by side in table-->
         <br>
@@ -62,6 +61,7 @@
         <ExportablePlotly :data="popGraphData" :layout="popGraphLayout"/>
 
         <h4>Business Vulnerability</h4>
+        <el-alert type="info" v-for="(error, idx) in errors.bvis" :key="idx">{{error}}</el-alert>
         <div v-for="bvi in bvis" :key="bvi.naics">
             <p>
                 <b><NaicsInfo :id="bvi.naics"/></b>
@@ -286,6 +286,9 @@ export default class Compare extends Vue {
 
         //find sectors that has non-0 vulnerability in any counties
         const vulnNaics = []
+        //let minyear = Infinity;
+        //let maxyear = -Infinity;
+        const allYears = [];
         this.fips.forEach(fip=>{
             if(!this.counties[fip]) return; //not yet loaded?
             const detail = this.counties[fip];
@@ -294,7 +297,7 @@ export default class Compare extends Vue {
             for(const naics in detail.bvis2) {
                 const data = detail.bvis2[naics];
                 if(!data) {
-                    this.errors.bvis.push("No BVI information for ",detail.county);
+                    //this.errors.bvis.push("No BVI("+naics+") information for "+detail.county);
                     return;
                 }
                 let vuln = false;
@@ -305,8 +308,16 @@ export default class Compare extends Vue {
                     if(v != 0) vuln = true;
                 });
                 if(vuln && !vulnNaics.includes(naics)) vulnNaics.push(naics);
+
+                //if(minyear > data.years[0]) minyear = data.years[0];
+                //if(maxyear < data.years[data.years.length-1]) maxyear = data.years[data.years.length-1];
+                data.years.forEach(y=>{
+                    if(!allYears.includes(y)) allYears.push(y);
+                })
             }
         });
+
+        allYears.sort();
 
         const bvis = [];
         /*
@@ -326,12 +337,30 @@ export default class Compare extends Vue {
                 if(detail.loading) return;
                 const data = detail.bvis2[naics];
                 if(!data) {
-                    this.errors.bvis.push("No BVI information for "+detail.county+","+detail.state);
+                    this.errors.bvis.push("No BVI("+naics+") information for "+detail.county);
                     return;
                 }
+
+                //make sure data has all years between min/max
+                const estabV = [];
+                const empV = [];
+                allYears.forEach(y=>{
+                    const idx = data.years.indexOf(y);
+                    if(~idx) {
+                        estabV.push(data.estab_v[idx]);
+                        empV.push(data.emp_v[idx]);
+                    } else {
+                        //value missing.. add 0
+                        estabV.push(0);
+                        empV.push(0);
+                    }
+                });
+
                 estTraces.push({
-                    x: data.years,
-                    y: data.estab_v,
+                    //x: data.years,
+                    x: allYears,
+                    //y: data.estab_v,
+                    y: estabV,
                     name: detail.county+","+detail.state,
                     mode: 'lines',
                     line: { width: 1, },
@@ -342,8 +371,10 @@ export default class Compare extends Vue {
                     //marker: { color: '#6008', },
                 });
                 empTraces.push({
-                    x: data.years,
-                    y: data.emp_v,
+                    //x: data.years,
+                    x: allYears,
+                    //y: data.emp_v,
+                    y: empV,
                     name: detail.county+","+detail.state,
                     mode: 'lines',
                     line: { width: 1, },
