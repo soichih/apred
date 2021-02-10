@@ -41,7 +41,6 @@ geo.features.forEach(feature=>{
 
 console.log("loading acs");
 const acs = require(config.pubdir+'/raw/statsamerica.acs.json');
-
 acs.forEach(rec=>{
     const fips = rec.statefips+rec.countyfips;
 
@@ -53,6 +52,7 @@ acs.forEach(rec=>{
         counties[fips].popdensity = rec.pop_density;
     }
 
+    //load population 
     let pops = counties[fips].pops;
     if(!pops) pops = {
         years: [],
@@ -69,6 +69,43 @@ acs.forEach(rec=>{
     pops.groups[2].y.push(rec.pop_25to44 + rec.pop_45to64); //315, 316
     pops.groups[3].y.push(rec.pop_65plus); //317
     counties[fips].pops = pops;
+
+    //load race
+    let or = counties[fips].or;
+    if(!or) or = {
+        years: [],
+        groups: {
+            white: [],
+            black: [],
+            aian: [],
+            asian: [],
+            hawaiian: [],
+            mixed: [],
+            non_hisp: [],
+            hispanic: [],
+        }
+    };
+    or.years.push(rec.year); //assume it's ordered by year..
+    or.groups.white.push(rec.white_alone);
+    or.groups.black.push(rec.black_alone);
+    or.groups.aian.push(rec.aian_alone);
+    or.groups.asian.push(rec.asian_alone);
+    or.groups.hawaiian.push(rec.hawaiian_alone);
+    or.groups.mixed.push(rec.two_or_more_races);
+    or.groups.non_hisp.push(rec.non_hisp);
+    or.groups.hispanic.push(rec.hispanic);
+    /*
+     what about these?
+      race_tom: 514,
+      hispanic: 36344,
+      mexican: 35,
+      cuban: 27,
+      pr: 36089,
+      oth_hisp: 193,
+      tot_nh: 95,
+      nh_orwhite: 48,
+    */
+    counties[fips].or = or;
 });
 
 //report counties with missing demo
