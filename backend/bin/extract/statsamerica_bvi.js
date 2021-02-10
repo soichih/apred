@@ -22,10 +22,8 @@ SELECT a.[year]
     , a.[naics_code]
     , a.[estab_total]
     , ISNULL(b.[estab_total],0) AS estab_vuln_total
-    , ISNULL(b.[estab_total],0)/a.[estab_total] AS estab_vuln_pct
-    , ISNULL(a.[mm_employees],0) mm_employees
+    , ISNULL(a.[mm_employees],0) AS mm_employees
     , ISNULL(b.[mm_employees], 0) AS emp_vuln_total
-    , CASE WHEN a.[mm_employees] = 0 THEN 0 ELSE ISNULL(b.[mm_employees],0)/a.[mm_employees] END AS emp_vuln_pct
 FROM [stats4].[dbo].[cbp_uscnty] a 
 LEFT JOIN (
     SELECT [year]
