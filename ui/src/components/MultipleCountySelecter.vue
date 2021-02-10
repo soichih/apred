@@ -67,7 +67,6 @@ export default {
 
             //delay if countyList is not loaded yet
             if(!this.countyList) return setTimeout(()=>{
-                console.log("waiting for countyList");
                 this.preselect(fips);
             }, 1000)
 
