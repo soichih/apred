@@ -135,7 +135,7 @@ export default class Compare extends Vue {
             t: 10,
             b: 20,
         },
-        legend: {orientation: 'h', side: 'bottom'},
+        legend: {orientation: 'h', x: 0.4, y: 1.4},
         yaxis: {rangemode: 'tozero', ticksuffix: "%"},
     }
 
@@ -150,6 +150,7 @@ export default class Compare extends Vue {
                 y: detail.distress_ur.rate,
                 name: detail.county+","+detail.state,
                 line: { width: 1, },
+                showlegend: true,
             })
         });
         return traces;
@@ -163,7 +164,8 @@ export default class Compare extends Vue {
             t: 10,
             b: 20,
         },
-        legend: {orientation: 'h', side: 'bottom'},
+        //legend: {orientation: 'h', side: 'bottom'},
+        showlegend: false,
         yaxis: {rangemode: 'tozero',/*ticksuffix: "%"*/},
     }
 
