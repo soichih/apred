@@ -11,8 +11,9 @@ import numeral from "numeral";
 
 import { Vue} from 'vue-property-decorator';
 
-Vue.filter("formatNumber", (value)=>{
-    return numeral(value).format("0,0"); // displaying other groupings/separators is possible, look at the docs
+//for format .. see http://numeraljs.com/
+Vue.filter("formatNumber", (value, f="0,0")=>{
+    return numeral(value).format(f); // displaying other groupings/separators is possible, look at the docs
 });
 
 export default {
