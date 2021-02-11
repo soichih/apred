@@ -173,12 +173,12 @@
 
                 <div>
                     <h5>US Average</h5>
-                    <span class="primary" style="color: gray;"> {{unempRateUS}}%</span>
+                    <span class="primary" style="color: gray;"> {{unempRateUS|formatNumber("0.00")}}%</span>
                 </div>
 
                 <div>
                     <h5><b>{{detail.county}}</b> County</h5>
-                    <span class="primary"> {{unempRateCounty}}%</span>
+                    <span class="primary"> {{unempRateCounty|formatNumber("0.00")}}%</span>
                     <br>
                     <el-tag type="danger" size="mini" v-if="unempRateUS < unempRateCounty">Above US Rate</el-tag>
                 </div>

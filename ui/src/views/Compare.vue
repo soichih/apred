@@ -267,6 +267,7 @@ export default class Compare extends Vue {
             t: 10,
             b: 30,
         },
+        /*
         legend: {
             y: 1.15,
             bgcolor: 'rgba(255, 255, 255, 0)',
@@ -274,6 +275,9 @@ export default class Compare extends Vue {
             orientation: 'h',
             font: { size: 10 },
         },
+        */
+        showlegend: false,
+
         //barmode: 'stack',
         xaxis: {
             type: 'category', //show all years
@@ -362,8 +366,9 @@ export default class Compare extends Vue {
                     //y: data.estab_v,
                     y: estabV,
                     name: detail.county+","+detail.state,
+                    //mode: 'lines',
                     mode: 'lines',
-                    line: { width: 1, },
+                    line: { width: 1, /*shape: 'spline'*/},
                     fill: "tozeroy",
                     fillcolor: 'rgba(0,0,0,0.02)',
                     //opacity: 0.1,
