@@ -4,8 +4,6 @@
     v-model="myid" 
     filterable 
     clearable 
-    remote
-    :remote-method="searchRegion"
     :loading="loading"
     :placeholder="placeholder"
     @change="change" style="width: 100%;" size="large">
@@ -45,13 +43,24 @@ export default {
         }).then(data=>{
             this.regionList = data;
             this.myid = this.id;
+
+            //convert regionList to select options
+            for(const eid in this.regionList) {
+                const r = this.regionList[eid];
+                this.options.push({
+                    value: eid,
+                    label: r.name,
+                    fips: r.fips,
+                })
+            }
         });
     },
 
     methods: {
+        /*
         searchRegion(q) {
             this.options = [];
-            if(q.length < 3) {
+            if(q.length < 2) {
                 return;
             }
 
@@ -68,6 +77,7 @@ export default {
             }
             this.loading = false;
         },
+        */
 
         change() {
             if(!this.myid) {
