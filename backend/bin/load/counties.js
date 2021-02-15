@@ -31,6 +31,8 @@ geo.features.forEach(feature=>{
         gdp: null, 
         medianincome: null, 
         percapitaincome: null, 
+        biggestIndustry: null, //naics: 62, naics_title: 'title', empl: 'num'
+        industries: [], 
 
         //measure_distress timeseries
         distress_pcm: {years: [], est: [], moe: []}, //percapitamoney
@@ -38,6 +40,21 @@ geo.features.forEach(feature=>{
         distress_ur: {date: [], employed: [], unemp: [], rate: []}, //percapitapersonal
     } 
 });
+
+console.log("loading industries");
+const industries = require(config.pubdir+"/raw/industries.json");
+for(let fips in counties) {
+    let max = null;
+    counties[fips].industries = industries.filter(r=>r.statefips+r.countyfips == fips).map(r=>{
+        return {
+            //year: r.year, //should be all the same!
+            empl: r.empl,
+            naics: r.naics,
+            name: r.naics_title,
+        }
+    })
+}
+//console.dir(counties["20095"].biggestIndustry);
 
 console.log("loading acs");
 const acs = require(config.pubdir+'/raw/statsamerica.acs.json');
@@ -429,7 +446,6 @@ function handleBVINaics(cb) {
 
     cb();
 }
-
 handleBVINaics(err=>{
     if(err) throw err;
 
