@@ -17,12 +17,12 @@
 
         <!-- when fips number are low, show some detail number side by side in table-->
         <br>
-        <table class="table" v-if="fips.length > 0 && fips.length <= 3">
+        <table class="table" v-if="fips.length > 0 && fips.length <= 6">
         <thead>
         <tr>
             <th v-for="fip in fips" :key="fip">
                 <h3 v-if="counties[fip] && !counties[fip].loading">
-                    {{counties[fip].county}}, {{counties[fip].state}}
+                    {{counties[fip].county}}<small v-if="stateDiffers">, {{counties[fip].state}}</small>
                 </h3>
             </th>
         </tr>
@@ -47,17 +47,23 @@
                     <h4>Median Household Income</h4> 
                     <span class="primary">${{counties[fip].medianincome | formatNumber}}</span>
                 </div>
+                <br>
+                <br>
+                <hr>
             </td>
         </tr>
         </tbody>
         </table>
 
-        <hr>
 
+        <!--
         <h4>Unemployment Rate</h4>
+        -->
         <ExportablePlotly :data="uGraphData" :layout="uGraphLayout"/>
 
+        <!--
         <h4>Population</h4>
+        -->
         <ExportablePlotly :data="popGraphData" :layout="popGraphLayout"/>
 
         <h4>Business Vulnerability</h4>
@@ -120,23 +126,42 @@ export default class Compare extends Vue {
 
     counties = {};//county details loaded for comparision
 
-    maxNum = 3;
-
     //list of aggregation errors
     errors = {
         bvis: [],
     }
 
     uGraphLayout = {
-        height: 200,
+        title: {
+            text: 'Unemployment Rate',
+            font: {
+                family: 'Avenir,Helvetica,Arial,sans-serif',
+                size: 17,
+                bold: true,
+                color: '#666',
+            },
+            x: 0,
+            y: 0.7,
+        },
+        height: 350,
         margin: {
             l: 30,
             r: 20,
-            t: 10,
-            b: 20,
+            //t: 10,
+            //b: 30,
         },
-        legend: {orientation: 'h', x: 0.4, y: 1.4},
+        legend: {orientation: 'h', x: 0, y: 2.2},
         yaxis: {rangemode: 'tozero', ticksuffix: "%"},
+    }
+
+    get stateDiffers() {
+        let differ = false;
+        let state = null;
+        this.fips.forEach(fip=>{
+            if(state == null) state = this.counties[fip].state;
+            if(this.counties[fip].state != state) differ = true;
+        });
+        return differ;
     }
 
     get uGraphData() {
@@ -157,11 +182,21 @@ export default class Compare extends Vue {
     }
 
     popGraphLayout = {
-        height: 200,
+        title: {
+            text: 'Population',
+            font: {
+                family: 'Avenir,Helvetica,Arial,sans-serif',
+                size: 17,
+                bold: true,
+                color: '#666',
+            },
+            x: 0,
+        },
+        height: 175,
         margin: {
             l: 30,
             r: 20,
-            t: 10,
+            t: 30,
             b: 20,
         },
         //legend: {orientation: 'h', side: 'bottom'},
@@ -413,13 +448,16 @@ h4 {
     opacity: 0.7;
     margin: 20px 0 5px 0;
 }
+table h4, table h3 {
+    font-size: 90%;
+}
 h5 {
     margin-bottom: 5px;
 }
 .primary {
     color: #409EFF;
     font-weight: bold;
-    font-size: 150%;
+    font-size: 130%;
 }
 .county {
     border-left: 1px solid #ddd;
