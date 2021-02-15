@@ -806,7 +806,7 @@ export default class CountyDetail extends Vue {
 
             this.orGraphData.push(Object.assign({ 
                 y: this.detail.or.groups[key],
-                name: key,
+                name: key.toUpperCase(),
                 hoverinfo: 'y+text',
             }, template));
         }
