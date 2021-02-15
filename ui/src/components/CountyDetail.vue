@@ -164,6 +164,21 @@
             </el-col>
         </el-row>
 
+        <el-row :gutter="20" v-if="detail.industries">
+            <el-col :span="5">
+                <h4>Industries</h4>
+            </el-col>
+            <el-col :span="19">
+                <!--
+                <NaicsInfo :id="detail.biggestIndustry.naics" style="font-size: 120%;"/><br>
+                <span class="primary">{{detail.biggestIndustry.empl | formatNumber("0.00")}}</span>
+                -->
+                <ExportablePlotly :data="industryGraphData" :layout="industryGraphLayout"/>
+                <br>
+                <br>
+            </el-col>
+        </el-row>
+
         <el-row :gutter="20">
             <el-col :span="5">
                 <h4>
@@ -517,6 +532,74 @@ export default class CountyDetail extends Vue {
     showPastHistory = false;
     shownIndicators = [];
 
+    industryGraphLayout = {
+        height: 400,
+        //width: 900,
+        margin: {"t": 0, "b": 30, "l": 400, "r": 0},
+        //showlegend: false
+        xaxis: {
+            title: "Employment (k)",
+        }
+    }
+
+    get industryGraphData() {
+        const non0 = this.detail.industries.filter(r=>r.empl > 0);
+        const total = non0.reduce((a,v)=>{ return a+v.empl}, 0);
+
+        /*
+        //group all industries <3% into "others"
+        const major = non0.filter(r=>r.empl >= total*0.03);
+        const others = non0.filter(r=>r.empl < total*0.03);
+        const othersTotal = others.reduce((a,v)=>a+v.empl, 0);
+        */
+
+        //add percentages to each industry name
+        non0.forEach(r=>{
+            r.name = r.name + " ("+(r.empl/total*100).toFixed(1)+"%)";
+        });
+
+        return [
+            {
+                //x: [othersTotal, ...major.map(r=>r.empl)],
+                //y: ['Others', ...major.map(r=>r.name)],
+                x: non0.map(r=>r.empl),
+                y: non0.map(r=>r.name),
+
+                type: 'bar',
+                orientation: 'h',
+
+                //type: 'pie',
+                //textinfo: 'label+percent',
+                //insidetextorientation: "radial",
+                //textposition: "outside",
+                //automargin: true
+            },
+        ];
+
+        /*
+        return [
+            {
+                x: this.detail.distress_ur.date,
+                y: this.detail.distress_ur.rate,
+                name: 'County Unempl. Rate',
+                line: {
+                    color: '#409EFF',
+                },
+            },
+
+            {
+                x: this.$root.unempUS.date,
+                y: this.$root.unempUS.rate,
+                //yaxis: 'y2',
+                name: 'US Unempl. Rate',
+                line: {
+                    color: '#999',
+                },
+            }
+        ];
+        */
+    }
+
     demoGraphData = [];
     demoGraphLayout = {
         height: 200,
@@ -619,6 +702,7 @@ export default class CountyDetail extends Vue {
 
     @Watch('fips')
     onDetailChange() {
+        this.$router.replace("/county/"+this.fips);
         this.load();
     }
 
