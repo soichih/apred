@@ -5,7 +5,7 @@ const async = require('async');
 const config = require('../../config');
 const mssql = require('mssql');
 
-console.log("statsamerica c2k_uscnty_acs --------------------------");
+console.log("statsamerica cbp_uscnty --------------------------");
 
 //I can only connect from IU VPN connected IPs - not dev1
 mssql.connect(config.stats_america.db_stats4).then(pool=>{
@@ -66,6 +66,8 @@ LEFT JOIN (
 ) b ON b.[year] = a.[year] AND b.[statefips] = a.[statefips] AND b.[countyfips] = a.[countyfips] AND b.[naics_code] = a.[naics_code]
 WHERE a.[naics_code] != '00' AND (LEN(a.[naics_code]) = 2 OR a.[naics_code] LIKE '__-__')  AND a.[year] >= '2012' 
 
+    ORDER BY a.year
+
     `).then(res=>{
         /*
           {
@@ -83,5 +85,35 @@ WHERE a.[naics_code] != '00' AND (LEN(a.[naics_code]) = 2 OR a.[naics_code] LIKE
         fs.writeFileSync(config.pubdir+"/raw/bvi.json", JSON.stringify(res.recordset));
         pool.close();
     });
+
+    pool.request().query(`
+        SELECT a.statefips, a.countyfips, a.year, a.naics, b.naics_title, a.empl
+        FROM cew_totown_n a, naics b
+        WHERE 
+            a.year = '2019' AND a.naics <> '00'
+            AND a.naics = b.naics_code
+            AND (a.naics LIKE '__' OR a.naics LIKE '__-__')
+        ORDER BY empl 
+    `).then(res=>{
+        //AND a.statefips = '18' AND a.countyfips = '097'
+        /*
+        {
+          statefips: '18',
+          countyfips: '097',
+          year: '2019',
+          naics: '62',
+          naics_title: 'Health Care and Social Services',
+          empl: 99721.25
+        }
+        */
+        /*
+        res.recordset.forEach(rec=>{
+            console.log(rec.statefips, rec.countfips, rec.naics, rec.naics_title);
+        });
+        */
+        fs.writeFileSync(config.pubdir+"/raw/industries.json", JSON.stringify(res.recordset));
+        pool.close();
+    });
+
 }
 
