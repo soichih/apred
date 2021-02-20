@@ -111,4 +111,57 @@ p.small {
         background-color: #eee;
     }
 }
+.mapboxgl-popup-tip,
+.mapboxgl-popup-content {
+    opacity: 1;
+}
+
+.popup {
+    padding: 0 5px;
+
+    h2 {
+        font-size: 15px;
+        background-color: #900;
+        color: white;
+        margin: -15px;
+        padding: 10px 15px;
+        margin-bottom: 10px;
+        border-radius: 5px 5px 0 0;
+    }
+    h3 {
+        font-size: 11px;
+    }
+    h4 {
+        margin-bottom: 0;
+    }
+    p {
+        margin-top: 5px;
+    }
+}
+
+.drs {
+    margin-bottom: 10px;
+
+    .dr {
+        padding-right: 10px;
+        text-transform: uppercase;
+        font-weight: bold;
+        white-space: nowrap;
+    }
+    .no-dr {
+        font-size: 80%;
+        opacity: 0.8;
+    }
+}
+.eda-award {
+    time {
+        font-size: 80%;
+        opacity: 0.9;
+        margin: 0 5px;
+    }
+    .eda-county {
+        font-size: 80%;
+        margin-right: 5px;
+    }
+}
 </style>
