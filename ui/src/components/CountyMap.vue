@@ -76,11 +76,13 @@
                     <br>
                     <el-radio v-for="type in edaTypes" :key="type" v-model="edaType" :label="type">{{type.split(" ").slice(0, 2).join(" ")}}</el-radio>
                 </p>
+                <!--
                 <div class="legend-item">
                     <span class="legend-color" style="background-color: #00ff00">&nbsp;</span>&nbsp;Statewide Awards
                     <br>
                     <span class="legend-color" style="background-color: #0066ff">&nbsp;</span>&nbsp;County Awards
                 </div>
+                -->
             </div>
 
             <div v-if="mode == 'resilience'">
@@ -130,6 +132,8 @@ import CountySelecter from '@/components/CountySelecter.vue'
 import mapboxgl from 'mapbox-gl';
 import "mapbox-gl/dist/mapbox-gl.css";
 
+import numeral from "numeral";
+
 mapboxgl.accessToken = "pk.eyJ1Ijoic29pY2hpaCIsImEiOiJjazVqdnBsM2cwN242M2psdjAwZXhhaTFuIn0.o3koWlzx1Tup8CJ1B_KaEA";
 
 @Component({
@@ -139,7 +143,7 @@ export default class Disaster extends Vue {
 
     modes = [
         {value: "dr", label: "FEMA Disaster Declarations"},
-        {value: "eda", label: "EDA Supplemental Awards"},
+        {value: "eda", label: "EDA Awards"},
         {value: "resilience", label: "Disaster Resilience"},
     ];
 
@@ -167,14 +171,16 @@ export default class Disaster extends Vue {
         {value: 'recent', label: '2017 - Now'},
     ];
     yearsDR = null;
+    eda2018 = null;
 
     resYear = null; //will be set to "2018" once cutter info is loaded
     resYears = [];
 
     edaYear = null; //will be set to "all" once eda layers area loaded
     edaYears = [];
-    edaType = 'Infrastructure';
-    edaTypes = [];
+    //edaType = 'Infrastructure';
+    edaType = "All"; //all
+    edaTypes = ["All"];
 
     cutterIndicators = {
         "SOC": {
@@ -202,6 +208,8 @@ export default class Disaster extends Vue {
     }
     */
 
+    awardIcon = require('@/assets/pin.png');
+
     @Watch('drRange')
     onRangeChange() {
         //apply to each layers
@@ -224,8 +232,13 @@ export default class Disaster extends Vue {
                     }
                 }); 
             });
-            this.map.setFilter('county_disaster_'+key, filter);
-            this.map.setFilter('state_disaster_'+key, stateFilter);
+
+            //they contain duplicates from different year - let's dedupe
+            const filterDeduped = [...new Set(filter)];
+            const stateFilterDeduped = [...new Set(stateFilter)];
+
+            this.map.setFilter('county_disaster_'+key, filterDeduped);
+            this.map.setFilter('state_disaster_'+key, stateFilterDeduped);
         }
     }
 
@@ -257,6 +270,7 @@ export default class Disaster extends Vue {
     @Watch('edaYear')
     onEdaYearChange(v) {
         if(!v) return;
+        console.log("year changed to", v);
         this.updateEda();
     }
 
@@ -267,21 +281,27 @@ export default class Disaster extends Vue {
     }
 
     updateEda() {
-        const filters = ["all"];
-        
-        //apply purpose filter
-        filters.push(["==", ['get', 'purpose'], this.edaType]);
-
-        //apply year filter
+        /*
+        //for pins
+        let filter = ["all"];
+        if(this.edaType != "All") filter.push(["==", ['get', 'purpose'], this.edaType]);
         if(this.edaYear != "all") {
             const startDate = new Date(this.edaYear+"-01-01").getTime();
             const endDate = new Date(this.edaYear+"-12-31").getTime();
-            filters.push([">=", ['get', 'date'], startDate]);
-            filters.push(["<=", ['get', 'date'], endDate]);
+            filter.push([">=", ['get', 'date'], startDate]);
+            filter.push(["<=", ['get', 'date'], endDate]);
         }
+        this.map.setFilter('eda-pins', filter);
+        */
 
-        this.map.setFilter('eda', filters);
-        this.map.setFilter('eda-labels', filters);
+        //eda county labels
+        const filter = ['in', 'fips'];
+        this.eda2018.forEach(rec=>{
+            if(this.edaYear != "all" && rec.year != this.edaYear) return;
+            if(this.edaType != "All" && rec.data.grant_purpose != this.edaType) return;
+            if(!filter.includes(rec.fips)) filter.push(rec.fips);
+        });
+        this.map.setFilter('eda', filter);
     }
  
     created() {
@@ -361,13 +381,13 @@ export default class Disaster extends Vue {
     }
     hideEDA2018Layers() {
         if(!this.edaYear) return; //not loaded yet
-        this.map.setLayoutProperty('eda-labels', 'visibility', 'none');
         this.map.setLayoutProperty('eda', 'visibility', 'none');
+        //this.map.setLayoutProperty('eda-pins', 'visibility', 'none');
     }
 
     showEDA2018Layers() {
-        this.map.setLayoutProperty('eda-labels', 'visibility', 'visible');
         this.map.setLayoutProperty('eda', 'visibility', 'visible');
+        //this.map.setLayoutProperty('eda-pins', 'visibility', 'visible');
     }
 
     loadCutters(year, measure) {
@@ -437,6 +457,7 @@ export default class Disaster extends Vue {
         this.popup = new mapboxgl.Popup({
             closeButton: false,
             offset: [0, -20],
+            maxWidth: 400,
         });
 
         this.map.on('load', ()=>{
@@ -536,103 +557,73 @@ export default class Disaster extends Vue {
                     }
                 });
 
-                fetch(this.$root.dataUrl+"/eda2018.albers.geojson").then(res=>{ 
+                //load eda awards
+                fetch(this.$root.dataUrl+"/eda2018.json").then(res=>{ 
                     return res.json()
                 }).then(data=>{
-
-                    //amount labels
-                    /*
-                    const geojsonPoint = {type: "FeatureCollection", features: []};
-                    for(const recid in data) {
-                        const rec = data[recid];
-                        geojsonPoint.features.push({
-                            type: "Feature",
-                            geometry: {
-                                type: "Point",
-                                coordinates: [ rec.lon, rec.lat ],
-                            },
-                            properties: {
-                                awardStr: "$"+this.$options.filters.formatNumber(rec.award_amount/1000)+"k",
-                                //type: rec.statewide?'state':'county',
-                                date: new Date(rec.grant_award_date).getTime(),
-                                purpose: rec.grant_purpose, //Infrastructure / Construction / Non-Construction / Technical.. / Disaster.. Revolving
-
-                            }
+                    this.eda2018 = [];
+                    //pull year/county and orignal rec
+                    for(const fain in data) {
+                        const rec = data[fain];
+                        rec.counties.forEach(county=>{
+                            this.eda2018.push({
+                                year: new Date(rec.grant_award_date).getFullYear(),
+                                fips: county.statefips+county.countyfips,
+                                data: rec,
+                            })
                         });
                     }
-                    */
-                    this.map.addSource('eda2018', { type: "geojson", data });
-                    this.map.addLayer({
-                        id: 'eda-labels',
-                        type: 'symbol',
-                        source: "eda2018",
-                        layout: {
-                            visibility: 'none', 
-                            'text-field': ['get', 'awardStr'],
-                            'text-size': [
-                                "interpolate", 
-                                [ "linear" ],
-                                [ "zoom" ], 
-                                2,
-                                [ "interpolate", [ "linear" ], [ "get", "award" ], 500, 3, 5000, 6 ],
-                                9,
-                                [ "interpolate", [ "linear" ], [ "get", "award" ], 500, 10, 5000, 30 ]
-                            ]
-                        },
-                        paint: {
-                            'text-color': 'rgba(0,0,0,1)'
-                        }
-                    });
-
-                    //bar graphs
-                    /*
-                    const geojson = {type: "FeatureCollection", features: []};
-                    for(const recid in data) {
-                        const rec = data[recid];
-                        const ep = 0.15;
-                        geojson.features.push({
-                            type: "Feature",
-                            geometry: {
-                                type: "Polygon",
-                                coordinates: [ 
-                                    [   [ rec.lon-ep, rec.lat-ep ],
-                                        [ rec.lon-ep, rec.lat+ep ],
-                                        [ rec.lon+ep, rec.lat+ep ],
-                                        [ rec.lon+ep, rec.lat-ep ],
-                                        [ rec.lon-ep, rec.lat-ep ], ]
-                                ]
-                            },
-                            properties: {
-                                height: Math.max(25000, rec.award_amount/10),
-                                date: new Date(rec.grant_award_date).getTime(),
-                                color: rec.statewide?'#00ff00':'#0066ff',
-                                purpose: rec.grant_purpose, //Infrastructure / Construction / Non-Construction / Technical.. / Disaster.. Revolving
-                            }
-                        });
-                        if(!this.edaTypes.includes(rec.grant_purpose)) this.edaTypes.push(rec.grant_purpose);
+                    //create edatype catalog
+                    for(const fain in data) {
+                        const rec = data[fain];
+                        if(!this.edaTypes.includes(rec.grant_purpose)) this.edaTypes.push(rec.grant_purpose)
                     }
-                    */
 
-                    //this.map.addSource('eda', { type: "geojson", data });
                     this.map.addLayer({
                         id: 'eda',
-                        type: 'fill-extrusion',
-                        source: "eda2018",
+                        type: 'fill',
+                        source: 'counties',
                         paint: {
-                            "fill-extrusion-color": ['get', 'color'],
-                            "fill-extrusion-height": ['get', 'height'],
+                            'fill-color': '#00f',
+                            'fill-opacity': 0.5,
                         },
+                        filter: ['in', 'fips', ''],
                         layout: {
-                            visibility: 'none', 
+                            visibility: 'none',
                         }
-                    });
+                    }, 'map');
 
-                    //create edatype catalog
-                    for(const feature of data.features) {
-                        if(!this.edaTypes.includes(feature.properties.purpose)) {
-                            this.edaTypes.push(feature.properties.purpose); 
-                        }
-                    }
+                    //load pins where eda is awareded (ike wants to remove this)
+                    /*
+                    fetch(this.$root.dataUrl+"/eda2018.albers.geojson").then(res=>{ 
+                        return res.json()
+                    }).then(data=>{
+
+                        this.map.addSource('eda2018-pin', { type: "geojson", data });
+                        const img = new Image();
+                        img.addEventListener('load', err=>{
+                            this.map.addImage('award-icon', img, {sdf: true});
+                            this.map.addLayer({
+                                id: 'eda-pins',
+                                type: 'symbol',
+                                source: "eda2018-pin",
+                                layout: {
+                                    visibility: 'none', 
+                                    'icon-image': 'award-icon',
+                                    'icon-size': 0.3,
+                                    'icon-allow-overlap': true,
+                                    'icon-anchor': 'bottom',
+                                },
+                                paint: {
+                                  'icon-color': '#00f',
+                                  'icon-opacity': 0.3,
+                                }
+                            });
+                            this.edaYear = 'all';
+                        });
+                        img.src = this.awardIcon;
+                    });
+                    */
                     this.edaYear = 'all';
                 });
             });
@@ -667,6 +658,9 @@ export default class Disaster extends Vue {
             });
 
             this.map.on('mousemove', 'counties', (e)=> {
+
+                //WATCH OUT - mapbox popup won't display the popup if it's too tall to fit in a screen
+
                 // Change the cursor style as a UI indicator.
                 this.map.getCanvas().style.cursor = 'pointer';
                 
@@ -674,14 +668,117 @@ export default class Disaster extends Vue {
                 const feature = e.features[0];
                 
                 // Display a popup with the name of the county
-                let text = feature.properties.county_name+", "+feature.properties.state_name;
-                for(const key in feature.properties) {
-                    if(key.startsWith("is")) {
-                        text += " | "+key.substring(2);
+                let html = "<div class='popup'>";
+                html += "<h2>"+feature.properties.county_name+"<small>,"+feature.properties.state_name+"</small></h2>";
+                const fips = feature.properties.county_fips;
+                const stateFips = feature.properties.state_fips;
+
+                //figure out which DR are present on current view
+                if(this.mode == 'dr') {
+
+                    //county drs
+                    const drs = [];
+                    for(const t in this.$root.layers) {
+                        const filter = this.map.getFilter('county_disaster_'+t);
+                        if(filter.includes(fips)) drs.push(t);
+                    }
+
+                    html += "<div class='drs'>";
+                    html += "<small>County Disaster Declarations</small><br>";
+                    if(drs.length == 0) html += "<span class='no-dr'>No county disaster declared during specified period</span>";
+                    else {
+                        drs.forEach(dr=>{
+                            const inf = this.$root.layers[dr];
+                            //html += "<div style='background-color: "+inf.color+"' class='dr-dot'>&nbsp;</div>";
+                            html += "<span class='dr' style='color: "+inf.color+"'>"+dr+"</span>\n";
+                        });
+                    }
+                    html += "</div>";
+
+                    //state drs
+                    const stateDrs = [];
+                    for(const t in this.$root.layers) {
+                        const stateFilter = this.map.getFilter('state_disaster_'+t);
+                        if(stateFilter.includes(stateFips)) stateDrs.push(t);
+                    }
+
+                    html += "<div class='drs'>";
+                    html += "<small>State Disaster Declarations</small><br>";
+                    if(stateDrs.length == 0) html += "<span class='no-dr'>No state disaster declared during specified period</span>";
+                    else {
+                        stateDrs.forEach(dr=>{
+                            const inf = this.$root.layers[dr];
+                            //html += "<div style='background-color: "+inf.color+"' class='dr-dot'>&nbsp;</div>";
+                            html += "<span class='dr' style='color: "+inf.color+"'>"+dr+"</span>\n";
+                        });
+                    }
+                    html += "</div>";
+
+                }
+
+                if(this.mode == 'eda') {
+                    let count = 0;
+                    this.eda2018.forEach(rec=>{
+                        if(this.edaYear != "all" && rec.year != this.edaYear) return;
+                        if(this.edaType != "All" && rec.data.grant_purpose != this.edaType) return;
+                        if(rec.fips != fips) return;
+
+                        //console.dir(rec);
+                        count++;
+
+                        html += "<div class='eda-award'>";
+
+                        //there are so small number of statewide award.. let's ignore for now?
+                        //console.dir(rec.data.statewide);
+
+                        html += "<h4>";
+                        html += numeral(rec.data.total_project_funding).format("$0,0");
+                        html += "<time>"+new Date(rec.data.grant_award_date).toLocaleDateString()+"</time>";
+                        html += "</h4>";
+                        //multi county award
+
+                        html += "<p>";
+                        if(rec.data.counties.length > 1) {
+                            html += " <span style='opacity: 0.7;'>Multi-county("+rec.data.counties.length+") award</span>"
+                            /*
+                            html += "<div>";
+                            rec.data.counties.forEach(county=>{
+                                html += "<span class='eda-county'>"+county.county+","+county.stateadd+"</span> ";
+                            });
+                            html += "</div>";
+                            */
+                        }
+                        if(this.edaType == "All") html += " <span style='opacity: 0.7; font-size: 80%'>For</span> "+rec.data.grant_purpose;
+                        html += "</p>";
+
+                        html += "</div>";
+                    });
+
+                    if(count == 0) html += "<small>No EDA Awards with matching criteria</small>";
+                }
+
+                if(this.mode == 'resilience') {
+                    const year = parseInt(this.resYear);
+                    for(const cid in this.cutterIndicators) {
+                        const info = this.cutterIndicators[cid];
+                        const values = {};
+                        const fipswithdot = fips.substring(0,2)+"."+fips.substring(2);
+                        const cutter = this.cutters[fipswithdot];
+                        html += "<h4>"+info.name+"</h4> ";
+                        if(!cutter || !cutter[cid]) {
+                            html += "<small>No resilience scores available for this county</small>";
+                        } else {
+                            const v = cutter[cid][year-2012];
+                            html +=numeral(v).format("0.123");
+                        }
                     }
                 }
 
-                this.popup.setLngLat(e.lngLat).setText(text).addTo(this.map);
+                html += "</div>";
+
+                this.popup.setLngLat(e.lngLat);
+                this.popup.setHTML(html);
+                this.popup.addTo(this.map);
             });
 
             this.map.on('mouseleave', 'counties', ()=>{
