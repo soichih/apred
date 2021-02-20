@@ -26,8 +26,9 @@ mssql.connect(config.stats_america.db_red_dr).then(async pool=>{
 
     console.log("loading dr_data_norm / Resilience values for individual indices per county.");
     const dr_data_norm = await pool.request().query(`
-        SELECT * FROM dr_data_norm
+        SELECT statefips, countyfips, measure, measure_category, year FROM dr_data_norm
     `);
+    console.log("done loading from sql");
     dr_data_norm.recordset.forEach(rec=>{
         rec.statefips = rec.statefips.trim();
         rec.countyfips = rec.countyfips.trim();
@@ -35,15 +36,16 @@ mssql.connect(config.stats_america.db_red_dr).then(async pool=>{
         rec.measure_category = rec.measure_category.trim();
         rec.year = rec.year.trim();
     });
+    console.log("now saving to disk");
     fs.writeFileSync(config.pubdir+"/raw/dr_normalized.json", JSON.stringify(dr_data_norm.recordset));
 
-    console.log("loading dr_measure (will be populated in the future)");
+    console.log("loading dr_measure");
     const dr_measure = await pool.request().query(`
         SELECT * FROM dr_measure
     `);
     fs.writeFileSync(config.pubdir+"/raw/dr_measure.json", JSON.stringify(dr_measure.recordset));
 
-    console.log("loading dr_measure_category (will be populated in the future)");
+    console.log("loading dr_measure_category");
     const dr_measure_category = await pool.request().query(`
         SELECT * FROM dr_measure_category
     `);
