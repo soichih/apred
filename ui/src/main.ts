@@ -139,7 +139,9 @@ new Vue({
                 },
                 "other": {
                     color: "#999",
-                    types: ["EarthQuake", "Coastal Storm", "Snow", "Mud/Landslide", "Volcano", "Dam/Levee Break", "Severe Ice Storm"],
+                    //TODO - do I need to other "Other" here?
+                    types: ["EarthQuake", "Coastal Storm", "Snow", "Mud/Landslide", 
+                        "Volcano", "Dam/Levee Break", "Severe Ice Storm"],
                     zIndex: 1,
                 }, 
             },
