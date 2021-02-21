@@ -3,8 +3,8 @@
     <div class="header">
         <div class="page">
             <div class="toolset">
-                <CountySelecter @select="fips = $event" placeholder="Search another county to show" style="width: 240px;"/>
-                or <el-button @click="compare" style="margin-left: 10px;" >Compare</el-button>
+                <CountySelecter @select="fips = $event" placeholder="Search other County" style="width: 180px;"/>
+                or <el-button @click="compare" style="margin-left: 10px;" >Compare Counties</el-button>
             </div>
             <h3 style="font-weight: normal; margin-right: 300px;">
                 <el-button type="primary" circle icon="el-icon-back" @click="goback()" class="back-button"/>
@@ -166,7 +166,7 @@
 
         <el-row :gutter="20" v-if="detail.industries">
             <el-col :span="5">
-                <h4>Industries</h4>
+                <h4>Top Industries</h4>
             </el-col>
             <el-col :span="19">
                 <!--
@@ -234,8 +234,8 @@
         <p>
             <ol>
                 <li>Data for population estimate, population density, per capita income, and median household income were generated from the 
-                    American Community Survey (ACS) platform.</li>
-                <li>GDP data was generated from the Business Economic Analysis (BEA) website.</li>
+                    <a href="https://www.census.gov/programs-surveys/acs/">American Community Survey (ACS)</a>.</li>
+                <li>GDP data was generated from the <a href ="https://www.bea.gov/">Business of Economic Analysis (BEA)</a>.</li>
             </ol>
         </p>
         <br>
@@ -273,7 +273,7 @@
         <br>
         <h3>Data Sources</h3>
         <p>
-         Data for the disaster declaration was generated from the FEMA website and is updated daily. Data for the EDA award was obtained from
+         Data for the disaster declaration was generated from the <a href="https://www.fema.gov/disasters/disaster-declarations"> FEMA website</a> and is updated daily. Data for the EDA award was obtained from
          the EDA and is updated as the data becomes available.
          </p>
         <br>
