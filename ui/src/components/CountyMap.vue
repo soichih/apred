@@ -1,15 +1,28 @@
 <template>
 <div>
     <div id="map"/>
-
+    
     <div class="side">
         <CountySelecter @select="countySelected"/>
         <div class="legend" v-if="mode">
+            <p class="map-heading">
+                <b>How to use the map</b>
+            </p>
+            <p>
+                <ol>
+                    <li>To view the disaster profile of a particular county enter the name of the county in the search box above.</li>
+                    <br>
+                    <li>To view the geographic spread of FEMA disaster declarations or EDA Awards, select desired option using the map control below.</li>
+                </ol>
+            </p>
+            <p class="map-heading">
+               <b>Map control</b>
+            </p>
             <p>
                 <el-select v-model="mode" placeholder="Select" size="small" style="width: 100%;">
                     <el-option v-for="item in modes" :key="item.value" :label="item.label" :value="item.value"> </el-option>
                 </el-select>
-            </p>
+            </p>            
             <div v-if="mode" class="map-description">
                 <p v-if="mode == 'dr'">
                     This map shows counties with FEMA declared disasters within specified time range. Please visit <a href="https://www.fema.gov/disasters/disaster-declarations">FEMA Disasters</a> page for more detail.
@@ -23,7 +36,7 @@
             </div>
 
             <div v-if="mode == 'dr'">
-                <p>
+                <p class="map-heading">
                     <b>Date Range</b>
                 </p>
                 <p>
@@ -41,7 +54,7 @@
                         </el-col>
                     </el-row>
                 </p>
-                <p>
+                <p class="map-heading">
                     <b>Disaster Types</b>
                 </p>
                 <div class="legend-item" style="border-bottom: 1px solid #0002; margin-bottom: 8px; padding-bottom: 3px;">
@@ -55,8 +68,10 @@
             </div>
 
             <div v-if="mode == 'eda'">
-                <p>
+                <p class="map-heading">
                     <b>Year</b>
+                </p>
+                <p>
                     <el-row :gutter="5">
                         <el-col :span="4">
                              <el-button icon="el-icon-back" size="mini" @click="edaPrevious" :disabled="edaYear == '2012'"></el-button>
@@ -74,10 +89,15 @@
                 <p class="legend-item">
                     <b>Grant Purpose</b>
                     <br>
+                </p>
+                <p>
                     <el-radio v-for="type in edaTypes" :key="type" v-model="edaType" :label="type">{{type.split(" ").slice(0, 2).join(" ")}}</el-radio>
                 </p>
                 <!--
                 <div class="legend-item">
+                    <p>
+                        <b>Award Legend</b>
+                    </p>
                     <span class="legend-color" style="background-color: #00ff00">&nbsp;</span>&nbsp;Statewide Awards
                     <br>
                     <span class="legend-color" style="background-color: #0066ff">&nbsp;</span>&nbsp;County Awards
@@ -86,7 +106,7 @@
             </div>
 
             <div v-if="mode == 'resilience'">
-                <p>
+                <p class="map-heading">
                     <b>Year</b>
                     <el-row :gutter="5">
                         <el-col :span="4">
@@ -102,8 +122,8 @@
                         </el-col>
                     </el-row>
                 </p>
-                <p>
-                    <b>Resiliences</b>
+                <p class="map-heading">
+                    <b>Resilience Indicators</b>
                 </p>
                 <div v-for="(info, cid) in cutterIndicators" :key="cid" class="legend-item">
                     <el-radio v-model="drLayer" :label="cid" @change="showDRLayers" :style="{color: info.color}">{{info.name}}</el-radio>
@@ -947,7 +967,7 @@ h4 {
 
 #map {
     position: fixed;
-    left: 250px;
+    left: 350px;
     right: 0;
     top: 50px;
     bottom: 0;
@@ -966,11 +986,15 @@ h4 {
     display: none;
 }
 
+.map-heading {
+    text-align: center;
+}
+
 .side {
     position: fixed;
     top: 50px;
     left: 0;
-    width: 250px;
+    width: 350px;
     bottom: 0;
     background-color: #f9f9f9;
 }
