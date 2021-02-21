@@ -293,7 +293,6 @@ export default class Disaster extends Vue {
     @Watch('edaYear')
     onEdaYearChange(v) {
         if(!v) return;
-        console.log("year changed to", v);
         this.updateEda();
     }
 
@@ -784,7 +783,6 @@ export default class Disaster extends Vue {
                     const year = parseInt(this.resYear);
                     for(const cid in this.cutterIndicators) {
                         const info = this.cutterIndicators[cid];
-                        const values = {};
                         const fipswithdot = fips.substring(0,2)+"."+fips.substring(2);
                         const cutter = this.cutters[fipswithdot];
                         html += "<h4>"+info.name+"</h4> ";
