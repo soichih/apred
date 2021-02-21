@@ -134,6 +134,9 @@ import "mapbox-gl/dist/mapbox-gl.css";
 
 import numeral from "numeral";
 
+const today = new Date();
+const thisYear = today.getFullYear();
+
 mapboxgl.accessToken = "pk.eyJ1Ijoic29pY2hpaCIsImEiOiJjazVqdnBsM2cwN242M2psdjAwZXhhaTFuIn0.o3koWlzx1Tup8CJ1B_KaEA";
 
 @Component({
@@ -314,7 +317,7 @@ export default class Disaster extends Vue {
         const drLayer = window.localStorage.getItem("drLayer");
         if(drLayer) this.drLayer = drLayer;
 
-        for(let year = 2021; year > 1960; --year) {
+        for(let year = thisYear; year > 1960; --year) {
             this.drRanges.push(
                 {value: year.toString(), label: year.toString()},
             );
@@ -325,7 +328,7 @@ export default class Disaster extends Vue {
             );
         }
         this.edaYears.push({value: 'all', label: 'All'});
-        for(let year = 2021; year >= 2012; --year) {
+        for(let year = thisYear; year >= 2012; --year) {
             this.edaYears.push({value: year.toString(), label: year.toString()});
         }
     }
@@ -892,14 +895,14 @@ export default class Disaster extends Vue {
 
     edaPrevious() {
         if(this.edaYear == "all") {
-            this.edaYear = "2021";
+            this.edaYear = thisYear.toString();
             return;
         }
         this.edaYear = (parseInt(this.edaYear)-1).toString();
     }
 
     edaNext() {
-        if(this.edaYear == "2021") this.edaYear = "all";
+        if(this.edaYear == thisYear.toString()) this.edaYear = "all";
         else this.edaYear = (parseInt(this.edaYear)+1).toString();
     }
 
