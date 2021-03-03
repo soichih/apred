@@ -300,7 +300,7 @@
         </div>
 
         <div class="plot-legend">
-            <div class="color-box" style="height: 4px; background-color: #999"/> Total
+            <div class="color-box" style="height: 4px; background-color: #999"/> Not Vulnerable
             <div class="color-box" style="height: 4px; background-color: #900"/> Vulnerable
         </div>
         <br clear="both">
@@ -487,7 +487,6 @@ export default class CountyDetail extends Vue {
 
     @Prop() fips;
 
-    popup;
     statemap;
     detail = null;
 
