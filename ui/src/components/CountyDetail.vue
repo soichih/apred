@@ -37,7 +37,7 @@
                 <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
             </el-col>
             <el-col :span="19">
-                <Histogram v-if="$root.commonReady" :value="detail.population" :histogram="$root.populationHistogram" :fips="fips" :state="detail.state"/>
+                <Histogram v-if="$root.commonReady" :value="detail.population" :histogram="$root.populationHistogram" :fips="fips" :state="detail.state" xunit="people"/>
                 <br>
                 <br>
             </el-col>
@@ -52,7 +52,7 @@
                 <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
             </el-col>
             <el-col :span="19">
-                <Histogram v-if="$root.commonReady" :value="detail.popdensity" :histogram="$root.popdensityHistogram" :fips="fips" :state="detail.state"/>
+                <Histogram v-if="$root.commonReady" :value="detail.popdensity" :histogram="$root.popdensityHistogram" :fips="fips" :state="detail.state" xunit="people per sq. mile"/>
                 <br>
                 <br>
             </el-col>
@@ -97,7 +97,7 @@
                 <br>
             </el-col>
             <el-col :span="19">
-                <Histogram v-if="$root.commonReady" :value="detail.gdp" :histogram="$root.gdpHistogram" :fips="fips" :state="detail.state"/>
+                <Histogram v-if="$root.commonReady" :value="detail.gdp" :histogram="$root.gdpHistogram" :fips="fips" :state="detail.state" xunit="dollars"/>
                 <br>
                 <br>
             </el-col>
@@ -113,7 +113,7 @@
                 <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
             </el-col>
             <el-col :span="19">
-                <Histogram v-if="$root.commonReady" :value="detail.percapitaincome" :histogram="$root.perCapitaIncomeHistogram" :fips="fips" :state="detail.state"/>
+                <Histogram v-if="$root.commonReady" :value="detail.percapitaincome" :histogram="$root.perCapitaIncomeHistogram" :fips="fips" :state="detail.state" xunit="dollars per capita"/>
                 <br>
                 <br>
             </el-col>
@@ -128,7 +128,7 @@
                 <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
             </el-col>
             <el-col :span="19">
-                <Histogram v-if="$root.commonReady" :value="detail.medianincome" :histogram="$root.medianIncomeHistogram" :fips="fips" :state="detail.state"/>
+                <Histogram v-if="$root.commonReady" :value="detail.medianincome" :histogram="$root.medianIncomeHistogram" :fips="fips" :state="detail.state" xunit="dollars"/>
                 <br>
                 <br>
             </el-col>
@@ -606,7 +606,7 @@ export default class CountyDetail extends Vue {
         height: 200,
         margin: {
             //l: 50,
-            r: 30,
+            r: 280,
             t: 10,
             b: 20,
         },
@@ -620,13 +620,14 @@ export default class CountyDetail extends Vue {
         height: 200,
         margin: {
             //l: 50,
-            r: 30,
+            r: 280,
             t: 10,
             b: 20,
         },
         //barmode: 'stack',
         //'plot_bgcolor': '#0000',
         //'paper_bgcolor': '#0000',
+        //legend: {"orientation": "h"}
     }
 
 
@@ -897,9 +898,12 @@ export default class CountyDetail extends Vue {
             if(key == "hispanic") continue;
             if(key == "non_hisp") continue;
 
+            let name = key.toUpperCase();
+            if(name == "AIAN") name="American Indian or Alaskan Native";
+
             this.orGraphData.push(Object.assign({ 
                 y: this.detail.or.groups[key],
-                name: key.toUpperCase(),
+                name,
                 hoverinfo: 'y+text',
             }, template));
         }
