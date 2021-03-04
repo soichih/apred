@@ -3,14 +3,9 @@
     <div id="map"/>
     
     <div class="search-control">
-        <el-row>
-            <el-col :span="8">
-                <div style="margin: 10px; opacity: 0.6;">Select a county on map to show <b>County Detail</b> <span style="opacity: 0.5; margin-left: 10px;">or</span></div>
-            </el-col>
-            <el-col :span="8">
-                <CountySelecter @select="countySelected" placeholder="Enter county name here"/>
-            </el-col>
-        </el-row>
+        <div style="margin: 10px; opacity: 0.6; display: inline-block;">Select a county on map to show County Detail 
+        <span style="opacity: 0.5; margin-left: 10px;">or</span></div>
+        <CountySelecter @select="countySelected" placeholder="Enter county name here" style="width: 300px"/>
     </div>
     <div class="side">
         <div class="legend" v-if="mode">
