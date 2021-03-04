@@ -635,7 +635,7 @@ export default class CountyDetail extends Vue {
     pcmGraphLayout = {
         height: 150,
         margin: {
-            l: 30,
+            l: 40,
             r: 30,
             t: 10,
             b: 30,
@@ -652,7 +652,7 @@ export default class CountyDetail extends Vue {
     pcpGraphLayout = {
         height: 150,
         margin: {
-            l: 30,
+            l: 40,
             r: 30,
             t: 10,
             b: 30,
@@ -665,7 +665,7 @@ export default class CountyDetail extends Vue {
     urGraphLayout = {
         height: 200,
         margin: {
-            l: 30,
+            l: 40,
             r: 30,
             t: 10,
             b: 20,
@@ -679,7 +679,7 @@ export default class CountyDetail extends Vue {
     uGraphLayout = {
         height: 200,
         margin: {
-            l: 30,
+            l: 40,
             r: 30,
             t: 10,
             b: 20,
@@ -849,7 +849,7 @@ export default class CountyDetail extends Vue {
     processStorms() {
         this.stormLayout = {
             margin: {
-                l: 30,
+                l: 40,
                 r: 30,
                 t: 10,
                 b: 30,
