@@ -748,7 +748,7 @@ export default class CountyDetail extends Vue {
         this.bviLayout = {
             height: 150,
             margin: {
-                l: 30,
+                l: 40,
                 r: 30,
                 t: 10,
                 b: 30,
