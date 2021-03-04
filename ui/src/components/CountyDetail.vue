@@ -202,7 +202,7 @@
 
                 <div style="opacity: 0.6">
                     <h5>Report Date</h5>
-                    {{new Date(unempRateDate).toLocaleDateString()}}
+                    {{new Date(unempRateDate).toLocaleDateString('en-US', {timeZone: 'UTC'})}}
                 </div>
 
             </el-col>
