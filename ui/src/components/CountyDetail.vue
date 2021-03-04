@@ -254,17 +254,17 @@
         <p v-if="recentHistory.length == 0" style="opacity: 0.8;">No disaster declared since 2017</p>
         <div v-for="(event, idx) in recentHistory" :key="idx" class="history">
             <Event :event="event">
-                <div class="connecter" v-if="idx < recentHistory.length" style="float: right;">
+                <div v-if="idx < recentHistory.length" style="padding: 10px 0;">
                     <Eligibility2018 v-if="$root.user && is2018Eligible(event)"/>
                     <Eligibility2019 v-if="$root.user && (is2019Eligible(event) || is2019FloodEligible(event))"/>
                 </div>
             </Event>
         </div>
 
-        <div v-if="!showPastHistory" style="border-top: 2px solid #f3f3f3;">
+        <div v-if="!showPastHistory" style="border-top: 2px solid #f3f3f3; margin-left: 230px;">
             <br>
             <el-button round @click="showPastHistory = !showPastHistory">
-                <i class="el-icon-caret-right"/> Show Past Disasters ({{pastHistory.length}})
+                <i class="el-icon-caret-right"/> Show Old Disaster Declarations ({{pastHistory.length}})
             </el-button>
         </div>
 
