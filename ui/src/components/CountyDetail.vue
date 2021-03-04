@@ -31,7 +31,7 @@
         <el-row :gutter="20">
             <el-col :span="5">
                 <h4>Population<br>
-                    <small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS 2018)</a></small>
+                    <small><a href="https://www.census.gov/programs-surveys/popest.html" target="census">(Census Bureau 2019)</a></small>
                 </h4>
                 <span class="primary" v-if="detail.population"> {{detail.population | formatNumber}}</span>
                 <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
@@ -45,7 +45,9 @@
 
         <el-row :gutter="20">
             <el-col :span="5">
-                <h4>Population Density</h4>
+                <h4>Population Density<br>
+                    <small><a href="https://www.census.gov/programs-surveys/popest.html" target="census">(Census Bureau 2019)</a></small>
+                </h4>
                 <span class="primary" v-if="detail.popdensity"> {{detail.popdensity | formatNumber}} people per sq. mile</span>
                 <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
             </el-col>
@@ -59,7 +61,7 @@
         <el-row :gutter="20">
             <el-col :span="5">
                 <h4>Population History<br>
-                    <small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS 2018)</a></small>
+                    <small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS)</a></small>
                 </h4>
             </el-col>
             <el-col :span="19">
@@ -72,7 +74,7 @@
         <el-row :gutter="20">
             <el-col :span="5">
                 <h4>Racial Makeup History<br>
-                    <small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS 2018)</a></small>
+                    <small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS)</a></small>
                 </h4>
             </el-col>
             <el-col :span="19">
@@ -120,7 +122,7 @@
         <el-row :gutter="20">
             <el-col :span="5">
                 <h4>Median Household Income<br>
-                    <small title="US Census Bureau"><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS 2018)</a></small>
+                    <small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS 2018)</a></small>
                 </h4>
                 <span class="primary" v-if="detail.medianincome"> ${{detail.medianincome | formatNumber}}</span>
                 <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
@@ -780,7 +782,11 @@ export default class CountyDetail extends Vue {
                     //non vulnerable
                     {
                         x: data.years,
-                        y: data.estab.map((nv, i)=>nv - data.estab_v[i]),
+                        y: data.estab.map((nv, i)=>{
+                            let v = nv - data.estab_v[i]
+                            if(v < 0) v = 0;
+                            return v;
+                        }),
                         name: 'Non Vulnerable',
                         showlegend: false,
                         type: 'bar',
@@ -807,7 +813,11 @@ export default class CountyDetail extends Vue {
                     //non vulnerable
                     {
                         x: data.years,
-                        y: data.emp.map((nv, i)=>nv - data.emp_v[i]),
+                        y: data.emp.map((nv, i)=>{
+                            let v = nv - data.emp_v[i];
+                            if(v < 0) v = 0;
+                            return v;
+                        }),
                         name: 'Non Vulnerable',
                         showlegend: false,
                         type: 'bar',
