@@ -64,7 +64,7 @@ acs.forEach(rec=>{
     if(!counties[fips]) return;
 
     //find the current(2018) info
-    if(rec.year == "2018") {
+    if(rec.year == "2019") {
         counties[fips].population = rec.totpop;
         counties[fips].popdensity = rec.pop_density;
     }
