@@ -77,6 +77,5 @@ export default {
 border: none;
 border-radius: 0;
 border-bottom: 1px solid #ddd;
-background: white;
 }
 </style>
