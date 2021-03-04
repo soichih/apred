@@ -1,15 +1,45 @@
 <template>
 <div>
     <div id="map"/>
-
+    
+    <div class="search-control">
+        <el-row>
+            <el-col :span="8">
+                <div style="margin: 10px; opacity: 0.6;">Select a county on map to show <b>County Detail</b> <span style="opacity: 0.5; margin-left: 10px;">or</span></div>
+            </el-col>
+            <el-col :span="8">
+                <CountySelecter @select="countySelected" placeholder="Enter county name here"/>
+            </el-col>
+        </el-row>
+    </div>
     <div class="side">
-        <CountySelecter @select="countySelected"/>
         <div class="legend" v-if="mode">
+            <!-- moved this to countyselecter placeholder. 
+                I am not sure what "geographic spread of FEMA disaster means.. so I am commenting this out for now
+            <p class="heading">
+                <b>How to use the map</b>
+            </p>
+            <p>
+                <ol>
+                    <li>To view the disaster profile of a particular county enter the name of the county in the search box above.</li>
+                    <br>
+                    <li>To view the geographic spread of FEMA disaster declarations or EDA Awards, select desired option using the map control below.</li>
+                </ol>
+            </p>
+            -->
+            <!-- this doesn't add new information to the user
+            <p class="heading">
+               <b>Map control</b>
+            </p>
+            -->
+            <p class="heading">
+                <b>Map Type</b>
+            </p>
             <p>
                 <el-select v-model="mode" placeholder="Select" size="small" style="width: 100%;">
                     <el-option v-for="item in modes" :key="item.value" :label="item.label" :value="item.value"> </el-option>
                 </el-select>
-            </p>
+            </p>            
             <div v-if="mode" class="map-description">
                 <p v-if="mode == 'dr'">
                     This map shows counties with FEMA declared disasters within specified time range. Please visit <a href="https://www.fema.gov/disasters/disaster-declarations">FEMA Disasters</a> page for more detail.
@@ -23,7 +53,7 @@
             </div>
 
             <div v-if="mode == 'dr'">
-                <p>
+                <p class="heading">
                     <b>Date Range</b>
                 </p>
                 <p>
@@ -41,7 +71,7 @@
                         </el-col>
                     </el-row>
                 </p>
-                <p>
+                <p class="heading">
                     <b>Disaster Types</b>
                 </p>
                 <div class="legend-item" style="border-bottom: 1px solid #0002; margin-bottom: 8px; padding-bottom: 3px;">
@@ -55,8 +85,10 @@
             </div>
 
             <div v-if="mode == 'eda'">
-                <p>
+                <p class="heading">
                     <b>Year</b>
+                </p>
+                <p>
                     <el-row :gutter="5">
                         <el-col :span="4">
                              <el-button icon="el-icon-back" size="mini" @click="edaPrevious" :disabled="edaYear == '2012'"></el-button>
@@ -71,13 +103,18 @@
                         </el-col>
                     </el-row>
                 </p>
-                <p class="legend-item">
+                <p class="heading">
                     <b>Grant Purpose</b>
                     <br>
-                    <el-radio v-for="type in edaTypes" :key="type" v-model="edaType" :label="type">{{type.split(" ").slice(0, 2).join(" ")}}</el-radio>
                 </p>
+                <ul style="list-style: none; padding: 0;">
+                    <li style="margin-bottom: 3px;" v-for="type in edaTypes" :key="type"><el-radio v-model="edaType" :label="type">{{type.split(" ").slice(0, 2).join(" ")}}</el-radio></li>
+                </ul>
                 <!--
                 <div class="legend-item">
+                    <p>
+                        <b>Award Legend</b>
+                    </p>
                     <span class="legend-color" style="background-color: #00ff00">&nbsp;</span>&nbsp;Statewide Awards
                     <br>
                     <span class="legend-color" style="background-color: #0066ff">&nbsp;</span>&nbsp;County Awards
@@ -86,8 +123,10 @@
             </div>
 
             <div v-if="mode == 'resilience'">
-                <p>
+                <p class="heading">
                     <b>Year</b>
+                </p>
+                <p>
                     <el-row :gutter="5">
                         <el-col :span="4">
                              <el-button icon="el-icon-back" size="mini" @click="resPrevious" :disabled="resYear == '2012'"></el-button>
@@ -102,8 +141,8 @@
                         </el-col>
                     </el-row>
                 </p>
-                <p>
-                    <b>Resiliences</b>
+                <p class="heading">
+                    <b>Resilience Indicators</b>
                 </p>
                 <div v-for="(info, cid) in cutterIndicators" :key="cid" class="legend-item">
                     <el-radio v-model="drLayer" :label="cid" @change="showDRLayers" :style="{color: info.color}">{{info.name}}</el-radio>
@@ -133,6 +172,9 @@ import mapboxgl from 'mapbox-gl';
 import "mapbox-gl/dist/mapbox-gl.css";
 
 import numeral from "numeral";
+
+const today = new Date();
+const thisYear = today.getFullYear();
 
 mapboxgl.accessToken = "pk.eyJ1Ijoic29pY2hpaCIsImEiOiJjazVqdnBsM2cwN242M2psdjAwZXhhaTFuIn0.o3koWlzx1Tup8CJ1B_KaEA";
 
@@ -270,7 +312,6 @@ export default class Disaster extends Vue {
     @Watch('edaYear')
     onEdaYearChange(v) {
         if(!v) return;
-        console.log("year changed to", v);
         this.updateEda();
     }
 
@@ -314,7 +355,7 @@ export default class Disaster extends Vue {
         const drLayer = window.localStorage.getItem("drLayer");
         if(drLayer) this.drLayer = drLayer;
 
-        for(let year = 2021; year > 1960; --year) {
+        for(let year = thisYear; year > 1960; --year) {
             this.drRanges.push(
                 {value: year.toString(), label: year.toString()},
             );
@@ -325,7 +366,7 @@ export default class Disaster extends Vue {
             );
         }
         this.edaYears.push({value: 'all', label: 'All'});
-        for(let year = 2021; year >= 2012; --year) {
+        for(let year = thisYear; year >= 2012; --year) {
             this.edaYears.push({value: year.toString(), label: year.toString()});
         }
     }
@@ -658,130 +699,18 @@ export default class Disaster extends Vue {
             });
 
             this.map.on('mousemove', 'counties', (e)=> {
+                clearTimeout(this.popupTimeout);
+                this.popup.remove();
 
-                //WATCH OUT - mapbox popup won't display the popup if it's too tall to fit in a screen
-
-                // Change the cursor style as a UI indicator.
-                this.map.getCanvas().style.cursor = 'pointer';
-                
-                // Single out the first found feature.
                 const feature = e.features[0];
-                
-                // Display a popup with the name of the county
-                let html = "<div class='popup'>";
-                html += "<h2>"+feature.properties.county_name+"<small>,"+feature.properties.state_name+"</small></h2>";
-                const fips = feature.properties.county_fips;
-                const stateFips = feature.properties.state_fips;
-
-                //figure out which DR are present on current view
-                if(this.mode == 'dr') {
-
-                    //county drs
-                    const drs = [];
-                    for(const t in this.$root.layers) {
-                        const filter = this.map.getFilter('county_disaster_'+t);
-                        if(filter.includes(fips)) drs.push(t);
-                    }
-
-                    html += "<div class='drs'>";
-                    html += "<small>County Disaster Declarations</small><br>";
-                    if(drs.length == 0) html += "<span class='no-dr'>No county disaster declared during specified period</span>";
-                    else {
-                        drs.forEach(dr=>{
-                            const inf = this.$root.layers[dr];
-                            //html += "<div style='background-color: "+inf.color+"' class='dr-dot'>&nbsp;</div>";
-                            html += "<span class='dr' style='color: "+inf.color+"'>"+dr+"</span>\n";
-                        });
-                    }
-                    html += "</div>";
-
-                    //state drs
-                    const stateDrs = [];
-                    for(const t in this.$root.layers) {
-                        const stateFilter = this.map.getFilter('state_disaster_'+t);
-                        if(stateFilter.includes(stateFips)) stateDrs.push(t);
-                    }
-
-                    html += "<div class='drs'>";
-                    html += "<small>State Disaster Declarations</small><br>";
-                    if(stateDrs.length == 0) html += "<span class='no-dr'>No state disaster declared during specified period</span>";
-                    else {
-                        stateDrs.forEach(dr=>{
-                            const inf = this.$root.layers[dr];
-                            //html += "<div style='background-color: "+inf.color+"' class='dr-dot'>&nbsp;</div>";
-                            html += "<span class='dr' style='color: "+inf.color+"'>"+dr+"</span>\n";
-                        });
-                    }
-                    html += "</div>";
-
-                }
-
-                if(this.mode == 'eda') {
-                    let count = 0;
-                    this.eda2018.forEach(rec=>{
-                        if(this.edaYear != "all" && rec.year != this.edaYear) return;
-                        if(this.edaType != "All" && rec.data.grant_purpose != this.edaType) return;
-                        if(rec.fips != fips) return;
-
-                        //console.dir(rec);
-                        count++;
-
-                        html += "<div class='eda-award'>";
-
-                        //there are so small number of statewide award.. let's ignore for now?
-                        //console.dir(rec.data.statewide);
-
-                        html += "<h4>";
-                        html += numeral(rec.data.total_project_funding).format("$0,0");
-                        html += "<time>"+new Date(rec.data.grant_award_date).toLocaleDateString()+"</time>";
-                        html += "</h4>";
-                        //multi county award
-
-                        html += "<p>";
-                        if(rec.data.counties.length > 1) {
-                            html += " <span style='opacity: 0.7;'>Multi-county("+rec.data.counties.length+") award</span>"
-                            /*
-                            html += "<div>";
-                            rec.data.counties.forEach(county=>{
-                                html += "<span class='eda-county'>"+county.county+","+county.stateadd+"</span> ";
-                            });
-                            html += "</div>";
-                            */
-                        }
-                        if(this.edaType == "All") html += " <span style='opacity: 0.7; font-size: 80%'>For</span> "+rec.data.grant_purpose;
-                        html += "</p>";
-
-                        html += "</div>";
-                    });
-
-                    if(count == 0) html += "<small>No EDA Awards with matching criteria</small>";
-                }
-
-                if(this.mode == 'resilience') {
-                    const year = parseInt(this.resYear);
-                    for(const cid in this.cutterIndicators) {
-                        const info = this.cutterIndicators[cid];
-                        const values = {};
-                        const fipswithdot = fips.substring(0,2)+"."+fips.substring(2);
-                        const cutter = this.cutters[fipswithdot];
-                        html += "<h4>"+info.name+"</h4> ";
-                        if(!cutter || !cutter[cid]) {
-                            html += "<small>No resilience scores available for this county</small>";
-                        } else {
-                            const v = cutter[cid][year-2012];
-                            html +=numeral(v).format("0.123");
-                        }
-                    }
-                }
-
-                html += "</div>";
-
-                this.popup.setLngLat(e.lngLat);
-                this.popup.setHTML(html);
-                this.popup.addTo(this.map);
+                const lngLat = e.lngLat;
+                this.popupTimeout = setTimeout(()=>{
+                    this.showPopup(feature, lngLat);
+                }, 300)
             });
 
             this.map.on('mouseleave', 'counties', ()=>{
+                clearTimeout(this.popupTimeout);
                 this.popup.remove();
             });
 
@@ -799,6 +728,130 @@ export default class Disaster extends Vue {
                 }
             });
         })
+    }
+
+    popupTimeout = null;
+
+    showPopup(feature, lngLat) {
+        //WATCH OUT - mapbox popup won't display the popup if it's too tall to fit in a screen
+
+        // Change the cursor style as a UI indicator.
+        this.map.getCanvas().style.cursor = 'pointer';
+        
+        // Single out the first found feature.
+        //const feature = e.features[0];
+        
+        // Display a popup with the name of the county
+        let html = "<div class='popup'>";
+        html += "<h2>"+feature.properties.county_name+"<small>, "+feature.properties.state_name+"</small></h2>";
+        const fips = feature.properties.county_fips;
+        const stateFips = feature.properties.state_fips;
+
+        //figure out which DR are present on current view
+        if(this.mode == 'dr') {
+
+            //county drs
+            const drs = [];
+            for(const t in this.$root.layers) {
+                const filter = this.map.getFilter('county_disaster_'+t);
+                if(filter.includes(fips)) drs.push(t);
+            }
+
+            html += "<div class='drs'>";
+            html += "<small>County Disaster Declarations</small><br>";
+            if(drs.length == 0) html += "<span class='no-dr'>No county disaster declared during specified period</span>";
+            else {
+                drs.forEach(dr=>{
+                    const inf = this.$root.layers[dr];
+                    //html += "<div style='background-color: "+inf.color+"' class='dr-dot'>&nbsp;</div>";
+                    html += "<span class='dr' style='color: "+inf.color+"'>"+dr+"</span>\n";
+                });
+            }
+            html += "</div>";
+
+            //state drs
+            const stateDrs = [];
+            for(const t in this.$root.layers) {
+                const stateFilter = this.map.getFilter('state_disaster_'+t);
+                if(stateFilter.includes(stateFips)) stateDrs.push(t);
+            }
+
+            html += "<div class='drs'>";
+            html += "<small>State Disaster Declarations</small><br>";
+            if(stateDrs.length == 0) html += "<span class='no-dr'>No state disaster declared during specified period</span>";
+            else {
+                stateDrs.forEach(dr=>{
+                    const inf = this.$root.layers[dr];
+                    //html += "<div style='background-color: "+inf.color+"' class='dr-dot'>&nbsp;</div>";
+                    html += "<span class='dr' style='color: "+inf.color+"'>"+dr+"</span>\n";
+                });
+            }
+            html += "</div>";
+
+        }
+
+        if(this.mode == 'eda') {
+            let count = 0;
+            this.eda2018.forEach(rec=>{
+                if(this.edaYear != "all" && rec.year != this.edaYear) return;
+                if(this.edaType != "All" && rec.data.grant_purpose != this.edaType) return;
+                if(rec.fips != fips) return;
+
+                //console.dir(rec);
+                count++;
+
+                html += "<div class='eda-award'>";
+
+                //there are so small number of statewide award.. let's ignore for now?
+                //console.dir(rec.data.statewide);
+
+                html += "<h4>";
+                html += numeral(rec.data.total_project_funding).format("$0,0");
+                html += "<time>"+new Date(rec.data.grant_award_date).toLocaleDateString()+"</time>";
+                html += "</h4>";
+                //multi county award
+
+                html += "<p>";
+                if(rec.data.counties.length > 1) {
+                    html += " <span style='opacity: 0.7;'>Multi-county("+rec.data.counties.length+") award</span>"
+                    /*
+                    html += "<div>";
+                    rec.data.counties.forEach(county=>{
+                        html += "<span class='eda-county'>"+county.county+","+county.stateadd+"</span> ";
+                    });
+                    html += "</div>";
+                    */
+                }
+                if(this.edaType == "All") html += " <span style='opacity: 0.7; font-size: 80%'>For</span> "+rec.data.grant_purpose;
+                html += "</p>";
+
+                html += "</div>";
+            });
+
+            if(count == 0) html += "<small>No EDA Awards with matching criteria</small>";
+        }
+
+        if(this.mode == 'resilience') {
+            const year = parseInt(this.resYear);
+            for(const cid in this.cutterIndicators) {
+                const info = this.cutterIndicators[cid];
+                const fipswithdot = fips.substring(0,2)+"."+fips.substring(2);
+                const cutter = this.cutters[fipswithdot];
+                html += "<h4>"+info.name+"</h4> ";
+                if(!cutter || !cutter[cid]) {
+                    html += "<small>No resilience scores available for this county</small>";
+                } else {
+                    const v = cutter[cid][year-2012];
+                    html +=numeral(v).format("0.123");
+                }
+            }
+        }
+
+        html += "</div>";
+
+        this.popup.setLngLat(lngLat);
+        this.popup.setHTML(html);
+        this.popup.addTo(this.map);
     }
 
     showTutorial(page) {
@@ -892,14 +945,14 @@ export default class Disaster extends Vue {
 
     edaPrevious() {
         if(this.edaYear == "all") {
-            this.edaYear = "2021";
+            this.edaYear = thisYear.toString();
             return;
         }
         this.edaYear = (parseInt(this.edaYear)-1).toString();
     }
 
     edaNext() {
-        if(this.edaYear == "2021") this.edaYear = "all";
+        if(this.edaYear == thisYear.toString()) this.edaYear = "all";
         else this.edaYear = (parseInt(this.edaYear)+1).toString();
     }
 
@@ -947,7 +1000,7 @@ h4 {
 
 #map {
     position: fixed;
-    left: 250px;
+    left: 350px;
     right: 0;
     top: 50px;
     bottom: 0;
@@ -966,11 +1019,16 @@ h4 {
     display: none;
 }
 
+.heading {
+    margin-bottom: 5px;
+    opacity: 0.7;
+}
+
 .side {
     position: fixed;
     top: 50px;
     left: 0;
-    width: 250px;
+    width: 350px;
     bottom: 0;
     background-color: #f9f9f9;
 }
@@ -1100,5 +1158,12 @@ h4 {
 }
 .el-button--mini {
     padding: 7px;
+}
+.search-control {
+    position: fixed;
+    top: 50px;
+    left: 350px;
+    right: 0;
+    padding-top: 10px;
 }
 </style>
