@@ -46,7 +46,7 @@
         <el-row :gutter="20">
             <el-col :span="5">
                 <h4>Population Density<br>
-                    <small><a href="https://www.census.gov/programs-surveys/popest.html" target="census">(Census Bureau 2019)</a></small>
+                    <small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS 2019)</a></small>
                 </h4>
                 <span class="primary" v-if="detail.popdensity"> {{detail.popdensity | formatNumber}} people per sq. mile</span>
                 <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
@@ -61,7 +61,7 @@
         <el-row :gutter="20">
             <el-col :span="5">
                 <h4>Population History<br>
-                    <small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS)</a></small>
+                    <small><a href="https://www.census.gov/programs-surveys/popest.html" target="census">(Census Bureau)</a></small>
                 </h4>
             </el-col>
             <el-col :span="19">
@@ -74,7 +74,7 @@
         <el-row :gutter="20">
             <el-col :span="5">
                 <h4>Racial Makeup History<br>
-                    <small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS)</a></small>
+                    <small><a href="https://www.census.gov/programs-surveys/popest.html" target="census">(Census Bureau)</a></small>
                 </h4>
             </el-col>
             <el-col :span="19">
@@ -83,7 +83,6 @@
                 <br>
             </el-col>
         </el-row>
-
 
         <hr>
 
