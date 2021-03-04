@@ -3,24 +3,8 @@
 </template>
 
 <script>
-
 import { Component, Vue, Prop } from 'vue-property-decorator'
-
-//import { Plotly } from 'vue-plotly' 
 import ExportablePlotly from '@/components/ExportablePlotly'
-
-//import util from '@/util'
-
-/*
-interface HistogramType {
-    min: number;
-    max: number;
-    bucket: number;
-    hists: {
-        [key: string]: number[];
-    };
-}
-*/
 
 @Component({
     components: {
@@ -28,10 +12,12 @@ interface HistogramType {
     }
 })
 export default class Histogram extends Vue {
+
     @Prop() value;
     @Prop() histogram;
     @Prop() fips;
     @Prop() state;
+    @Prop() xunit;
 
     data = null;
     layout = null;
@@ -79,7 +65,7 @@ export default class Histogram extends Vue {
             y: [-1],
             marker:{ color: ['#ccc'], },
 
-            name: 'US',
+            name: 'All Counties',
             type: 'bar'
         }
         const usValues = this.histogram.hists['_us'];
@@ -101,7 +87,7 @@ export default class Histogram extends Vue {
             y: [-1],
             marker:{ color: ['#66b1ff'], },
 
-            name: this.state,
+            name: 'Counties in '+this.state,
             type: 'bar',
         }
         const stateValues = this.histogram.hists[statefips];
@@ -126,7 +112,7 @@ export default class Histogram extends Vue {
             },
             barmode: 'stack',
             xaxis: {
-                title: 'Population ('+this.histogram.bucket+' people per sq. mile for each bar)',
+                title: this.$options.filters.formatNumber(this.histogram.bucket)+' '+this.xunit+' for each bar',
                 range: [this.histogram.min-this.histogram.bucket, this.histogram.max + this.histogram.bucket],
             },
             yaxis: {
