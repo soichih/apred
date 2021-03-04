@@ -361,7 +361,7 @@
         <div class="overview">
             <p>
             The Disaster Resilience Index <b>measures the capacity of {{detail.county}} County to recover from disaster events</b> without losing its socioeconomic 
-            capacity. This information will help practitioners and policymakers to see where there are strengths and weaknesses within {{detail.county}} 
+            capacity. This information will help practitioners and policymakers to see where there are strengths and weaknesses within {{detail.county}} county
             in the context of vulnerability to disaster events. These insights are also useful for performing a <b>SWOT Analysis for economic recovery</b>.
             </p>
             <p>
