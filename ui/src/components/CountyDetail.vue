@@ -239,7 +239,13 @@
                 <li>GDP data was generated from the <a href ="https://www.bea.gov/">Business of Economic Analysis (BEA)</a>.</li>
             </ol>
         </p>
-        <br>
+        <h3>Additional Resources</h3>
+        <p>
+            <ol>
+                <li>Measuring Distress Platform <a href="https://www.statsamerica.org/distress/distress.aspx">(StatsAmerica)</a>.</li>
+                <li>USA Opportunity Zones <a href ="https://www.statsamerica.org/opportunity/">(StatsAmerica)</a>.</li>
+            </ol>
+        </p>
     </div>
 
     <div class="page" v-if="tab == 'disaster'">
@@ -277,7 +283,13 @@
          Data for the disaster declaration was generated from the <a href="https://www.fema.gov/disasters/disaster-declarations"> FEMA website</a> and is updated daily. Data for the EDA award was obtained from
          the EDA and is updated as the data becomes available.
          </p>
-        <br>
+        <h3>Additional Resources</h3>
+        <p>
+            <ol>
+                <li>FEMA Hazard Mitigation Plan Status <a href="https://fema.maps.arcgis.com/apps/webappviewer/index.html?id=ec2fb023df744cf480da89539338c386">(FEMA)</a>.</li>
+                <li>Resilience Analysis and Planning Tool (RAPT)<a href ="https://fema.maps.arcgis.com/apps/webappviewer/index.html?id=90c0c996a5e242a79345cdbc5f758fc6">(FEMA)</a>.</li>
+            </ol>
+        </p>
     </div>
 
     <div v-if="tab == 'bvi'" class="page">
