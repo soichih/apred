@@ -170,10 +170,6 @@
                 <h4>Top Industries</h4>
             </el-col>
             <el-col :span="19">
-                <!--
-                <NaicsInfo :id="detail.biggestIndustry.naics" style="font-size: 120%;"/><br>
-                <span class="primary">{{detail.biggestIndustry.empl | formatNumber("0.00")}}</span>
-                -->
                 <ExportablePlotly :data="industryGraphData" :layout="industryGraphLayout"/>
                 <br>
                 <br>
@@ -573,44 +569,13 @@ export default class CountyDetail extends Vue {
 
         return [
             {
-                //x: [othersTotal, ...major.map(r=>r.empl)],
-                //y: ['Others', ...major.map(r=>r.name)],
                 x: non0.map(r=>r.empl),
                 y: non0.map(r=>r.name),
-
                 type: 'bar',
                 orientation: 'h',
-
-                //type: 'pie',
-                //textinfo: 'label+percent',
-                //insidetextorientation: "radial",
-                //textposition: "outside",
-                //automargin: true
+                hovertemplate: '%{x:,f}',
             },
         ];
-
-        /*
-        return [
-            {
-                x: this.detail.distress_ur.date,
-                y: this.detail.distress_ur.rate,
-                name: 'County Unempl. Rate',
-                line: {
-                    color: '#409EFF',
-                },
-            },
-
-            {
-                x: this.$root.unempUS.date,
-                y: this.$root.unempUS.rate,
-                //yaxis: 'y2',
-                name: 'US Unempl. Rate',
-                line: {
-                    color: '#999',
-                },
-            }
-        ];
-        */
     }
 
     demoGraphData = [];
@@ -813,7 +778,7 @@ export default class CountyDetail extends Vue {
                         marker: {
                             color: '#0004',
                         },
-                        hovertemplate: '%{y:,.0}',
+                        hovertemplate: '%{y:,f}',
                     },
 
                     //vul
@@ -826,7 +791,7 @@ export default class CountyDetail extends Vue {
                         marker: {
                             color: '#6008',
                         },
-                        hovertemplate: '%{y:,.0}',
+                        hovertemplate: '%{y:,f}',
                     }
                 ],
 
@@ -845,7 +810,7 @@ export default class CountyDetail extends Vue {
                         marker: {
                             color: '#0004',
                         },
-                        hovertemplate: '%{y:,.0}',
+                        hovertemplate: '%{y:,f}',
                     },
 
                     //vul
@@ -858,7 +823,7 @@ export default class CountyDetail extends Vue {
                         marker: {
                             color: '#6008',
                         },
-                        hovertemplate: '%{y:,.0}',
+                        hovertemplate: '%{y:,f}',
                     }
                 ]
             }
@@ -913,6 +878,7 @@ export default class CountyDetail extends Vue {
                 smoothing: 0.8,
             },
             mode: 'lines',
+            hovertemplate: '%{y:,f}',
         }
         for(const key in this.detail.or.groups) {
 
@@ -950,6 +916,7 @@ export default class CountyDetail extends Vue {
                 y: group.y,
                 name: group.name,
                 hoverinfo: 'y+text',
+                hovertemplate: '%{y:,f}',
             }, template));
         });
 
@@ -974,22 +941,17 @@ export default class CountyDetail extends Vue {
                 array: this.detail.distress_pcm.moe,
                 visible: true,
             },
-            name: 'EST'
+            name: 'EST',
+            hovertemplate: '%{y:,f}',
         },
-        /*
-        {
-            x: this.detail.distress_pcm.years,
-            y: this.detail.distress_pcm.moe,
-            name: 'MOE'
-        }
-        */
         ];
         
         this.pcpGraphData = [
         {
             x: this.detail.distress_pcp.years,
             y: this.detail.distress_pcp.data,
-            title: 'MOE'
+            name: 'MOE',
+            hovertemplate: '%{y:,f}',
         }];
     }
 
