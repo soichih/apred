@@ -16,7 +16,7 @@
             <br clear="both">
             <el-tabs v-model="tab" @tab-click="scroll2top">
                 <el-tab-pane name="info" label="County Detail"></el-tab-pane>
-                <el-tab-pane name="disaster" :label="'Disaster Declarations/EDA Awards ('+history.length+')'"></el-tab-pane>
+                <el-tab-pane name="disaster" :label="'Disaster Declarations ('+history.length+')'"></el-tab-pane>
                 <el-tab-pane v-if="detail.bvis2" name="bvi" label="Business Vulnerability"></el-tab-pane>
                 <el-tab-pane name="resilience" label="Disaster Resilience"></el-tab-pane>
                 <el-tab-pane name="storms" label="Storm History"></el-tab-pane>
@@ -737,12 +737,14 @@ export default class CountyDetail extends Vue {
     processHistory() {
         this.history = [];
 
-        this.detail.eda2018.forEach(rec=>{
-            rec.grantee = rec.grantee_name+", "+rec.grantee_city+", "+rec.grantee_state;
-            rec.date = new Date(rec.grant_award_date);
-            rec.type = "eda2018";
-            this.history.push(rec);
-        });
+        if(this.$root.user) {
+            this.detail.eda2018.forEach(rec=>{
+                rec.grantee = rec.grantee_name+", "+rec.grantee_city+", "+rec.grantee_state;
+                rec.date = new Date(rec.grant_award_date);
+                rec.type = "eda2018";
+                this.history.push(rec);
+            });
+        }
         
         this.detail.disasters.forEach(rec=>{
             rec.type = "dr";

@@ -9,24 +9,6 @@
     </div>
     <div class="side">
         <div class="legend" v-if="mode">
-            <!-- moved this to countyselecter placeholder. 
-                I am not sure what "geographic spread of FEMA disaster means.. so I am commenting this out for now
-            <p class="heading">
-                <b>How to use the map</b>
-            </p>
-            <p>
-                <ol>
-                    <li>To view the disaster profile of a particular county enter the name of the county in the search box above.</li>
-                    <br>
-                    <li>To view the geographic spread of FEMA disaster declarations or EDA Awards, select desired option using the map control below.</li>
-                </ol>
-            </p>
-            -->
-            <!-- this doesn't add new information to the user
-            <p class="heading">
-               <b>Map control</b>
-            </p>
-            -->
             <p class="heading">
                 <b>Map Type</b>
             </p>
@@ -178,11 +160,7 @@ mapboxgl.accessToken = "pk.eyJ1Ijoic29pY2hpaCIsImEiOiJjazVqdnBsM2cwN242M2psdjAwZ
 })
 export default class Disaster extends Vue {
 
-    modes = [
-        {value: "dr", label: "FEMA Disaster Declarations"},
-        {value: "eda", label: "EDA Awards"},
-        {value: "resilience", label: "Disaster Resilience"},
-    ];
+    modes = [];
 
     popup;
     selected = null;
@@ -341,6 +319,10 @@ export default class Disaster extends Vue {
     }
  
     created() {
+        this.modes.push({value: "dr", label: "FEMA Disaster Declarations"});
+        if(this.$root.user) this.modes.push({value: "eda", label: "EDA Awards"});
+        this.modes.push({value: "resilience", label: "Disaster Resilience"});
+
         const h = window.localStorage.getItem("hiddenLayers");
         if(h) {
             this.hiddenLayers = JSON.parse(h);
