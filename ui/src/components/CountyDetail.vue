@@ -296,11 +296,12 @@
         <br>
         <div class="overview">
             <p>
-            The Business Vulnerability Index (BVI) presents information on the <b>percentage of businesses in {{detail.county}} County</b> that is believed to be most 
-            vulnerable to various natural disasters. Businesses that we identified to be especially vulnerable to a disaster have the following 
-            characteristics:
+            The Business Vulnerability Index (BVI) presents information on the percentage of businesses in <b>{{detail.county}} County</b> that is believed to be most 
+            vulnerable to various natural disasters. The information comes from the U.S. Census Bureau's County Business Patterns.
             </p>
+
             <p>
+                Businesses that we identified to be especially vulnerable to a disaster have the following characteristics:
                 <ol>
                     <li>dependent on supply chains.</li>
                     <li>have a high reliance on public utilities like water and electricity.</li>
@@ -776,6 +777,11 @@ export default class CountyDetail extends Vue {
             xaxis: {
                 type: 'category', //show all years
             },
+            /*
+            yaxis: {
+                tickformat: '',
+            },
+            */
         }
 
         if(!this.detail.bvis2) return;
@@ -807,7 +813,7 @@ export default class CountyDetail extends Vue {
                         marker: {
                             color: '#0004',
                         },
-                        
+                        hovertemplate: '%{y:,.0}',
                     },
 
                     //vul
@@ -820,6 +826,7 @@ export default class CountyDetail extends Vue {
                         marker: {
                             color: '#6008',
                         },
+                        hovertemplate: '%{y:,.0}',
                     }
                 ],
 
@@ -838,6 +845,7 @@ export default class CountyDetail extends Vue {
                         marker: {
                             color: '#0004',
                         },
+                        hovertemplate: '%{y:,.0}',
                     },
 
                     //vul
@@ -850,6 +858,7 @@ export default class CountyDetail extends Vue {
                         marker: {
                             color: '#6008',
                         },
+                        hovertemplate: '%{y:,.0}',
                     }
                 ]
             }
