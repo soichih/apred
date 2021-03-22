@@ -34,12 +34,12 @@
                 </span>
             </div>
 
-            <div style="float: right; margin-top: 5px">
+            <div style="float: right; margin-top: 8px">
                 <a v-if="event.type == 'dr'" :href="'https://www.fema.gov/disaster/'+event.disasterNumber" target="fema">
                     <el-tag size="small" effect="plain" type="info">Disaster # {{event.disasterNumber}}</el-tag>&nbsp;
                 </a>
                 <a v-if="event.type == 'eda2018'">
-                    <el-tag size="small" effect="dark" type="success" style="float: right;">fain: {{event.fain}}</el-tag>
+                    <el-tag size="small" effect="dark" type="success" style="float: right;">FAIN {{event.fain}}</el-tag>
                 </a>
             </div>
 
@@ -53,19 +53,14 @@
                 EDA 2018 Disaster Supplemental Award
                 <span style="opacity: 0.5;"> | </span>
                 ${{event.award_amount | formatNumber}}
-                <el-tag type="info" effect="plain" v-if="event.counties.length">Multi-county({{event.counties.length}})</el-tag>
+                <el-tag type="info" effect="plain" v-if="event.counties.length" size="small">Multi-county({{event.counties.length}})</el-tag>
             </h3>
         </div>
     </div>
 
     <div class="event-body">
         <div v-if="event.type == 'dr'">
-            <p style="opacity: 0.9; font-style: italic;">{{event.declarationTitle}}</p>
-            <!-- same as incident begin date?
-            <small style="opacity: 0.6;">
-                declared on {{event.date.toLocaleDateString()}}
-            </small>
-            -->
+            <p style="opacity: 0.9; font-style: italic; margin: 0; padding: 10px 0;">{{event.declarationTitle}}</p>
 
             <h3 :style="eventIconStyle">
                 <span>
@@ -84,16 +79,17 @@
             <slot/>
         </div>
 
-        <div v-else-if="event.type == 'eda2018'">
-            <b>To:</b> <!--{{event.grantee}},-->{{event.grantee_name}},
+        <div v-else-if="event.type == 'eda2018'" style="margin-top: 8px;">
+
+            <small>To</small> <!--{{event.grantee}},-->{{event.grantee_name}},
             {{event.grantee_city}}, {{event.grantee_state}}<br>
-        
             <br>
 
-            <b>For:</b> {{event.grant_purpose}} 
+            <small>For</small> {{event.grant_purpose}} 
             <br>
             <br>
-            <b>Regional Office:</b> {{event.eda_regional_office}}
+
+            <small>Regional Office</small> {{event.eda_regional_office}}
             <slot/>
         </div>
 
@@ -170,7 +166,7 @@ h3 {
     display: inline-block;
     width: 200px;
     padding-right: 10px;
-    padding-top: 13px;
+    padding-top: 10px;
     font-size: 90%;
     float: left;
 
@@ -182,10 +178,11 @@ h3 {
     .event-icon {
         display: inline-block;
         width: 50px;
-        font-size: 200%;
+        font-size: 170%;
 
         position: relative;
-        top: 5px;
+        top: 3px;
+        left: 2px;
     }
 }
 .event-body {
@@ -194,7 +191,6 @@ h3 {
     border-left: 3px solid #0001;
 
     padding-bottom: 10px;
-    padding-top: 10px;
     padding-left: 24px;
 }
 .event-type {

@@ -204,7 +204,8 @@ new Vue({
     methods: {
         signout() {
             localStorage.removeItem("jwt");
-            this.user = null;
+            //this.user = null;
+            window.location.reload();
         },
     },
 
