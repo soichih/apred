@@ -544,23 +544,16 @@ export default class CountyDetail extends Vue {
     industryGraphLayout = {
         height: 400,
         //width: 900,
-        margin: {"t": 0, "b": 30, "l": 400, "r": 0},
+        margin: {"t": 30, "b": 30, "l": 400, "r": 0},
         //showlegend: false
         xaxis: {
             title: "Employment (k)",
-        }
+        },
     }
 
     get industryGraphData() {
         const non0 = this.detail.industries.filter(r=>r.empl > 0);
         const total = non0.reduce((a,v)=>{ return a+v.empl}, 0);
-
-        /*
-        //group all industries <3% into "others"
-        const major = non0.filter(r=>r.empl >= total*0.03);
-        const others = non0.filter(r=>r.empl < total*0.03);
-        const othersTotal = others.reduce((a,v)=>a+v.empl, 0);
-        */
 
         //add percentages to each industry name
         non0.forEach(r=>{
@@ -574,6 +567,7 @@ export default class CountyDetail extends Vue {
                 type: 'bar',
                 orientation: 'h',
                 hovertemplate: '%{x:,f}',
+                name: "",
             },
         ];
     }
@@ -584,7 +578,7 @@ export default class CountyDetail extends Vue {
         margin: {
             //l: 50,
             r: 280,
-            t: 10,
+            t: 20,
             b: 20,
         },
         //barmode: 'stack',
@@ -598,7 +592,7 @@ export default class CountyDetail extends Vue {
         margin: {
             //l: 50,
             r: 280,
-            t: 10,
+            t: 20,
             b: 20,
         },
         //barmode: 'stack',
@@ -614,7 +608,7 @@ export default class CountyDetail extends Vue {
         margin: {
             l: 40,
             r: 30,
-            t: 10,
+            t: 20,
             b: 30,
         },
         //'plot_bgcolor': '#0000',
@@ -631,7 +625,7 @@ export default class CountyDetail extends Vue {
         margin: {
             l: 40,
             r: 30,
-            t: 10,
+            t: 20,
             b: 30,
         },
         yaxis: {/*title: 'Unemployment Rate',*/ ticksuffix: "$"},
@@ -941,7 +935,7 @@ export default class CountyDetail extends Vue {
                 array: this.detail.distress_pcm.moe,
                 visible: true,
             },
-            name: 'EST',
+            name: '',
             hovertemplate: '%{y:,f}',
         },
         ];
@@ -950,7 +944,7 @@ export default class CountyDetail extends Vue {
         {
             x: this.detail.distress_pcp.years,
             y: this.detail.distress_pcp.data,
-            name: 'MOE',
+            name: '',
             hovertemplate: '%{y:,f}',
         }];
     }
