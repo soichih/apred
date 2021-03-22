@@ -38,7 +38,8 @@ export default class TopMenu extends Vue {
     }
 
     signup() {
-        document.location.href = "https://api.ctil.iu.edu/auth/#!/signup?app="+this.app;
+        alert('Sign up is only applicable for EDA staff. Please contact APRED team for more information.');
+        //document.location.href = "https://api.ctil.iu.edu/auth/#!/signup?app="+this.app;
     }
 
     login() {
