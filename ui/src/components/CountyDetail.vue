@@ -423,8 +423,8 @@
         <br>
         <div v-if="stormData && stormData.length > 0">
             <div class="overview">
-                <p>This graph shows the counts of storm events for <b>{{detail.county}} County</b> published by NOAA since 1950s.</p>
-                <p>Storm data has gone through many changes and versions over the years. The source data ingested into the database are widely varied and leads to many questions about the precision and accuracy of the location data. Please see <a href="https://www.ncdc.noaa.gov/stormevents/details.jsp" target="noaa">https://www.ncdc.noaa.gov/stormevents/faq.jsp</a> for more detail.</p>
+                <p>This graph shows the counts of storm events for <b>{{detail.county}} County</b> published by NOAA since the 1950s.</p>
+                <p>Storm data has gone through many changes and versions over the years. The source data ingested into the database are widely varied and leads to many questions about the precision and accuracy of the location data. For example, data collected before 1996 was a developing system. Less information was recorded as the database of storm information developed from 1954. Since 1996, a 48-event system was implemented with consistency thus producing more accurate and reliable data. Please see <a href="https://www.ncdc.noaa.gov/stormevents/faq.jsp" target="noaa">https://www.ncdc.noaa.gov/stormevents/faq.jsp</a> for more detail.</p>
                 <p>You can click on the chart legend to select or deselect which storm events to show on the graph.</p>
             </div>
             <ExportablePlotly :data="stormData" :layout="stormLayout"/>

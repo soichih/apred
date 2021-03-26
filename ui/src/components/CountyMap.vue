@@ -85,18 +85,30 @@
                     <br>
                 </p>
                 <ul style="list-style: none; padding: 0;">
-                    <li style="margin-bottom: 3px;" v-for="type in edaTypes" :key="type"><el-radio v-model="edaType" :label="type">{{type.split(" ").slice(0, 2).join(" ")}}</el-radio></li>
-                </ul>
-                <!--
-                <div class="legend-item">
-                    <p>
-                        <b>Award Legend</b>
+
+                    <p style="margin-bottom: 5px">
+                        <el-radio v-model="edaType" label="All">All</el-radio>
                     </p>
-                    <span class="legend-color" style="background-color: #00ff00">&nbsp;</span>&nbsp;Statewide Awards
+
+                    <p style="margin-bottom: 5px;">
+                        <small><b>2012 Supplemental</b></small>
+                    </p>
+                    <li style="margin-bottom: 3px;" v-for="type in edaTypes['2012']" :key="type">
+                        <el-radio v-model="edaType" :label="type">
+                            {{type.split(" ").slice(0, 2).join(" ")}}
+                        </el-radio>
+                    </li>
+
+                    <p style="margin-bottom: 5px">
+                        <small><b>2018 Supplemental</b></small>
+                    </p>
+                    <li style="margin-bottom: 3px;" v-for="type in edaTypes['2018']" :key="type">
+                        <el-radio v-model="edaType" :label="type">
+                            {{type.split(" ").slice(0, 2).join(" ")}}
+                        </el-radio>
+                    </li>
                     <br>
-                    <span class="legend-color" style="background-color: #0066ff">&nbsp;</span>&nbsp;County Awards
-                </div>
-                -->
+                </ul>
             </div>
 
             <div v-if="mode == 'resilience'">
@@ -193,9 +205,8 @@ export default class Disaster extends Vue {
 
     edaYear = null; //will be set to "all" once eda layers area loaded
     edaYears = [];
-    //edaType = 'Infrastructure';
-    edaType = "All"; //all
-    edaTypes = ["All"];
+    edaType = "All";
+    edaTypes = {"2012": [], "2018": []};
 
     cutterIndicators = {
         "SOC": {
@@ -295,19 +306,6 @@ export default class Disaster extends Vue {
     }
 
     updateEda() {
-        /*
-        //for pins
-        let filter = ["all"];
-        if(this.edaType != "All") filter.push(["==", ['get', 'purpose'], this.edaType]);
-        if(this.edaYear != "all") {
-            const startDate = new Date(this.edaYear+"-01-01").getTime();
-            const endDate = new Date(this.edaYear+"-12-31").getTime();
-            filter.push([">=", ['get', 'date'], startDate]);
-            filter.push(["<=", ['get', 'date'], endDate]);
-        }
-        this.map.setFilter('eda-pins', filter);
-        */
-
         //eda county labels
         const filter = ['in', 'fips'];
         this.eda2018.forEach(rec=>{
@@ -591,10 +589,22 @@ export default class Disaster extends Vue {
                             })
                         });
                     }
+
                     //create edatype catalog
                     for(const fain in data) {
                         const rec = data[fain];
-                        if(!this.edaTypes.includes(rec.grant_purpose)) this.edaTypes.push(rec.grant_purpose)
+
+                        //some purposes are for 2012supp
+                        let year = "2018";
+                        switch(rec.grant_purpose) {
+                        case "Construction":
+                        case "Non-Construction":
+                            year = "2012";
+                        }
+
+                        if(!this.edaTypes[year].includes(rec.grant_purpose)) {
+                            this.edaTypes[year].push(rec.grant_purpose)
+                        }
                     }
 
                     this.map.addLayer({
@@ -612,36 +622,6 @@ export default class Disaster extends Vue {
                     }, 'map');
 
                     //load pins where eda is awareded (ike wants to remove this)
-                    /*
-                    fetch(this.$root.dataUrl+"/eda2018.albers.geojson").then(res=>{ 
-                        return res.json()
-                    }).then(data=>{
-
-                        this.map.addSource('eda2018-pin', { type: "geojson", data });
-                        const img = new Image();
-                        img.addEventListener('load', err=>{
-                            this.map.addImage('award-icon', img, {sdf: true});
-                            this.map.addLayer({
-                                id: 'eda-pins',
-                                type: 'symbol',
-                                source: "eda2018-pin",
-                                layout: {
-                                    visibility: 'none', 
-                                    'icon-image': 'award-icon',
-                                    'icon-size': 0.3,
-                                    'icon-allow-overlap': true,
-                                    'icon-anchor': 'bottom',
-                                },
-                                paint: {
-                                  'icon-color': '#00f',
-                                  'icon-opacity': 0.3,
-                                }
-                            });
-                            this.edaYear = 'all';
-                        });
-                        img.src = this.awardIcon;
-                    });
-                    */
                     this.edaYear = 'all';
                 });
             });
