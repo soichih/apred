@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "vue-cli-service serve --port 8084",
-    "build": "vue-cli-service build && git add dist",
+    "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
     "deploy-prod": "ssh -t apred@api.ctil.iu.edu ./update.sh"
   },
