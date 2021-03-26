@@ -169,7 +169,7 @@
             <el-row :gutter="20">
                 <el-col :span="5">
                     <h4>Per Capita Income<br>
-                        <small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS 2018)</a></small>
+                        <small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS 2019)</a></small>
                     </h4>
                     <span class="primary" v-if="detail.percapitaincome"> ${{detail.percapitaincome | formatNumber}}</span>
                     <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
@@ -184,7 +184,7 @@
             <el-row :gutter="20">
                 <el-col :span="5">
                     <h4>Median Household Income<br>
-                        <small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS 2018)</a></small>
+                        <small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS 2019)</a></small>
                     </h4>
                     <span class="primary" v-if="detail.medianincome"> ${{detail.medianincome | formatNumber}}</span>
                     <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
@@ -240,9 +240,10 @@
         <h3>Data Sources</h3>
         <p>
             <ol>
-                <li>Data for population estimate, population density, per capita income, and median household income were generated from the 
-                    <a href="https://www.census.gov/programs-surveys/acs/">American Community Survey (ACS)</a>.</li>
-                <li>GDP data was generated from the <a href ="https://www.bea.gov/">Business of Economic Analysis (BEA)</a>.</li>
+                <li>The population estimate, racial makeup, and population history data are coming from the Census Bureau's Population Estimates by Age, Sex, Race, and Hispanic Origin.</li>
+                <li>The Population Density, Median Household Income, and Per Capita Money Income are coming from the Census Bureau's American Community Survey, 5-year estimates.</li>
+                <li>The GDP, Per Capita Income, and Per Capita Personal Income (which is the same as the Per Capita Income data that is currently being displayed) are from the Bureau of Economic Analysis.</li>
+                <li>The Top Industries data is from the Census of Employment and Wages data from the Bureau of Labor Statistics and the Unemployment Rate data is LAUS from BLS.</li>
             </ol>
         </p>
         <h3>Additional Resources</h3>
@@ -993,7 +994,7 @@ export default class CountyDetail extends Vue {
             //county
             {
                 x: this.detail.distress_ur.date,
-                y: this.detail.distress_ur.employed,
+                y: this.detail.distress_ur.employed.map(v=>v/24),
                 stackgroup: 'county',
                 name: 'Employed',
                 fillcolor: 'rgba(0,0,0,0.1)',
@@ -1003,7 +1004,7 @@ export default class CountyDetail extends Vue {
             },
             {
                 x: this.detail.distress_ur.date,
-                y: this.detail.distress_ur.unemp,
+                y: this.detail.distress_ur.unemp.map(v=>v/24),
                 stackgroup: 'county',
                 name: 'Unemployed',
                 fillcolor: 'rgba(153, 30, 30, 0.4)',
