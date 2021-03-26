@@ -994,7 +994,7 @@ export default class CountyDetail extends Vue {
             //county
             {
                 x: this.detail.distress_ur.date,
-                y: this.detail.distress_ur.employed,
+                y: this.detail.distress_ur.employed.map(v=>v/24),
                 stackgroup: 'county',
                 name: 'Employed',
                 fillcolor: 'rgba(0,0,0,0.1)',
@@ -1004,7 +1004,7 @@ export default class CountyDetail extends Vue {
             },
             {
                 x: this.detail.distress_ur.date,
-                y: this.detail.distress_ur.unemp,
+                y: this.detail.distress_ur.unemp.map(v=>v/24),
                 stackgroup: 'county',
                 name: 'Unemployed',
                 fillcolor: 'rgba(153, 30, 30, 0.4)',
