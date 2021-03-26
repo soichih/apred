@@ -169,7 +169,7 @@
             <el-row :gutter="20">
                 <el-col :span="5">
                     <h4>Per Capita Income<br>
-                        <small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS 2018)</a></small>
+                        <small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS 2019)</a></small>
                     </h4>
                     <span class="primary" v-if="detail.percapitaincome"> ${{detail.percapitaincome | formatNumber}}</span>
                     <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
@@ -184,7 +184,7 @@
             <el-row :gutter="20">
                 <el-col :span="5">
                     <h4>Median Household Income<br>
-                        <small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS 2018)</a></small>
+                        <small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS 2019)</a></small>
                     </h4>
                     <span class="primary" v-if="detail.medianincome"> ${{detail.medianincome | formatNumber}}</span>
                     <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
