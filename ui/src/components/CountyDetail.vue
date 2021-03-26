@@ -89,7 +89,7 @@
         <el-row :gutter="20">
             <el-col :span="5">
                 <h4>GDP<br>
-                    <small><a href="https://www.bea.gov/" target="bea">(BEA)</a></small>
+                    <small><a href="https://www.bea.gov/" target="bea">(BEA 2018)</a></small>
                 </h4>
                 <span class="primary" v-if="detail.gdp"> ${{(detail.gdp/1000) | formatNumber}} M</span>
                 <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
