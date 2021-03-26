@@ -28,35 +28,6 @@
         <div class="overview">
             <p>This page presents information on measuring distress indicators, economic, and demographic data for <b>{{detail.county}} County, {{detail.state}}</b>.</p>
         </div>
-        <el-row :gutter="20">
-            <el-col :span="5">
-                <h4>Population<br>
-                    <small><a href="https://www.census.gov/programs-surveys/popest.html" target="census">(Census Bureau 2019)</a></small>
-                </h4>
-                <span class="primary" v-if="detail.population"> {{detail.population | formatNumber}}</span>
-                <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
-            </el-col>
-            <el-col :span="19">
-                <Histogram v-if="$root.commonReady" :value="detail.population" :histogram="$root.populationHistogram" :fips="fips" :state="detail.state" xunit="people"/>
-                <br>
-                <br>
-            </el-col>
-        </el-row>
-
-        <el-row :gutter="20">
-            <el-col :span="5">
-                <h4>Population Density<br>
-                    <small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS 2019)</a></small>
-                </h4>
-                <span class="primary" v-if="detail.popdensity"> {{detail.popdensity | formatNumber}} people per sq. mile</span>
-                <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
-            </el-col>
-            <el-col :span="19">
-                <Histogram v-if="$root.commonReady" :value="detail.popdensity" :histogram="$root.popdensityHistogram" :fips="fips" :state="detail.state" xunit="people per sq. mile"/>
-                <br>
-                <br>
-            </el-col>
-        </el-row>
 
         <el-row :gutter="20">
             <el-col :span="5">
@@ -79,98 +50,6 @@
             </el-col>
             <el-col :span="19">
                 <ExportablePlotly :data="orGraphData" :layout="orGraphLayout"/>
-                <br>
-                <br>
-            </el-col>
-        </el-row>
-
-        <hr>
-
-        <el-row :gutter="20">
-            <el-col :span="5">
-                <h4>GDP<br>
-                    <small><a href="https://www.bea.gov/" target="bea">(BEA 2018)</a></small>
-                </h4>
-                <span class="primary" v-if="detail.gdp"> ${{(detail.gdp/1000) | formatNumber}} M</span>
-                <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
-                <br>
-            </el-col>
-            <el-col :span="19">
-                <Histogram v-if="$root.commonReady" :value="detail.gdp" :histogram="$root.gdpHistogram" :fips="fips" :state="detail.state" xunit="dollars"/>
-                <br>
-                <br>
-            </el-col>
-        </el-row>
-
-
-        <el-row :gutter="20">
-            <el-col :span="5">
-                <h4>Per Capita Income<br>
-                    <small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS 2018)</a></small>
-                </h4>
-                <span class="primary" v-if="detail.percapitaincome"> ${{detail.percapitaincome | formatNumber}}</span>
-                <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
-            </el-col>
-            <el-col :span="19">
-                <Histogram v-if="$root.commonReady" :value="detail.percapitaincome" :histogram="$root.perCapitaIncomeHistogram" :fips="fips" :state="detail.state" xunit="dollars per capita"/>
-                <br>
-                <br>
-            </el-col>
-        </el-row>
-
-        <el-row :gutter="20">
-            <el-col :span="5">
-                <h4>Median Household Income<br>
-                    <small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS 2018)</a></small>
-                </h4>
-                <span class="primary" v-if="detail.medianincome"> ${{detail.medianincome | formatNumber}}</span>
-                <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
-            </el-col>
-            <el-col :span="19">
-                <Histogram v-if="$root.commonReady" :value="detail.medianincome" :histogram="$root.medianIncomeHistogram" :fips="fips" :state="detail.state" xunit="dollars"/>
-                <br>
-                <br>
-            </el-col>
-        </el-row>
-
-        <hr>
-
-        <el-row :gutter="20">
-            <el-col :span="5">
-                <h4>Per Capita Money Income<br>
-                    <small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(5-year ACS)</a></small>
-                </h4>
-            </el-col>
-            <el-col :span="19">
-                <p>
-                    <ExportablePlotly :data="pcmGraphData" :layout="pcmGraphLayout"/>
-                    <small>The amount of money (only cash sources) earned per person. Released annually in December.</small>
-                </p>
-                <br>
-                <br>
-            </el-col>
-        </el-row>
-
-        <el-row :gutter="20">
-            <el-col :span="5">
-                <h4>Per Capita Personal Income<br>
-                    <small><a href="https://www.bea.gov/" target="bea">(BEA)</a></small></h4>
-            </el-col>
-            <el-col :span="19">
-                <p>
-                    <ExportablePlotly :data="pcpGraphData" :layout="pcpGraphLayout"/>
-                    <small>An estimate of income per person that includes not only cash sources of income, but also insurance, transfer payments, dividends, interest, and rent. Released annually in the spring.</small>
-                </p>
-                <br>
-            </el-col>
-        </el-row>
-
-        <el-row :gutter="20" v-if="detail.industries">
-            <el-col :span="5">
-                <h4>Top Industries</h4>
-            </el-col>
-            <el-col :span="19">
-                <ExportablePlotly :data="industryGraphData" :layout="industryGraphLayout"/>
                 <br>
                 <br>
             </el-col>
@@ -219,6 +98,137 @@
                 <br>
             </el-col>
         </el-row>
+
+        <el-row :gutter="20" v-if="detail.industries">
+            <el-col :span="5">
+                <h4>Top Industries</h4>
+            </el-col>
+            <el-col :span="19">
+                <ExportablePlotly :data="industryGraphData" :layout="industryGraphLayout"/>
+                <br>
+                <br>
+            </el-col>
+        </el-row>
+
+        <div v-if="!showOtherInfo">
+            <el-button round @click="showOtherInfo = true">
+                <i class="el-icon-caret-right"/> Show More Information
+            </el-button>
+        </div>
+
+        <div v-if="showOtherInfo">
+            <el-row :gutter="20">
+                <el-col :span="5">
+                    <h4>Population<br>
+                        <small><a href="https://www.census.gov/programs-surveys/popest.html" target="census">(Census Bureau 2019)</a></small>
+                    </h4>
+                    <span class="primary" v-if="detail.population"> {{detail.population | formatNumber}}</span>
+                    <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
+                </el-col>
+                <el-col :span="19">
+                    <Histogram v-if="$root.commonReady" :value="detail.population" :histogram="$root.populationHistogram" :fips="fips" :state="detail.state" xunit="people"/>
+                    <br>
+                    <br>
+                </el-col>
+            </el-row>
+
+            <el-row :gutter="20">
+                <el-col :span="5">
+                    <h4>Population Density<br>
+                        <small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS 2019)</a></small>
+                    </h4>
+                    <span class="primary" v-if="detail.popdensity"> {{detail.popdensity | formatNumber}} people per sq. mile</span>
+                    <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
+                </el-col>
+                <el-col :span="19">
+                    <Histogram v-if="$root.commonReady" :value="detail.popdensity" :histogram="$root.popdensityHistogram" :fips="fips" :state="detail.state" xunit="people per sq. mile"/>
+                    <br>
+                    <br>
+                </el-col>
+            </el-row>
+
+            <hr>
+
+            <el-row :gutter="20">
+                <el-col :span="5">
+                    <h4>GDP<br>
+                        <small><a href="https://www.bea.gov/" target="bea">(BEA 2018)</a></small>
+                    </h4>
+                    <span class="primary" v-if="detail.gdp"> ${{(detail.gdp/1000) | formatNumber}} M</span>
+                    <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
+                    <br>
+                </el-col>
+                <el-col :span="19">
+                    <Histogram v-if="$root.commonReady" :value="detail.gdp" :histogram="$root.gdpHistogram" :fips="fips" :state="detail.state" xunit="dollars"/>
+                    <br>
+                    <br>
+                </el-col>
+            </el-row>
+
+
+            <el-row :gutter="20">
+                <el-col :span="5">
+                    <h4>Per Capita Income<br>
+                        <small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS 2018)</a></small>
+                    </h4>
+                    <span class="primary" v-if="detail.percapitaincome"> ${{detail.percapitaincome | formatNumber}}</span>
+                    <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
+                </el-col>
+                <el-col :span="19">
+                    <Histogram v-if="$root.commonReady" :value="detail.percapitaincome" :histogram="$root.perCapitaIncomeHistogram" :fips="fips" :state="detail.state" xunit="dollars per capita"/>
+                    <br>
+                    <br>
+                </el-col>
+            </el-row>
+
+            <el-row :gutter="20">
+                <el-col :span="5">
+                    <h4>Median Household Income<br>
+                        <small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS 2018)</a></small>
+                    </h4>
+                    <span class="primary" v-if="detail.medianincome"> ${{detail.medianincome | formatNumber}}</span>
+                    <span v-else style="padding: 10px 0; opacity: 0.5;">No information</span>
+                </el-col>
+                <el-col :span="19">
+                    <Histogram v-if="$root.commonReady" :value="detail.medianincome" :histogram="$root.medianIncomeHistogram" :fips="fips" :state="detail.state" xunit="dollars"/>
+                    <br>
+                    <br>
+                </el-col>
+            </el-row>
+
+            <hr>
+
+            <el-row :gutter="20">
+                <el-col :span="5">
+                    <h4>Per Capita Money Income<br>
+                        <small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(5-year ACS)</a></small>
+                    </h4>
+                </el-col>
+                <el-col :span="19">
+                    <p>
+                        <ExportablePlotly :data="pcmGraphData" :layout="pcmGraphLayout"/>
+                        <small>The amount of money (only cash sources) earned per person. Released annually in December.</small>
+                    </p>
+                    <br>
+                    <br>
+                </el-col>
+            </el-row>
+
+            <el-row :gutter="20">
+                <el-col :span="5">
+                    <h4>Per Capita Personal Income<br>
+                        <small><a href="https://www.bea.gov/" target="bea">(BEA)</a></small></h4>
+                </el-col>
+                <el-col :span="19">
+                    <p>
+                        <ExportablePlotly :data="pcpGraphData" :layout="pcpGraphLayout"/>
+                        <small>An estimate of income per person that includes not only cash sources of income, but also insurance, transfer payments, dividends, interest, and rent. Released annually in the spring.</small>
+                    </p>
+                    <br>
+                </el-col>
+            </el-row>
+
+        </div>
 
         <br>
 
@@ -540,6 +550,8 @@ export default class CountyDetail extends Vue {
 
     showPastHistory = false;
     shownIndicators = [];
+
+    showOtherInfo = false;
 
     industryGraphLayout = {
         height: 400,
