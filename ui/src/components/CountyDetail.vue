@@ -240,9 +240,10 @@
         <h3>Data Sources</h3>
         <p>
             <ol>
-                <li>Data for population estimate, population density, per capita income, and median household income were generated from the 
-                    <a href="https://www.census.gov/programs-surveys/acs/">American Community Survey (ACS)</a>.</li>
-                <li>GDP data was generated from the <a href ="https://www.bea.gov/">Business of Economic Analysis (BEA)</a>.</li>
+                <li>The population estimate, racial makeup, and population history data are coming from the Census Bureau's Population Estimates by Age, Sex, Race, and Hispanic Origin.</li>
+                <li>The Population Density, Median Household Income, and Per Capita Money Income are coming from the Census Bureau's American Community Survey, 5-year estimates.</li>
+                <li>The GDP, Per Capita Income, and Per Capita Personal Income (which is the same as the Per Capita Income data that is currently being displayed) are from the Bureau of Economic Analysis.</li>
+                <li>The Top Industries data is from the Census of Employment and Wages data from the Bureau of Labor Statistics and the Unemployment Rate data is LAUS from BLS.</li>
             </ol>
         </p>
         <h3>Additional Resources</h3>
