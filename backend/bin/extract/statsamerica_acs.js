@@ -112,7 +112,7 @@ function load_population(pool) {
 }
 
 function load_medianincome(pool) {
-    pool.request().query(` SELECT * FROM [stats_dms5].[dbo].[acs_common_items_extract] WHERE code_id = '307' and time_id = '2018'`).then(res=>{
+    pool.request().query(` SELECT * FROM [stats_dms5].[dbo].[acs_common_items_extract] WHERE code_id = '307' and time_id = '2019'`).then(res=>{
         /*
           {
             "geo_id": 11000,
@@ -129,8 +129,9 @@ function load_medianincome(pool) {
 
 
 function load_percapitaincome(pool) {
+    //select * from stats4.dbo.pcpi_uscnty WHERE year = (SELECT TOP (1) year FROM stats4.dbo.pcpi_uscnty ORDER BY year DESC) AND countyfips <> '000' AND LINECODE = '0030'
     pool.request().query(`
-        select * from stats4.dbo.pcpi_uscnty WHERE year = (SELECT TOP (1) year FROM stats4.dbo.pcpi_uscnty ORDER BY year DESC) AND countyfips <> '000' AND LINECODE = '0030'
+        select * from stats4.dbo.pcpi_uscnty WHERE year = '2019' AND countyfips <> '000' AND LINECODE = '0030'
     `).then(res=>{
         /*
         {
