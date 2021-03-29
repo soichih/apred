@@ -217,7 +217,7 @@
             <el-row :gutter="20">
                 <el-col :span="5">
                     <h4>Per Capita Personal Income<br>
-                        <small><a href="https://www.bea.gov/" target="bea">(BEA)</a></small></h4>
+                        <small><a href="https://www.bea.gov/" target="bea">(BEA 2019)</a></small></h4>
                 </el-col>
                 <el-col :span="19">
                     <p>
