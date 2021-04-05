@@ -592,7 +592,7 @@ export default class CountyDetail extends Vue {
             //l: 50,
             r: 280,
             t: 20,
-            b: 20,
+            b: 30,
         },
         //barmode: 'stack',
         //'plot_bgcolor': '#0000',
@@ -606,7 +606,7 @@ export default class CountyDetail extends Vue {
             //l: 50,
             r: 280,
             t: 20,
-            b: 20,
+            b: 30,
         },
         //barmode: 'stack',
         //'plot_bgcolor': '#0000',
@@ -652,7 +652,7 @@ export default class CountyDetail extends Vue {
             l: 40,
             r: 30,
             t: 10,
-            b: 20,
+            b: 30,
         },
         //'plot_bgcolor': '#0000',
         //'paper_bgcolor': '#0000',
@@ -666,7 +666,7 @@ export default class CountyDetail extends Vue {
             l: 40,
             r: 30,
             t: 10,
-            b: 20,
+            b: 30,
         },
         //'plot_bgcolor': '#0000',
         //'paper_bgcolor': '#0000',
@@ -922,8 +922,8 @@ export default class CountyDetail extends Vue {
             this.demoGraphData.push(Object.assign({ 
                 y: group.y,
                 name: group.name,
-                hoverinfo: 'y+text',
-                hovertemplate: '%{y:,f}',
+                //hoverinfo: 'y+text',
+                hovertemplate: '%{y:,f} (%{text})',
             }, template));
         });
 
@@ -931,9 +931,9 @@ export default class CountyDetail extends Vue {
         for(let y = 0;y < this.detail.pops.years.length; ++y) {
             const total = this.demoGraphData.reduce((sum, v)=>sum+v.y[y], 0);
             this.demoGraphData.forEach(v=>{
-                if(!v.hovertext) v.hovertext = [];
-                if(total == 0) v.hovertext.push(null);
-                else v.hovertext.push((v.y[y]/total*100).toFixed(1)+"%");
+                if(!v.text) v.text = [];
+                if(total == 0) v.text.push(null);
+                else v.text.push((v.y[y]/total*100).toFixed(1)+"%");
             });
         }
     }
