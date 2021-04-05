@@ -388,8 +388,8 @@ export default class Compare extends Vue {
                 allYears.forEach(y=>{
                     const idx = data.years.indexOf(y);
                     if(~idx) {
-                        estabV.push(data.estab_v[idx]);
-                        empV.push(data.emp_v[idx]);
+                        estabV.push(data.estab_v_pct[idx]);
+                        empV.push(data.emp_v_pct[idx]);
                     } else {
                         //value missing.. add 0
                         estabV.push(0);
@@ -398,24 +398,16 @@ export default class Compare extends Vue {
                 });
 
                 estTraces.push({
-                    //x: data.years,
                     x: allYears,
-                    //y: data.estab_v,
                     y: estabV,
                     name: detail.county+","+detail.state,
-                    //mode: 'lines',
                     mode: 'lines',
                     line: { width: 1, /*shape: 'spline'*/},
                     fill: "tozeroy",
                     fillcolor: 'rgba(0,0,0,0.02)',
-                    //opacity: 0.1,
-                    //type: 'bar',
-                    //marker: { color: '#6008', },
                 });
                 empTraces.push({
-                    //x: data.years,
                     x: allYears,
-                    //y: data.emp_v,
                     y: empV,
                     name: detail.county+","+detail.state,
                     mode: 'lines',

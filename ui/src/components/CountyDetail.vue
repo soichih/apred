@@ -1001,6 +1001,7 @@ export default class CountyDetail extends Vue {
                 line: {
                     width: 0,
                 },
+                hovertemplate: '%{y:,f}',
             },
             {
                 x: this.detail.distress_ur.date,
@@ -1011,6 +1012,7 @@ export default class CountyDetail extends Vue {
                 line: {
                     width: 0,
                 },
+                hovertemplate: '%{y:,f}',
             },
 
             /*
@@ -1025,6 +1027,7 @@ export default class CountyDetail extends Vue {
                 line: {
                     width: 0,
                 },
+                hovertemplate: '%{y:,f}',
             },
             {
                 x: this.$root.unempUS.date,
@@ -1036,6 +1039,7 @@ export default class CountyDetail extends Vue {
                 line: {
                     width: 0,
                 },
+                hovertemplate: '%{y:,f}',
             },
             */
         ];
