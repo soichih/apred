@@ -118,7 +118,8 @@ export default class Histogram extends Vue {
             yaxis: {
                 type: 'log',
                 autorange: true,
-                title: '# of Counties'
+                title: '# of Counties',
+                dtick: 1, //remove subticks
             }
         }
     }
