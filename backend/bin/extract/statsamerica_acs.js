@@ -130,6 +130,8 @@ function load_medianincome(pool) {
 
 function load_percapitaincome(pool) {
     //select * from stats4.dbo.pcpi_uscnty WHERE year = (SELECT TOP (1) year FROM stats4.dbo.pcpi_uscnty ORDER BY year DESC) AND countyfips <> '000' AND LINECODE = '0030'
+
+    //blj4 says percapitaincome is from "BEA".. so maybe we should move it?
     pool.request().query(`
         select * from stats4.dbo.pcpi_uscnty WHERE year = '2019' AND countyfips <> '000' AND LINECODE = '0030'
     `).then(res=>{

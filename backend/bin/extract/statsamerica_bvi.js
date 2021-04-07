@@ -5,7 +5,6 @@ const async = require('async');
 const config = require('../../config');
 const mssql = require('mssql');
 
-console.log("statsamerica cbp_uscnty --------------------------");
 
 //I can only connect from IU VPN connected IPs - not dev1
 mssql.connect(config.stats_america.db_stats4).then(pool=>{
@@ -15,17 +14,20 @@ mssql.connect(config.stats_america.db_stats4).then(pool=>{
 function load(pool) {
     let density = {};
 
+    console.log("dbp_uscnty--------------------------------------------");
     pool.request().query(`
 
 SELECT a.[year]
     , CONCAT(a.[statefips], a.[countyfips]) AS fips
-    , a.[naics_code]
-    , a.[estab_total]
+    , b.[naics_code]
+    , ISNULL(a.[estab_total],0) AS estab_total
     , ISNULL(b.[estab_total],0) AS estab_vuln_total
-    , ISNULL(a.[mm_employees],0) AS mm_employees
+    , CASE WHEN a.[estab_total] = 0 THEN 0 ELSE ISNULL(b.[estab_total],0)/a.[estab_total] END AS estab_vuln_pct
+    , ISNULL(a.[mm_employees],0) AS emp_total
     , ISNULL(b.[mm_employees], 0) AS emp_vuln_total
+    , CASE WHEN a.[mm_employees] = 0 THEN 0 ELSE ISNULL(b.[mm_employees],0)/a.[mm_employees] END AS emp_vuln_pct
 FROM [stats4].[dbo].[cbp_uscnty] a 
-LEFT JOIN (
+JOIN (
     SELECT [year]
         , [statefips]
         , [countyfips]
@@ -53,39 +55,45 @@ LEFT JOIN (
         '440000','450000',
         '493110','493120','493130','493190',
         '722410','722511','722513','722514'
-    ) GROUP BY 
-        [year]
-        , [statefips]
-        , [countyfips]
-        , CASE
-            WHEN LEFT([naics_code],2) IN ('31','32','33') THEN '31-33'
-            WHEN LEFT([naics_code],2) IN ('44','45') THEN '44-45'
-            WHEN LEFT([naics_code],2) IN ('48','49') THEN '48-49'
-            ELSE LEFT([naics_code],2)
-        END
-) b ON b.[year] = a.[year] AND b.[statefips] = a.[statefips] AND b.[countyfips] = a.[countyfips] AND b.[naics_code] = a.[naics_code]
-WHERE a.[naics_code] != '00' AND (LEN(a.[naics_code]) = 2 OR a.[naics_code] LIKE '__-__')  AND a.[year] >= '2012' 
-
-    ORDER BY a.year
+    )
+    GROUP BY [year], [statefips], [countyfips],
+    CASE
+        WHEN LEFT([naics_code],2) IN ('31','32','33') THEN '31-33'
+        WHEN LEFT([naics_code],2) IN ('44','45') THEN '44-45'
+        WHEN LEFT([naics_code],2) IN ('48','49') THEN '48-49'
+        ELSE LEFT([naics_code],2)
+    END
+) b ON b.[year] = a.[year] 
+    AND b.[statefips] = a.[statefips] 
+    AND b.[countyfips] = a.[countyfips]
+    AND b.[naics_code] = a.[naics_code]
+WHERE a.[year] >= '2012'
+    AND (a.[naics_code] LIKE '__' OR a.[naics_code] LIKE '__-__')
+ORDER BY 
+    a.[statefips], 
+    a.[countyfips],
+    a.[naics_code],
+    a.[year] 
 
     `).then(res=>{
         /*
           {
-            year: '2014',
-            fips: '22071',
-            naics_code: '51',
-            estab_total: 154,
-            estab_vuln_total: 49,
-            estab_vuln_pct: 0.318181,
-            mm_employees: 2488,
-            emp_vuln_total: 92,
-            emp_vuln_pct: 0.036977
+            year: '2017',
+            fips: '01007',
+            naics_code: '72',
+            estab_total: 18,
+            estab_vuln_total: 15,
+            estab_vuln_pct: 0.833333,
+            emp_total: 265,
+            emp_vuln_total: 215,
+            emp_vuln_pct: 0.81132
           },
         */
         fs.writeFileSync(config.pubdir+"/raw/bvi.json", JSON.stringify(res.recordset));
         pool.close();
     });
 
+    console.log("empl--------------------------------------------");
     pool.request().query(`
         SELECT a.statefips, a.countyfips, a.year, a.naics, b.naics_title, a.empl
         FROM cew_totown_n a, naics b

@@ -187,14 +187,10 @@ const unemp_us = {date: [], rate: [], unemp: [], employed: []}
 distress_ur.forEach(rec=>{
     let fips = rec.statefips+rec.countyfips;
     if(fips != 0) return; //pull us data
-    
-    //only pull data quaterly
-    //if(rec.month%4 == 1) {
-        unemp_us.date.push(new Date(rec.year+"/"+rec.month));
-        unemp_us.employed.push(rec.employed);
-        unemp_us.unemp.push(rec.unemp);
-        unemp_us.rate.push(rec.rate);
-    //}
+    unemp_us.date.push(new Date(rec.year+"/"+rec.month));
+    unemp_us.employed.push(rec.employed);
+    unemp_us.unemp.push(rec.unemp);
+    unemp_us.rate.push(rec.rate);
 });
 
 distress_ur.forEach(rec=>{
@@ -416,8 +412,10 @@ function handleBVINaics(cb) {
         counties[rec.fips].bvis2[rec.naics_code][rec.year] = {
             estab: rec.estab_total,
             estab_v: rec.estab_vuln_total,
+            estab_v_pct: rec.estab_vuln_pct,
             emp: rec.mm_employees,
             emp_v: rec.emp_vuln_total,
+            emp_v_pct: rec.emp_vuln_pct,
         }
     });
 
@@ -430,15 +428,19 @@ function handleBVINaics(cb) {
                 years,
                 estab: [],
                 estab_v: [],
+                estab_v_pct: [],
                 emp: [],
                 emp_v: [],
+                emp_v_pct: [],
             }
             for(let year of years) {
                 let o = counties[fips].bvis2[naics][year];
                 info.estab.push(o.estab);
                 info.estab_v.push(o.estab_v);
+                info.estab_v_pct.push(o.estab_v_pct);
                 info.emp.push(o.emp);
                 info.emp_v.push(o.emp_v);
+                info.emp_v_pct.push(o.emp_v_pct);
             }
             counties[fips].bvis2[naics] = info;
         }
