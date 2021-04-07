@@ -66,8 +66,10 @@
         -->
         <ExportablePlotly :data="popGraphData" :layout="popGraphLayout"/>
 
-        <h4>Business Vulnerability</h4>
-        <el-alert type="info" v-for="(error, idx) in errors.bvis" :key="idx">{{error}}</el-alert>
+        <h3>Business Vulnerability</h3>
+        <p v-for="(error, idx) in errors.bvis" :key="idx">
+            <el-alert type="info">{{error}}</el-alert>
+        </p>
         <div v-for="bvi in bvis" :key="bvi.naics">
             <p>
                 <b><NaicsInfo :id="bvi.naics"/></b>
@@ -299,27 +301,22 @@ export default class Compare extends Vue {
     bviLayout = {
         height: 175,
         margin: {
-            l: 30,
+            l: 40,
             r: 30,
             t: 10,
             b: 30,
         },
-        /*
-        legend: {
-            y: 1.15,
-            bgcolor: 'rgba(255, 255, 255, 0)',
-            bordercolor: 'rgba(255, 255, 255, 0)',
-            orientation: 'h',
-            font: { size: 10 },
-        },
-        */
         showlegend: false,
 
         //barmode: 'stack',
         xaxis: {
             type: 'category', //show all years
         },
-        yaxis: {rangemode: 'tozero'},
+        yaxis: {
+            //rangemode: 'tozero'
+            tickformat: ',.0%',
+            range: [0,1.05]
+        },
     }
 
     get bvis() {
@@ -361,12 +358,6 @@ export default class Compare extends Vue {
         allYears.sort();
 
         const bvis = [];
-        /*
-            {
-                naics: "20",
-                data: "todo",
-            }    
-        */
 
         //now create graphs for naics code with vulnerable businesses
         vulnNaics.forEach(naics=>{
@@ -402,7 +393,8 @@ export default class Compare extends Vue {
                     y: estabV,
                     name: detail.county+","+detail.state,
                     mode: 'lines',
-                    line: { width: 1, /*shape: 'spline'*/},
+                    line: { width: 1},
+                    //line: { width: 1, shape: 'spline'},
                     fill: "tozeroy",
                     fillcolor: 'rgba(0,0,0,0.02)',
                 });
@@ -434,7 +426,8 @@ box-shadow: none;
 background-color: white;
 }
 h3 {
-    margin: 0;
+    opacity: 0.7;
+    margin: 30px 0;
 }
 h4 {
     opacity: 0.7;
