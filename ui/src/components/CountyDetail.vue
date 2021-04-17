@@ -29,6 +29,7 @@
             <p>This page presents information on measuring distress indicators, economic, and demographic data for <b>{{detail.county}} County, {{detail.state}}</b>.</p>
         </div>
 
+
         <el-row :gutter="20">
             <el-col :span="5">
                 <h4>Population History<br>
@@ -98,6 +99,26 @@
                 <br>
             </el-col>
         </el-row>
+
+        <el-row :gutter="20">
+            <el-col :span="5">
+                <h4>Total Households</h4>
+                <span class="primary">
+                    {{detail.households|formatNumber}}
+                </span>
+                <br>
+                <small><a href="https://www.census.gov/programs-surveys/acs" target="acs">(ACS 2019)</a></small>
+            </el-col>
+            <el-col :span="19">
+                <h4>Households with broadband subscription</h4>
+                <span class="primary">
+                    {{detail.householdsBroadband|formatNumber}}
+                    <small>({{(detail.householdsBroadband/detail.households*100) | formatNumber('0.00')}}%)</small>
+                </span>
+            </el-col>
+        </el-row>
+        <br>
+        <br>
 
         <el-row :gutter="20" v-if="detail.industries">
             <el-col :span="5">
@@ -361,12 +382,10 @@
                 <el-row>
                     <el-col :span="12">
                         <h4 style="margin: 0"><small>Establishments</small></h4>
-                        <!--<BVIPlot :data="data.est"/>-->
                         <ExportablePlotly :data="data.estPlotly" :layout="bviLayout"/>
                     </el-col>
                     <el-col :span="12">
                         <h4 style="margin: 0"><small>Employment</small></h4>
-                        <!--<BVIPlot :data="data.emp"/>-->
                         <ExportablePlotly :data="data.empPlotly" :layout="bviLayout"/>
                     </el-col>
                 </el-row>
@@ -757,6 +776,10 @@ export default class CountyDetail extends Vue {
         }
 
         if(!this.detail.bvis2) return;
+
+
+        console.dir(this.detail.bvis2);
+
         for(const naics in this.detail.bvis2) {
             const data = this.detail.bvis2[naics];
 
@@ -769,14 +792,24 @@ export default class CountyDetail extends Vue {
                 if(v != 0) vuln = true;
             });
 
+            for(let y = 2012; y <= 2018; ++y) {
+                if(!data.years.includes(y.toString())) {
+                    data.years.push(y);
+                    data.estab.push(0);
+                    data.estab_v.push(0);
+                    data.emp.push(0);
+                    data.emp_v.push(0);
+                }
+            }
+
             const traces = {
                 estPlotly: [
                     //non vulnerable
                     {
                         x: data.years,
                         y: data.estab.map((nv, i)=>{
-                            let v = nv - data.estab_v[i]
-                            if(v < 0) v = 0;
+                            const v = nv - data.estab_v[i]
+                            if(v <= 0) return null;
                             return v;
                         }),
                         name: 'Non Vulnerable',
@@ -791,7 +824,10 @@ export default class CountyDetail extends Vue {
                     //vul
                     {
                         x: data.years,
-                        y: data.estab_v,
+                        y: data.estab_v.map(v=>{
+                            if(v <= 0) return null;
+                            return v;
+                        }),
                         name: 'Vulnerable',
                         showlegend: false,
                         type: 'bar',
@@ -807,8 +843,8 @@ export default class CountyDetail extends Vue {
                     {
                         x: data.years,
                         y: data.emp.map((nv, i)=>{
-                            let v = nv - data.emp_v[i];
-                            if(v < 0) v = 0;
+                            const v = nv - data.emp_v[i];
+                            if(v <= 0) return null;
                             return v;
                         }),
                         name: 'Non Vulnerable',
@@ -823,7 +859,10 @@ export default class CountyDetail extends Vue {
                     //vul
                     {
                         x: data.years,
-                        y: data.emp_v,
+                        y: data.emp_v.map(v=>{
+                            if(v <= 0) return null;
+                            return v;
+                        }),
                         name: 'Vulnerable',
                         showlegend: false,
                         type: 'bar',
