@@ -9,6 +9,7 @@ console.log("statsamerica_resilience -----------------------------------");
 
 //I can only connect from IU VPN connected IPs - not dev1
 mssql.connect(config.stats_america.db_red_dr).then(async pool=>{
+
     console.log("loading dr_data / Resilience values for individual indices per county.");
     const dr_data = await pool.request().query(`
         SELECT * FROM dr_data

@@ -34,6 +34,9 @@ geo.features.forEach(feature=>{
         biggestIndustry: null, //naics: 62, naics_title: 'title', empl: 'num'
         industries: [], 
 
+        households: null,  //number of household from acs
+        householdsBroadband: null, //number of hosuehold with broadband access
+
         //measure_distress timeseries
         distress_pcm: {years: [], est: [], moe: []}, //percapitamoney
         distress_pcp: {years: [], data: []}, //percapitapersonal
@@ -55,6 +58,15 @@ for(let fips in counties) {
     })
 }
 //console.dir(counties["20095"].biggestIndustry);
+console.log("loading broadband");
+const broadband = require(config.pubdir+'/raw/statsamerica.broadband.json');
+broadband.forEach(rec=>{
+    if(!counties[rec.fips]) return;
+
+    //find the current(2018) info
+    counties[rec.fips].households = rec.total_households;
+    counties[rec.fips].householdsBroadband = rec.total_households_broadband;
+});
 
 console.log("loading acs");
 const acs = require(config.pubdir+'/raw/statsamerica.acs.json');
@@ -413,7 +425,8 @@ function handleBVINaics(cb) {
             estab: rec.estab_total,
             estab_v: rec.estab_vuln_total,
             estab_v_pct: rec.estab_vuln_pct,
-            emp: rec.mm_employees,
+            //emp: rec.mm_employees,
+            emp: rec.emp_total,
             emp_v: rec.emp_vuln_total,
             emp_v_pct: rec.emp_vuln_pct,
         }

@@ -9,10 +9,40 @@ console.log("statsamerica c2k_uscnty_acs --------------------------");
 
 //I can only connect from IU VPN connected IPs - not dev1
 mssql.connect(config.stats_america.db_stats4).then(pool=>{
+    load_broadband(pool);
     load_population(pool);
     load_medianincome(pool);
     load_percapitaincome(pool);
 });
+
+function load_broadband(pool) {
+    console.log("loading broadband usage");
+    pool.request().query(`
+        SELECT
+            RIGHT(a.[geo_id],5) [fips]
+            , a.[time_id] [year]
+            , a.[data] [total_households]
+            , b.[data] [total_households_broadband]
+        FROM [stats_dms5].[dbo].[ACS_common_items_extract] a
+        JOIN [stats_dms5].[dbo].[GEOGRAPHY_NAME] g ON g.[geo_id] = a.[geo_id] AND g.[sumlev] = '050'
+        LEFT JOIN (
+            SELECT [geo_id], [time_id], [data] FROM [stats_dms5].[dbo].[ACS_common_items_extract] WHERE [code_id] = '912'
+        ) b ON b.[geo_id] = a.[geo_id] AND b.[time_id] = a.[time_id]
+        WHERE a.[code_id] = '304' AND a.[time_id] = '2019'
+    `).then(res=>{
+        /*
+          {
+            fips: '13059',
+            year: 2019,
+            total_households: 48844,
+            total_households_broadband: 40232
+          },
+        */
+        fs.writeFileSync(config.pubdir+"/raw/statsamerica.broadband.json", JSON.stringify(res.recordset));
+        pool.close();
+    });
+}
+
 function load_population(pool) {
     //pool.request().query(` SELECT * FROM [stats_dms5].[dbo].[c2k_uscnty_acs] `).then(res=>{
         /* c2k_uscnty_acs (old - only contains data since 2008?)
