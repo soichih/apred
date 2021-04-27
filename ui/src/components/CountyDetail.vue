@@ -19,7 +19,7 @@
                 <el-tab-pane name="disaster" :label="'Disaster Declarations ('+history.length+')'"></el-tab-pane>
                 <el-tab-pane v-if="detail.bvis2" name="bvi" label="Business Vulnerability"></el-tab-pane>
                 <el-tab-pane name="resilience" label="Disaster Resilience"></el-tab-pane>
-                <el-tab-pane name="storms" label="Storm History"></el-tab-pane>
+                <el-tab-pane name="storms" label="Storm History / Potential Cost"></el-tab-pane>
             </el-tabs>
         </div>
     </div>
@@ -337,7 +337,7 @@
                 </ol>
             </p>
             <p>This information will <b>help practitioners and policymakers</b> in {{detail.county}} County to know the business sectors that <b>deserve more attention</b> in 
-            terms of disaster resiliency planning.
+            terms of disaster resiliency planning. Some data points are suppressed (missing) due to small employment size to avoid disclosure (confidentiality) or withheld because data do not meet publication standards. 
             </p>
         </div>
 
@@ -460,6 +460,47 @@
             <ExportablePlotly :data="stormData" :layout="stormLayout"/>
         </div>
         <p v-else>No storm data</p>
+
+        <div v-if="detail.costDisasters">
+            <br>
+            <h3>Potential Cost of Disasters</h3>
+            <div class="overview">
+                <p>
+                    Examining GDP from one year before to one year afer a declared disaster for almost 20 years
+                    between 2003 and 2019 the following changes in <b>GDP</b> may be expected for {{detail.state}} if a 
+                    disaster strikes.
+                </p>
+            </div>
+            <el-row>
+                <el-col :span="6" v-for="rec in detail.costDisasters" :key="rec.code">
+                    <div style="padding-left: 10px; height: 250px;">
+                        <div style="height: 110px;">
+                            <p style="margin-bottom: 5px;"><small style="font-size: 80%;">{{rec.code}}</small></p>
+                            <h4>
+                                {{rec.desc}}
+                            </h4>
+                            <span class="primary" :style="{color: rec.z>0?'#409EFF':'#F56C6C'}">
+                                {{rec.z|formatNumber("+0.00")}}%
+                            </span>
+                            <el-tag v-if="!rec.result.includes('INSIG')" :type="rec.z>0?'':'danger'" size="mini">{{rec.result}}</el-tag>
+                        </div>
+                        <p>
+                            <small style="opacity: 0.9;">
+                                <span v-if="rec.code != '0001'">
+                                    This sector accounts for 
+                                    <b>{{(detail.gdpPerSector[rec.code]/detail.gdpPerSector['0001'])*100|formatNumber('0.0')}}%</b>
+                                    of the county GDP
+                                </span>
+                                with a potential 
+                                <span v-if="rec.z<0">loss</span> 
+                                <span v-if="rec.z>=0">gain</span> 
+                                in productivity of <b>${{Math.abs(rec.z)*detail.gdpPerSector[rec.code]|formatNumber()}}</b> million dollars due to a declared disaster.
+                            </small>
+                        </p>
+                    </div>
+                </el-col>
+            </el-row>
+        </div>
         <br>
         <br>
         <br>
@@ -560,7 +601,7 @@ export default class CountyDetail extends Vue {
         //'plot_bgcolor': '#0000',
     }
 
-    bvi2 = {}; //keyed by naics code, then {years, estab, estab_v, emp, emp_v} 
+    bvi2 = {}; //keyed by naics code, then {years, estab, estabV, emp, empV} 
     bvi2_nonv = {}; //bvi2 with all-0 vulnerablility
     showNonvBVI = false;
     bviLayout = null;
@@ -768,39 +809,47 @@ export default class CountyDetail extends Vue {
             xaxis: {
                 type: 'category', //show all years
             },
-            /*
             yaxis: {
-                tickformat: '',
+                //tickformat: '',
+                //range: [0, 100], //no way to set min without enforcing it?
             },
-            */
         }
 
         if(!this.detail.bvis2) return;
-
-
-        console.dir(this.detail.bvis2);
-
         for(const naics in this.detail.bvis2) {
             const data = this.detail.bvis2[naics];
+            data.years = data.years.map(year=>parseInt(year));
+
+            data.estabV = data.estab_v;
+            data.empV = data.emp_v;
 
             //see if there is any non-0 vulnerability values
             let vuln = false;
-            data.estab_v.forEach(v=>{
+            data.estabV.forEach(v=>{
                 if(v != 0) vuln = true;
             });
-            data.emp_v.forEach(v=>{
+            data.empV.forEach(v=>{
                 if(v != 0) vuln = true;
             });
 
-            for(let y = 2012; y <= 2018; ++y) {
-                if(!data.years.includes(y.toString())) {
-                    data.years.push(y);
-                    data.estab.push(0);
-                    data.estab_v.push(0);
-                    data.emp.push(0);
-                    data.emp_v.push(0);
-                }
+            const populatedYears = [];
+            const populatedEstab = [];
+            const populatedEstabV = [];
+            const populatedEmp = [];
+            const populatedEmpV = [];
+            for(let y = 2012; y <= 2019; ++y) {
+                populatedYears.push(y);
+                const p = data.years.indexOf(y);
+                populatedEstab.push(~p?data.estab[p]:0);
+                populatedEstabV.push(~p?data.estabV[p]:0);
+                populatedEmp.push(~p?data.emp[p]:0);
+                populatedEmpV.push(~p?data.empV[p]:0);
             }
+            data.years = populatedYears;
+            data.estab = populatedEstab;
+            data.estabV = populatedEstabV;
+            data.emp = populatedEmp;
+            data.empV = populatedEmpV;
 
             const traces = {
                 estPlotly: [
@@ -808,7 +857,7 @@ export default class CountyDetail extends Vue {
                     {
                         x: data.years,
                         y: data.estab.map((nv, i)=>{
-                            const v = nv - data.estab_v[i]
+                            const v = nv - data.estabV[i]
                             if(v <= 0) return null;
                             return v;
                         }),
@@ -824,7 +873,7 @@ export default class CountyDetail extends Vue {
                     //vul
                     {
                         x: data.years,
-                        y: data.estab_v.map(v=>{
+                        y: data.estabV.map(v=>{
                             if(v <= 0) return null;
                             return v;
                         }),
@@ -843,7 +892,7 @@ export default class CountyDetail extends Vue {
                     {
                         x: data.years,
                         y: data.emp.map((nv, i)=>{
-                            const v = nv - data.emp_v[i];
+                            const v = nv - data.empV[i];
                             if(v <= 0) return null;
                             return v;
                         }),
@@ -859,7 +908,7 @@ export default class CountyDetail extends Vue {
                     //vul
                     {
                         x: data.years,
-                        y: data.emp_v.map(v=>{
+                        y: data.empV.map(v=>{
                             if(v <= 0) return null;
                             return v;
                         }),
