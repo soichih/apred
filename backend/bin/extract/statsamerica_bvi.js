@@ -19,15 +19,15 @@ function load(pool) {
 
 SELECT a.[year]
     , CONCAT(a.[statefips], a.[countyfips]) AS fips
-    , b.[naics_code]
+    , a.[naics_code]
     , ISNULL(a.[estab_total],0) AS estab_total
     , ISNULL(b.[estab_total],0) AS estab_vuln_total
     , CASE WHEN a.[estab_total] = 0 THEN 0 ELSE ISNULL(b.[estab_total],0)/a.[estab_total] END AS estab_vuln_pct
     , ISNULL(a.[mm_employees],0) AS emp_total
-    , ISNULL(b.[mm_employees], 0) AS emp_vuln_total
+    , ISNULL(b.[mm_employees],0) AS emp_vuln_total
     , CASE WHEN a.[mm_employees] = 0 THEN 0 ELSE ISNULL(b.[mm_employees],0)/a.[mm_employees] END AS emp_vuln_pct
 FROM [stats4].[dbo].[cbp_uscnty] a 
-JOIN (
+LEFT OUTER JOIN (
     SELECT [year]
         , [statefips]
         , [countyfips]
@@ -69,12 +69,12 @@ JOIN (
     AND b.[naics_code] = a.[naics_code]
 WHERE a.[year] >= '2012'
     AND (a.[naics_code] LIKE '__' OR a.[naics_code] LIKE '__-__')
+       AND a.[naics_code] != '00'
 ORDER BY 
     a.[statefips], 
     a.[countyfips],
     a.[naics_code],
     a.[year] 
-
     `).then(res=>{
         /*
           {

@@ -41,7 +41,50 @@ geo.features.forEach(feature=>{
         distress_pcm: {years: [], est: [], moe: []}, //percapitamoney
         distress_pcp: {years: [], data: []}, //percapitapersonal
         distress_ur: {date: [], employed: [], unemp: [], rate: []}, //percapitapersonal
+
+        //cost of disasters
+        costDisasters: {}, //for entire states. keyed by linecd
+        gdpPerSector: {}, //gcp_r for each sector(linecd)
     } 
+});
+
+console.log("loading linecodes");
+const linecodesArray = require(config.pubdir+"/raw/linecodes.json");
+const linecodes = {};
+linecodesArray.forEach(r=>{
+    linecodes[r.code] = r.description;
+});
+
+console.log("loading estimated_state_cost.json");
+const stateCostArray = require(config.pubdir+"/raw/estimated_cost.json");
+const statesCost = {}; //key by edd_id
+stateCostArray.forEach(r=>{
+    if(!statesCost[r.statefips]) statesCost[r.statefips] = [];
+    statesCost[r.statefips].push({
+        code:r.linecd,
+        z: r.z,
+        result: r.result,
+        desc: linecodes[r.linecd],
+    });
+});
+for(let statefip in statesCost) {
+    statesCost[statefip].sort((a,b)=>{
+        return a.code - b.code;
+    });
+}
+for(let fips in counties) {
+    const statefips = fips.substring(0, 2);
+    counties[fips].costDisasters = statesCost[statefips];
+}
+
+console.log("loading gdp per sector");
+const gdpPerSectors = require(config.pubdir+"/raw/statsamerica.bea.gdp-per-sector.json");
+gdpPerSectors.forEach(rec=>{
+    if(!counties[rec.fips]) {
+        console.error("can't find", rec.fips, "to put the gdpPerSector record", rec);
+        return;
+    }
+    counties[rec.fips].gdpPerSector[rec.linecd] = rec.gcp_r;
 });
 
 console.log("loading industries");
