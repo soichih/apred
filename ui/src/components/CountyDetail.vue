@@ -19,7 +19,8 @@
                 <el-tab-pane name="disaster" :label="'Disaster Declarations ('+history.length+')'"></el-tab-pane>
                 <el-tab-pane v-if="detail.bvis2" name="bvi" label="Business Vulnerability"></el-tab-pane>
                 <el-tab-pane name="resilience" label="Disaster Resilience"></el-tab-pane>
-                <el-tab-pane name="storms" label="Storm History / Potential Cost"></el-tab-pane>
+                <el-tab-pane name="storms" label="Storm History"></el-tab-pane>
+                <el-tab-pane name="cost" label="Potential Cost"></el-tab-pane>
             </el-tabs>
         </div>
     </div>
@@ -460,10 +461,11 @@
             <ExportablePlotly :data="stormData" :layout="stormLayout"/>
         </div>
         <p v-else>No storm data</p>
+    </div>
 
+    <div v-if="tab == 'cost'" class="page">
         <div v-if="detail.costDisasters">
             <br>
-            <h3>Potential Cost of Disasters</h3>
             <div class="overview">
                 <p>
                     Examining GDP from one year before to one year afer a declared disaster for almost 20 years
@@ -472,7 +474,7 @@
                 </p>
             </div>
             <el-row>
-                <el-col :span="6" v-for="rec in detail.costDisasters" :key="rec.code">
+                <el-col :span="6" v-for="rec in detail.costDisasters.filter(rec=>showInsigCost||!rec.result.includes('INSIG'))" :key="rec.code">
                     <div style="padding-left: 10px; height: 250px;">
                         <div style="height: 110px;">
                             <p style="margin-bottom: 5px;"><small style="font-size: 80%;">{{rec.code}}</small></p>
@@ -482,7 +484,7 @@
                             <span class="primary" :style="{color: rec.z>0?'#409EFF':'#F56C6C'}">
                                 {{rec.z|formatNumber("+0.00")}}%
                             </span>
-                            <el-tag v-if="!rec.result.includes('INSIG')" :type="rec.z>0?'':'danger'" size="mini">{{rec.result}}</el-tag>
+                            <el-tag v-if="!rec.result.includes('INSIG')" :type="rec.z>0?'':'danger'" size="mini">{{rec.result!=""?"Significant":""}}</el-tag>
                         </div>
                         <p>
                             <small style="opacity: 0.9;">
@@ -494,12 +496,19 @@
                                 with a potential 
                                 <span v-if="rec.z<0">loss</span> 
                                 <span v-if="rec.z>=0">gain</span> 
-                                in productivity of <b>${{Math.abs(rec.z)*detail.gdpPerSector[rec.code]|formatNumber()}}</b> million dollars due to a declared disaster.
+                                in productivity of <b>${{Math.abs(rec.z)*detail.gdpPerSector[rec.code]*1000|formatNumber()}}</b> dollars due to a declared disaster.
                             </small>
                         </p>
                     </div>
                 </el-col>
             </el-row>
+
+            <div v-if="!showInsigCost">
+                <el-button round @click="showInsigCost = true">
+                    <i class="el-icon-caret-right"/> Show Industries with Incignificant Changes
+                </el-button>
+            </div>
+
         </div>
         <br>
         <br>
@@ -608,6 +617,8 @@ export default class CountyDetail extends Vue {
 
     stormLayout = null;
     stormData = null;
+
+    showInsigCost = false;
 
     showPastHistory = false;
     shownIndicators = [];
