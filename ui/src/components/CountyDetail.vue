@@ -505,7 +505,7 @@
 
             <div v-if="!showInsigCost">
                 <el-button round @click="showInsigCost = true">
-                    <i class="el-icon-caret-right"/> Show Industries with Incignificant Changes
+                    <i class="el-icon-caret-right"/> Show Industries with insignificant Changes
                 </el-button>
             </div>
 
