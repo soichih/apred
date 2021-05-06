@@ -473,6 +473,12 @@
                     disaster strikes.
                 </p>
             </div>
+
+            <p style="margin-left: 10px;">
+                <el-checkbox v-model="showInsigCost">Show industries with insignificant changes</el-checkbox>
+            </p>
+            <br clear="both">
+
             <el-row>
                 <el-col :span="6" v-for="rec in detail.costDisasters.filter(rec=>showInsigCost||!rec.result.includes('INSIG'))" :key="rec.code">
                     <div style="padding-left: 10px; height: 250px;">
@@ -503,11 +509,6 @@
                 </el-col>
             </el-row>
 
-            <div v-if="!showInsigCost">
-                <el-button round @click="showInsigCost = true">
-                    <i class="el-icon-caret-right"/> Show Industries with insignificant Changes
-                </el-button>
-            </div>
 
         </div>
         <br>
