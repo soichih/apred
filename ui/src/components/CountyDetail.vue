@@ -482,13 +482,11 @@
             <el-row>
                 <el-col :span="6" v-for="rec in detail.costDisasters.filter(rec=>showInsigCost||!rec.result.includes('INSIG'))" :key="rec.code">
                     <div style="padding-left: 10px; height: 250px;">
-                        <div style="height: 110px;">
+                        <div style="padding-bottom: 10px;">
                             <!--
                             <p style="margin-bottom: 5px;"><small style="font-size: 80%;">{{rec.code}}</small></p>
                             -->
-                            <h4 :title="rec.code">
-                                {{rec.desc}}
-                            </h4>
+                            <h4 :title="rec.code" style="height: 30px; font-size: 11pt;">{{rec.desc}}</h4>
                             <span class="primary" :style="{color: rec.z>0?'#409EFF':'#F56C6C'}">
                                 {{rec.z|formatNumber("+0.00")}}%
                             </span>
