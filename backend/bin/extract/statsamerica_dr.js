@@ -39,6 +39,39 @@ mssql.connect(config.stats_america.db_red_dr).then(async pool=>{
     });
     fs.writeFileSync(config.pubdir+"/raw/estimated_cost.json", JSON.stringify(cost.recordset));
 
+    const cost_avg = await pool.request().query(`
+        SELECT [statefips], [linecd], [disaster_avg] - [no_avg] [change_pct], [disaster_avg], [no_avg]
+        FROM [RED_DR].[dbo].[ecd_gdp_fixed_results_pivot]
+    `);
+    cost_avg.recordset.forEach(rec=>{
+        //This is by state (the state fips code) and linecd (the sector). The result column contains one of three values: 
+        //  INSIG meaning insignificant difference, 
+        //  SIG-GROWTH which means there was an increase, and 
+        //  SIG-LOSS which means there was a statistically-significant decrease. 
+        //
+        //  The SIG-GROWTH controls if it is green and the SIG-GROWTH should control if it is red.
+        /*
+        {
+          statefips: '48',
+          linecd: '0079',
+          z: 0.5554474777005738,
+          result: 'INSIG'
+        }
+        */
+        /*
+        rec.statefips = rec.statefips.trim();
+        rec.countyfips = rec.countyfips.trim();
+        rec.measure = rec.measure.trim();
+        rec.measure_category = rec.measure_category.trim();
+        rec.year = rec.year.trim();
+
+        //if(rec.statefips == "18" && rec.countyfips == "105" && rec.measure == "16") console.dir(rec);
+        */
+        console.dir(rec);
+        process.exit(1);
+    });
+    fs.writeFileSync(config.pubdir+"/raw/estimated_cost_avg.json", JSON.stringify(cost.recordset));
+
     console.log("loading dr_data / Resilience values for individual indices per county.");
     const dr_data = await pool.request().query(`
         SELECT * FROM dr_data
