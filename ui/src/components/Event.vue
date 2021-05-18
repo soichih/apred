@@ -12,8 +12,9 @@
             <div v-if="event.type == 'dr'">
                 <div class="event-date">
                     <time title="Incident Begin Date">{{new Date(event.incidentBeginDate).toLocaleDateString()}}</time>
+                    <br>
                     <small>
-                        <time v-if="event.incidentEndDate" title="Incident End Date"> to {{new Date(event.incidentEndDate).toLocaleDateString()}}</time>
+                        <time v-if="event.incidentEndDate" title="Incident End Date"> - {{new Date(event.incidentEndDate).toLocaleDateString()}}</time>
                         <span v-else> - ongoing</span>
                     </small>
                 </div>

@@ -135,6 +135,7 @@ new Vue({
                     color: "#396",
                     opacity: 0.5,
                     types: ["Biological"],
+                    tooltip: "COVID, etc.",
                     zIndex: 0,
                 },
                 "other": {

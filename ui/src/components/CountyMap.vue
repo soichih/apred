@@ -1,14 +1,18 @@
 <template>
-<div>
+<div :class="{sidebarHidden: hideSidebar}">
     <div id="map"/>
     
     <div class="search-control">
         <div style="margin: 10px; opacity: 0.6; display: inline-block;">
         <span style="opacity: 0.5; margin-left: 10px;"></span></div>
-        <CountySelecter @select="countySelected" placeholder="Search county name here" style="width: 300px"/>
+        <CountySelecter @select="countySelected" placeholder="Search county name here" style="width: 250px"/>
     </div>
-    <div class="side">
+    <div class="showSide" v-if="hideSidebar">
+        <el-button icon="el-icon-arrow-right" type="primary" size="mini" @click="collapse" style="position: fixed; top: 65px; left: -4px; "></el-button>
+    </div>
+    <div class="side" :class="{sidebarHidden: hideSidebar}">
         <div class="legend" v-if="mode">
+            <el-button icon="el-icon-arrow-left" type="primary" size="mini" @click="collapse" style="float: right; position: relative; top: -5px; z-index: 1;"></el-button>
             <p class="heading">
                 <b>Map Type</b>
             </p>
@@ -55,9 +59,23 @@
                     <input type="checkbox" v-model="layersAll" @change="handleAll"/>
                     All
                 </div>
-                <div v-for="(info, layer) in $root.layers" :key="layer" class="legend-item" :class="{hidden: hiddenLayers.includes(layer)}" @click.stop="toggleLayer(layer)" style="clear: right;" :title="info.types.join(', ')">
-                    <input type="checkbox" :checked="!hiddenLayers.includes(layer)"/>
+                <div v-for="(info, layer) in $root.layers" :key="layer" class="legend-item" :class="{hidden: hiddenLayers.includes(layer)}" style="clear: right;">
+                    <input type="checkbox" @click.stop="toggleLayout(layer)" :checked="!hiddenLayers.includes(layer)"/>
                     <span class="legend-color" :style="{backgroundColor: info.color}">&nbsp;</span>&nbsp;{{layer.toUpperCase()}}
+                    <!--
+                    <span v-if="info.tooltip" :title="info.tooltip">
+                        <i class="el-icon-question"></i>
+
+                    </span>
+                    -->
+                    <el-popover placement="top-start" trigger="hover" v-if="info.tooltip || info.types.length > 1" :content="info.tooltip || info.types.join(', ')">
+                        <el-button slot="reference" size="mini" type="info" style="padding: 3px;">?</el-button>
+                    </el-popover>
+                    <!--
+                    <span v-if="info.types.length > 1" :title="info.types.join(', ')">
+                        <i class="el-icon-question"></i>
+                    </span>
+                    -->
                 </div>
             </div>
 
@@ -183,7 +201,6 @@ export default class Disaster extends Vue {
 
     hiddenLayers = ["biological"];
     drLayer = "SOC";
-    //countyList = [];
     layersAll = true;
 
     contextMenuCounty = null;
@@ -226,13 +243,6 @@ export default class Disaster extends Vue {
             color: "#444",
         },
     }
-
-    /*
-    @Watch('$route')
-    onRouteChange() {
-        this.loadCounty(this.$route.params.fips);
-    }
-    */
 
     awardIcon = require('@/assets/pin.png');
 
@@ -398,12 +408,10 @@ export default class Disaster extends Vue {
     hideEDA2018Layers() {
         if(!this.edaYear) return; //not loaded yet
         this.map.setLayoutProperty('eda', 'visibility', 'none');
-        //this.map.setLayoutProperty('eda-pins', 'visibility', 'none');
     }
 
     showEDA2018Layers() {
         this.map.setLayoutProperty('eda', 'visibility', 'visible');
-        //this.map.setLayoutProperty('eda-pins', 'visibility', 'visible');
     }
 
     loadCutters(year, measure) {
@@ -432,32 +440,15 @@ export default class Disaster extends Vue {
                 visibility: 'none',
             }
         }, 'map');
-
         this.resYear = '2018';
     }
 
     mounted() {
         this.map = new mapboxgl.Map({
             container: 'map', // HTML container id
-
-            //style: 'mapbox://styles/mapbox/light-v10', // style URL
-            //center: [-100, 41.5], // starting position as [lng, lat]
-            //minZoom: 2,
-
-            //https://www.mapbox.com/elections/albers-usa-projection-style
-            //https://studio.mapbox.com/styles/soichih/ckig6p3ph51e719pcdusqyd1o/edit/#4.71/-0.86/-2.94
             style: 'mapbox://styles/soichih/ckig6p3ph51e719pcdusqyd1o', 
             center: [0, 0], // starting position as [lng, lat]
             minZoom: 4,
-            /* properties
-            county_fips: "20017"
-            county_name: "Chase"
-            state_abbrev: "KS"
-            state_fips: "20"
-            state_name: "Kansas"
-            type: "county"
-            */
-
             pitch: 30, // pitch in degrees
             //bearing: 10, // bearing in degrees
             zoom: 1,
@@ -491,17 +482,6 @@ export default class Disaster extends Vue {
                 return res.json()
             }).then(data=>{
                 this.geojson = data;
-                /* features[].properties = {
-                    CENSUSAREA: 27.887
-                    county: "Gurabo"
-                    countyfips: "063"
-                    fips: "72063"
-                    resilience: 0
-                    stabb: "PR"
-                    state: "Puerto Rico"
-                    statefips: "72"
-                }
-                */
 
                 //all counties
                 this.map.addSource('counties', { type: "geojson", data });
@@ -753,8 +733,6 @@ export default class Disaster extends Vue {
                 if(this.edaYear != "all" && rec.year != this.edaYear) return;
                 if(this.edaType != "All" && rec.data.grant_purpose != this.edaType) return;
                 if(rec.fips != fips) return;
-
-                //console.dir(rec);
                 count++;
 
                 html += "<div class='eda-award'>";
@@ -930,13 +908,27 @@ export default class Disaster extends Vue {
         const idx = this.findIndexDrRange(this.drRange);
         this.drRange = this.drRanges[idx-1].value;
     }
+
+    hideSidebar = false;
+    collapse() {
+        console.log("todo");
+        this.hideSidebar = !this.hideSidebar;
+    }
+    @Watch('hideSidebar')
+    onHideSidebar() {
+        this.$nextTick(()=>{
+            console.log("resizing");
+            this.map.resize();
+        });
+    }
+
 }
 </script>
 <style lang="scss" scoped> 
 p {
     margin-top: 0px;
     line-height: 150%;
-    color: #666;
+    color: #333;
 }
 h2 {
     font-size: 15pt;
@@ -961,7 +953,9 @@ h4 {
     right: 0;
     top: 50px;
     bottom: 0;
-    box-shadow: inset 0 0 3px #eee;
+}
+.sidebarHidden #map {
+    left: 0;
 }
 
 .map-overlay {
@@ -988,6 +982,13 @@ h4 {
     width: 350px;
     bottom: 0;
     background-color: #f9f9f9;
+    transition: left 0.3s;
+    border-right: 1px solid #ccc;
+    overflow: auto;
+    padding-top: 10px;
+}
+.sidebarHidden .side {
+    left: -350px;
 }
 
 .sub-heading {
@@ -1005,21 +1006,9 @@ h4 {
     padding: 10px;
     font-size: 90%;
     margin: 0;
-    /*
-    background-color: #fff9;
-    text-transform: capitalize;
-    border-radius: 5px;
-    margin-top: 20px;
-    margin-right: 40px;
-    
-    z-index: 1; 
-    position: relative; 
-    width: 100%;
-    */
 
     .map-description {
-        font-size: 85%;
-        opacity: 0.7;
+        font-size: 90%;
     }
     .legend-color {
         display: inline-block;
@@ -1037,7 +1026,6 @@ h4 {
 
     .legend-item {
         margin-right: 10px;
-        cursor: pointer;
         font-size: 10pt;
         &.hidden {
             color: #999;
@@ -1051,29 +1039,6 @@ h4 {
         line-height: 175%;
     }    
 }
-
-/*
-.map-description {
-    position: fixed;
-    bottom: 0;
-    padding: 10px;
-    box-sizing: border-box;
-    background-color: #000;
-    opacity: 0.7;
-    width: 100%;
-    font-size: 85%;
-    p {
-        color: white;
-        margin-bottom: 0;
-    }
-}
-
-@media (max-width: 600px) {
-    .map-description {
-        display: none;
-    }
-}
-*/
 
 .tutorial {
     display: none;
@@ -1119,8 +1084,11 @@ h4 {
 .search-control {
     position: fixed;
     top: 50px;
-    left: 350px;
+    left: 330px;
     right: 0;
     padding-top: 10px;
+}
+.sidebarHidden .search-control {
+    left: 20px;
 }
 </style>

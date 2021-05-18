@@ -11,15 +11,15 @@
         <el-button class="pull-right" v-if="$root.user" @click="signout" size="small">Sign Out</el-button>
         <el-button class="pull-right" v-if="$root.user" @click="settings" size="small" type="success">Settings</el-button>
 
-        <span class="pull-right" style="font-weight: bold; top: 15px;"> 
+        <span class="pull-right" style="font-weight: bold; top: 18px;"> 
             <a href="https://ctil.iu.edu/" style="color: inherit;">CTIL</a>
         </span>
         <p class="title">
-            <el-tag effect="dark" type="info" class="beta" size="mini"><b>BETA</b></el-tag>
+            <!--<el-tag effect="dark" type="info" class="beta" size="mini"><b>BETA</b></el-tag>-->
             <a href="https://ctil.iu.edu/projects/apred-landing"><b style="color: #900;">APRED</b></a>
             <span class="sub-title">Analysis Platform for Risk, Resilience and Expenditure in Disasters</span>
         </p>
-        <p class="disclaimer">For testing purposes only. Not for public use or for supporting current EDA applications.</p>
+        <!-- <small>For testing purposes only. Not for public use or for supporting current EDA applications.</small>-->
     </div>
 </div>
 </template>
@@ -77,22 +77,23 @@ export default class TopMenu extends Vue {
 }
 .title {
     color:#666;
-    margin: 13px 0;
-    font-size: 16pt;
+    margin: 10px 0;
+    font-size: 20pt;
     position: relative;
     display: inline-block;
 }
 .sub-title {
     font-size: 12pt;
     padding-left: 10px;
-    top: -10px;
+    top: -5px;
+    opacity: 0.7;
     position: relative;
 }
 .disclaimer {
     font-size: 75%;
     position: relative;
     top: -34px;
-    left: 85px;
+    left: 150px;
     color: #999;
     font-style: italic;
     display: inline-block;
