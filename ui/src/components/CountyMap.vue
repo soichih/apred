@@ -911,13 +911,11 @@ export default class Disaster extends Vue {
 
     hideSidebar = false;
     collapse() {
-        console.log("todo");
         this.hideSidebar = !this.hideSidebar;
     }
     @Watch('hideSidebar')
     onHideSidebar() {
         this.$nextTick(()=>{
-            console.log("resizing");
             this.map.resize();
         });
     }
