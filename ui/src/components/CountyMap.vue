@@ -60,7 +60,7 @@
                     All
                 </div>
                 <div v-for="(info, layer) in $root.layers" :key="layer" class="legend-item" :class="{hidden: hiddenLayers.includes(layer)}" style="clear: right;">
-                    <input type="checkbox" @click.stop="toggleLayout(layer)" :checked="!hiddenLayers.includes(layer)"/>
+                    <input type="checkbox" @click.stop="toggleLayer(layer)" :checked="!hiddenLayers.includes(layer)"/>
                     <span class="legend-color" :style="{backgroundColor: info.color}">&nbsp;</span>&nbsp;{{layer.toUpperCase()}}
                     <!--
                     <span v-if="info.tooltip" :title="info.tooltip">
