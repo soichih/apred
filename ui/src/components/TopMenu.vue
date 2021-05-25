@@ -1,26 +1,24 @@
 <template>
 <div id="topmenu">
-    <div class="page">
-        <a href="https://iu.edu">
-            <img src="../assets/trident-large.png" height="50px" class="trident"/>
-        </a>
+    <a href="https://iu.edu">
+        <img src="../assets/trident-large.png" class="trident"/>
+    </a>
 
-        <el-button class="pull-right" v-if="!$root.user" @click="login" size="small">Log In</el-button>
-        <el-button class="pull-right" v-if="!$root.user" @click="signup" size="small" type="primary">Sign Up</el-button>
+    <el-button class="pull-right" v-if="!$root.user" @click="login" size="small">Log In</el-button>
+    <el-button class="pull-right" v-if="!$root.user" @click="signup" size="small" type="primary">Sign Up</el-button>
 
-        <el-button class="pull-right" v-if="$root.user" @click="signout" size="small">Sign Out</el-button>
-        <el-button class="pull-right" v-if="$root.user" @click="settings" size="small" type="success">Settings</el-button>
+    <el-button class="pull-right" v-if="$root.user" @click="signout" size="small">Sign Out</el-button>
+    <el-button class="pull-right" v-if="$root.user" @click="settings" size="small" type="success">Settings</el-button>
 
-        <span class="pull-right" style="font-weight: bold; top: 18px;"> 
-            <a href="https://ctil.iu.edu/" style="color: inherit;">CTIL</a>
-        </span>
-        <p class="title">
-            <!--<el-tag effect="dark" type="info" class="beta" size="mini"><b>BETA</b></el-tag>-->
-            <a href="https://ctil.iu.edu/projects/apred-landing"><b style="color: #900;">APRED</b></a>
-            <span class="sub-title">Analysis Platform for Risk, Resilience and Expenditure in Disasters</span>
-        </p>
-        <!-- <small>For testing purposes only. Not for public use or for supporting current EDA applications.</small>-->
-    </div>
+    <span class="pull-right" style="font-weight: bold; top: 18px;"> 
+        <a href="https://ctil.iu.edu/" style="color: inherit;">CTIL</a>
+    </span>
+    <p class="title">
+        <!--<el-tag effect="dark" type="info" class="beta" size="mini"><b>BETA</b></el-tag>-->
+        <a href="https://ctil.iu.edu/projects/apred-landing"><b style="color: #900;">APRED</b></a>
+        <span class="sub-title">Analysis Platform for Risk, Resilience and Expenditure in Disasters</span>
+    </p>
+    <!-- <small>For testing purposes only. Not for public use or for supporting current EDA applications.</small>-->
 </div>
 </template>
 
@@ -38,8 +36,8 @@ export default class TopMenu extends Vue {
     }
 
     signup() {
-        alert('Sign up is only applicable for EDA staff. Please contact APRED team for more information.');
-        //document.location.href = "https://api.ctil.iu.edu/auth/#!/signup?app="+this.app;
+        //alert('Sign up is only applicable for EDA staff. Please con^tact APRED team for more information.');
+        document.location.href = "https://api.ctil.iu.edu/auth/#!/signup?app="+this.app;
     }
 
     login() {
@@ -60,24 +58,24 @@ export default class TopMenu extends Vue {
 <style scoped lang="scss">
 #topmenu {
     position: fixed;
-    z-index: 3;
     left: 0;
     right: 0;
     top: 0;
     height: 50px;
     padding: 0;
     margin: 0;
-    box-shadow: 0 0 2px #0003;
+    box-shadow: 0 0 3px #0003;
     background-color: white;
     min-width: 400px;
     overflow: hidden;
+    z-index: 4;
 }
 #topmenu .page {
     height: 50px;
 }
 .title {
     color:#666;
-    margin: 10px 0;
+    margin: 10px 10px;
     font-size: 20pt;
     position: relative;
     display: inline-block;
@@ -124,8 +122,8 @@ export default class TopMenu extends Vue {
 }
 .trident {
     margin-right: 10px; 
-    position: relative; 
     float: right;
+    height: 50px;
 }
 .beta {
     margin-left: 10px;

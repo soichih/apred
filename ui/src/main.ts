@@ -26,10 +26,11 @@ import axios from 'axios'
 import VueAxios from 'vue-axios'
 Vue.use(VueAxios, axios)
 
-import VueAnalytics from 'vue-analytics'
+import VueGtag from 'vue-gtag'
 
-Vue.use(VueAnalytics, {
-    id: 'UA-161425227-2'
+Vue.use(VueGtag, {
+    //config: {id: 'G-5JHHB9SWSD'} //iuctil
+    config: {id: 'G-J6DFQLRPTX'} //from jjunge@iu.edu
 })
 
 import JwtDecode from 'jwt-decode'
@@ -102,6 +103,7 @@ new Vue({
             commonReady: false,
 
             user: null,
+            isEDA: false,
             
             map: null,
 
@@ -174,6 +176,21 @@ new Vue({
                 //TODO - maybe I should keep refreshing like warehouse?
                 axios.defaults.headers.common['Authorization'] = 'Bearer '+jwt;
                 //console.dir(this.user);
+
+                //check to see if user is using eda domain
+                const edaDomains = [
+                    "iu.edu",
+                    "iupui.edu",
+                    "eda.gov",
+                    "fema.gov",
+                    "doc.gov",
+                    "ntia.gov",
+                    "nist.gov",
+                    "noaa.gov",
+                ]
+                const emailDomain = this.user.profile.email.split("@")[1];
+                this.isEDA = edaDomains.includes(emailDomain);
+                if(this.isEDA) console.log("user is EDA personal");
             }
         }
 

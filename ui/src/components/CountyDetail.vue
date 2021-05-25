@@ -6,7 +6,7 @@
                 <CountySelecter @select="fips = $event" placeholder="Search other County" style="width: 180px;"/>
                 or <el-button @click="compare" style="margin-left: 10px;" >Compare Counties</el-button>
             </div>
-            <h3 style="font-weight: normal; margin-right: 300px;">
+            <h3 style="font-weight: normal;">
                 <el-button type="primary" circle icon="el-icon-back" @click="goback()" class="back-button"/>
                 &nbsp;
                 &nbsp;
@@ -289,8 +289,8 @@
         <div v-for="(event, idx) in recentHistory" :key="idx" class="history">
             <Event :event="event">
                 <div v-if="idx < recentHistory.length" style="padding: 10px 0;">
-                    <Eligibility2018 v-if="$root.user && is2018Eligible(event)"/>
-                    <Eligibility2019 v-if="$root.user && (is2019Eligible(event) || is2019FloodEligible(event))"/>
+                    <Eligibility2018 v-if="$root.isEDA && is2018Eligible(event)"/>
+                    <Eligibility2019 v-if="$root.isEDA && (is2019Eligible(event) || is2019FloodEligible(event))"/>
                 </div>
             </Event>
         </div>
@@ -782,7 +782,7 @@ export default class CountyDetail extends Vue {
     processHistory() {
         this.history = [];
 
-        if(this.$root.user) {
+        if(this.$root.isEDA) {
             this.detail.eda2018.forEach(rec=>{
                 rec.grantee = rec.grantee_name+", "+rec.grantee_city+", "+rec.grantee_state;
                 rec.date = new Date(rec.grant_award_date);
@@ -1400,6 +1400,7 @@ h5 {
 .header {
     position: sticky;
     top: 50px;
+    padding-top: 10px;
     width: 100%;
     background-color: white;
     z-index: 3;

@@ -29,7 +29,7 @@
                     This map shows locations and amounts of EDA (U.S. Economic Development Administration) fundings awarded in the specified time range. EDA assists communities experiencing economic distress or harm resulting from federally-declared natural disasters.
                 </p>
                 <p v-if="mode == 'resilience'">
-                    This map shows disaster resilience score for each counties in the specified year aggregated into 4 major categories (Social, Economic, Infrastructure, and Community Capital).  Disaster resilience scores are calculated using data from U.S. Census using formulas defined by [Cuter et al. 2020].
+                    This map shows disaster resilience scores for each county in the specified year aggregated into 4 major categories (Social, Economic, Infrastructure, and Community Capital).  Disaster resilience scores are calculated using data from U.S. Census using formulas defined by [Cuter et al. 2020].
                 </p>
             </div>
 
@@ -162,10 +162,10 @@
             </div>
         </div>
     </div>
-
     <div class="contextmenu" ref="contextmenu">
         <p class="menu-item" @click="openContextMenuCounty">Open ({{contextMenuCounty}}) in a new tab</p>
     </div>
+    <Footer :fixed="true"/>
 </div>
 </template>
 
@@ -174,6 +174,7 @@
 import { Component, Vue, Watch } from 'vue-property-decorator'
 
 import CountySelecter from '@/components/CountySelecter.vue'
+import Footer from '@/components/Footer.vue'
 
 import mapboxgl from 'mapbox-gl';
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -186,7 +187,7 @@ const thisYear = today.getFullYear();
 mapboxgl.accessToken = "pk.eyJ1Ijoic29pY2hpaCIsImEiOiJjazVqdnBsM2cwN242M2psdjAwZXhhaTFuIn0.o3koWlzx1Tup8CJ1B_KaEA";
 
 @Component({
-    components: { CountySelecter,/*TopMenu, CountyDetail, Footer*/ },
+    components: { CountySelecter, Footer },
 })
 export default class Disaster extends Vue {
 
@@ -328,7 +329,7 @@ export default class Disaster extends Vue {
  
     created() {
         this.modes.push({value: "dr", label: "FEMA Disaster Declarations"});
-        if(this.$root.user) this.modes.push({value: "eda", label: "EDA Awards"});
+        if(this.$root.isEDA) this.modes.push({value: "eda", label: "EDA Awards"});
         this.modes.push({value: "resilience", label: "Disaster Resilience"});
 
         const h = window.localStorage.getItem("hiddenLayers");
@@ -342,11 +343,6 @@ export default class Disaster extends Vue {
 
         for(let year = thisYear; year > 1960; --year) {
             this.drRanges.push(
-                {value: year.toString(), label: year.toString()},
-            );
-        }
-        for(let year = 2018; year >= 2012; --year) {
-            this.resYears.push(
                 {value: year.toString(), label: year.toString()},
             );
         }
@@ -414,7 +410,7 @@ export default class Disaster extends Vue {
         this.map.setLayoutProperty('eda', 'visibility', 'visible');
     }
 
-    loadCutters(year, measure) {
+    loadCutters(measure) {
         //create source / layer
         this.map.addSource('dr'+measure, { type: "geojson", data: this.geojson });
         this.map.addLayer({
@@ -440,7 +436,6 @@ export default class Disaster extends Vue {
                 visibility: 'none',
             }
         }, 'map');
-        this.resYear = '2018';
     }
 
     mounted() {
@@ -549,8 +544,18 @@ export default class Disaster extends Vue {
                 }).then(data=>{
                     this.cutters = data;
                     for(const cid in this.cutterIndicators) {
-                        this.loadCutters(2018, cid);
+                        this.loadCutters(cid);
                     }
+
+                    //guess the year that we have DR data for
+                    const nonNull = this.cutters["01.001"]["COMM"].filter(v=>!!v);
+                    const maxResYears = 2012 + nonNull.length - 1;
+                    for(let year = maxResYears; year >= 2012; --year) {
+                        this.resYears.push(
+                            {value: year.toString(), label: year.toString()},
+                        );
+                    }
+                    this.resYear = maxResYears;
                 });
 
                 //load eda awards
@@ -651,6 +656,7 @@ export default class Disaster extends Vue {
                 this.popup.remove();
             });
 
+            /*
             this.map.on('idle', ()=>{
                 const tutorialPlayed = localStorage.getItem("tutorial-played");
                 if(!tutorialPlayed && !this.selected && window.innerWidth > 800) {
@@ -664,6 +670,7 @@ export default class Disaster extends Vue {
                     });
                 }
             });
+            */
         })
     }
 
@@ -789,6 +796,7 @@ export default class Disaster extends Vue {
         this.popup.addTo(this.map);
     }
 
+    /*
     showTutorial(page) {
 
         const tutorial = document.getElementsByClassName("tutorial")[0];
@@ -832,6 +840,7 @@ export default class Disaster extends Vue {
         item.classList.add("tutorial-focus");
         text.classList.add("tutorial-text-show");
     }
+    */
 
     countySelected(fips) {
         //this.$router.push('/county/'+fips);
@@ -950,7 +959,7 @@ h4 {
     left: 350px;
     right: 0;
     top: 50px;
-    bottom: 0;
+    bottom: 50px;
 }
 .sidebarHidden #map {
     left: 0;
@@ -978,7 +987,7 @@ h4 {
     top: 50px;
     left: 0;
     width: 350px;
-    bottom: 0;
+    bottom: 50px;
     background-color: #f9f9f9;
     transition: left 0.3s;
     border-right: 1px solid #ccc;
@@ -1038,55 +1047,14 @@ h4 {
     }    
 }
 
-.tutorial {
-    display: none;
-    opacity: 0;
-    position: fixed;
-    background-color: #0009;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    z-index: 2;
-    transition: opacity 1s;
-
-    &.tutorial-active {
-        opacity: 1;
-    }
-    .tutorial-text {
-        position: fixed;
-        width: 400px;
-        color: white;
-        opacity: 0;
-        transition: opacity 1s;
-        font-size: 110%;
-        p { 
-            color: white;
-        }
-
-        &.tutorial-text-show {
-            opacity: 1;
-        }
-    }
-}
-
-.tutorial-focus {
-    position: relative;
-    z-index: 3;
-    transition: box-shadow 1s;
-    box-shadow: 0 0 20px black;
-}
 .el-button--mini {
     padding: 7px;
 }
 .search-control {
-    position: fixed;
-    top: 50px;
-    left: 330px;
-    right: 0;
     padding-top: 10px;
+    margin-left: 330px;
 }
 .sidebarHidden .search-control {
-    left: 20px;
+    margin-left: inherit;
 }
 </style>

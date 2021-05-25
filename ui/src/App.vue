@@ -63,7 +63,7 @@ p.small {
     opacity: 0.8;
 }
 .page {
-    width: 1000px;
+    width: 1100px;
     margin: auto;
 }
 @media only screen and (max-width: 1100px) {
