@@ -35,6 +35,64 @@ Vue.use(VueGtag, {
 
 import JwtDecode from 'jwt-decode'
 
+const edaDomains = `
+iu.edu
+iupui.edu
+eda.gov
+fema.gov
+doc.gov
+ntia.gov
+nist.gov
+noaa.gov
+2020census.gov
+ap.gov
+aviationweather.gov
+bea.gov
+bldrdoc.gov
+buyusa.gov
+census.gov
+climate.gov
+commerce.gov
+dnsops.gov
+drought.gov
+earthsystemprediction.gov
+export.gov
+firstnet.gov
+fishwatch.gov
+goes-r.gov
+gps.gov
+hurricanes.gov
+icams-portal.gov
+luca-appeals.gov
+manufacturing.gov
+marinecadastre.gov
+mbda.gov
+mgi.gov
+my2020census.gov
+nehrp.gov
+ntis.gov
+nwirp.gov
+ofcm.gov
+papahanaumokuakea.gov
+privacyshield.gov
+pscr.gov
+sdr.gov
+selectusa.gov
+spaceweather.gov
+spectrum.gov
+standards.gov
+stopfakes.gov
+sworm.gov
+tasefiling.gov
+time.gov
+trade.gov
+tsunami.gov
+usicecenter.gov
+uspto.gov
+weather.gov
+xd.gov
+`.split("\n");
+
 interface RawDrMeasureRec {
     measure: string;
     measure_name: string;
@@ -178,16 +236,6 @@ new Vue({
                 //console.dir(this.user);
 
                 //check to see if user is using eda domain
-                const edaDomains = [
-                    "iu.edu",
-                    "iupui.edu",
-                    "eda.gov",
-                    "fema.gov",
-                    "doc.gov",
-                    "ntia.gov",
-                    "nist.gov",
-                    "noaa.gov",
-                ]
                 const emailDomain = this.user.profile.email.split("@")[1];
                 this.isEDA = edaDomains.includes(emailDomain);
                 if(this.isEDA) console.log("user is EDA personal");
