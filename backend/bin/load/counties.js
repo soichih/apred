@@ -63,6 +63,7 @@ stateCostArray.forEach(r=>{
     statesCost[r.statefips].push({
         code:r.linecd,
         z: r.z,
+        chg_pct: r.chg_pct,
         result: r.result,
         desc: linecodes[r.linecd],
     });

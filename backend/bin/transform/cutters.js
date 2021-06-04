@@ -128,6 +128,8 @@ async.series([
         }
     }
 
+    const thisYear = new Date().getFullYear();
+
     //for each county
     let summaries = {};
     for(let fips in data.cutter.counties) {
@@ -136,7 +138,7 @@ async.series([
         for(let indicator in data.cutter.indicators) {
             summaries[fips][indicator] = []; //contains years
             //we process each year separately
-            for(let year = 2012; year <= 2018; ++year) {
+            for(let year = 2012; year <= thisYear; ++year) {
                 let total = 0;
                 let counts = 0;
                 //then iterate over measure id (source.id) and aggregate that year
