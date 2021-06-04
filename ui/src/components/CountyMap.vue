@@ -3,9 +3,9 @@
     <div id="map"/>
     
     <div class="search-control">
-        <div style="margin: 10px; opacity: 0.6; display: inline-block;">
+        <div style="margin: 20px; opacity: 0.6; display: inline-block;">
         <span style="opacity: 0.5; margin-left: 10px;"></span></div>
-        <CountySelecter @select="countySelected" placeholder="Search county name here" style="width: 250px"/>
+        <CountySelecter @select="countySelected" placeholder="Search county name here" style="width: 300px"/>
     </div>
     <div class="showSide" v-if="hideSidebar">
         <el-button icon="el-icon-arrow-right" type="primary" size="mini" @click="collapse" style="position: fixed; top: 65px; left: -4px; "></el-button>
@@ -23,7 +23,7 @@
             </p>            
             <div v-if="mode" class="map-description">
                 <p v-if="mode == 'dr'">
-                    This map shows counties with FEMA declared disasters within specified time range. Please visit <a href="https://www.fema.gov/disasters/disaster-declarations">FEMA Disasters</a> page for more detail.
+                    This map shows counties with <a href="https://www.fema.gov/disasters/disaster-declarations">FEMA Disaster Declarations</a>. Enter a specific county name in search box to view in-depth information.
                 </p>
                 <p v-if="mode == 'eda'">
                     This map shows locations and amounts of EDA (U.S. Economic Development Administration) fundings awarded in the specified time range. EDA assists communities experiencing economic distress or harm resulting from federally-declared natural disasters.
@@ -35,6 +35,7 @@
 
             <div v-if="mode == 'dr'">
                 <p class="heading">
+                    <br>
                     <b>Date Range</b>
                 </p>
                 <p>
@@ -53,6 +54,7 @@
                     </el-row>
                 </p>
                 <p class="heading">
+                    <br>
                     <b>Disaster Types</b>
                 </p>
                 <div class="legend-item" style="border-bottom: 1px solid #0002; margin-bottom: 8px; padding-bottom: 3px;">
