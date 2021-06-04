@@ -13,6 +13,9 @@
     <span class="pull-right" style="font-weight: bold; top: 18px;"> 
         <a href="https://ctil.iu.edu/" style="color: inherit;">CTIL</a>
     </span>
+    <span class="pull-right" style="font-weight: bold; top: 18px;"> 
+        <a href="javascript:window.print();"><i class="el-icon-printer"/></a>
+    </span>
     <p class="title">
         <!--<el-tag effect="dark" type="info" class="beta" size="mini"><b>BETA</b></el-tag>-->
         <a href="https://ctil.iu.edu/projects/apred-landing"><b style="color: #900;">APRED</b></a>

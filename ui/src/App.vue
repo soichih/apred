@@ -83,6 +83,9 @@ p.small {
     #app {
         padding-top: 0;
     }
+    footer {
+        box-shadow: none !important;
+    }
 }
 
 .el-tabs__header {

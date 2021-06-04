@@ -2,7 +2,7 @@
 <footer :class="{fixed: fixed}">
     <div :class="{page: !fixed}">
         <div v-if="!fixed">
-            <p>
+            <p style="background-color: rgba(255,255,255,0.1); padding: 10px; border-radius: 5px;">
                 This platform brings data science to decision-makers dealing with the economics of 
                 disaster mitigation, analysis, and recovery activities. 
             </p>
