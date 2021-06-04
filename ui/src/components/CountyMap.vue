@@ -61,7 +61,8 @@
                 </div>
                 <div v-for="(info, layer) in $root.layers" :key="layer" class="legend-item" :class="{hidden: hiddenLayers.includes(layer)}" style="clear: right;">
                     <input type="checkbox" @click.stop="toggleLayer(layer)" :checked="!hiddenLayers.includes(layer)"/>
-                    <span class="legend-color" :style="{backgroundColor: info.color}">&nbsp;</span>&nbsp;{{layer.toUpperCase()}}
+                    <span class="legend-color" :style="{backgroundColor: info.color}">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                    {{layer.toUpperCase()}}
                     <!--
                     <span v-if="info.tooltip" :title="info.tooltip">
                         <i class="el-icon-question"></i>
@@ -1018,7 +1019,6 @@ h4 {
         font-size: 90%;
     }
     .legend-color {
-        display: inline-block;
         width: 10px;
         height: 10px;
     }

@@ -488,7 +488,7 @@
                             -->
                             <h4 :title="rec.code" style="height: 30px; font-size: 11pt;">{{rec.desc}}</h4>
                             <span class="primary" :style="{color: rec.z>0?'#409EFF':'#F56C6C'}">
-                                {{rec.z|formatNumber("+0.00")}}%
+                                {{rec.chg_pct|formatNumber("+0.00")}}%
                             </span>
                             <el-tag v-if="!rec.result.includes('INSIG')" :type="rec.z>0?'':'danger'" size="mini">{{rec.result!=""?"Significant":""}}</el-tag>
                         </div>
@@ -502,7 +502,7 @@
                                 with a potential 
                                 <span v-if="rec.z<0">loss</span> 
                                 <span v-if="rec.z>=0">gain</span> 
-                                in productivity of <b>${{Math.abs(rec.z)*detail.gdpPerSector[rec.code]*1000|formatNumber()}}</b> dollars due to a declared disaster.
+                                in productivity of <b>${{Math.abs(rec.chg_pct)*detail.gdpPerSector[rec.code]*1000|formatNumber()}}</b> dollars due to a declared disaster.
                             </small>
                         </p>
                     </div>
@@ -1065,10 +1065,9 @@ export default class CountyDetail extends Vue {
     get urGraphData() {
         return [
             //county 
-            /*
-            */
             {
                 x: this.detail.distress_ur.date,
+                //y: this.detail.distress_ur.rate.map(v=>v.toFixed(1)),
                 y: this.detail.distress_ur.rate,
                 //yaxis: 'y2',
                 name: 'County Unempl. Rate',
@@ -1079,6 +1078,7 @@ export default class CountyDetail extends Vue {
 
             {
                 x: this.$root.unempUS.date,
+                //y: this.$root.unempUS.rate.map(v=>v.toFixed(1)),
                 y: this.$root.unempUS.rate,
                 //yaxis: 'y2',
                 name: 'US Unempl. Rate',
