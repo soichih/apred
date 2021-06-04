@@ -15,12 +15,12 @@
             </h3>
             <br clear="both">
             <el-tabs v-model="tab" @tab-click="scroll2top">
-                <el-tab-pane name="info" label="County Detail"></el-tab-pane>
-                <el-tab-pane name="disaster" :label="'Disaster Declarations ('+history.length+')'"></el-tab-pane>
-                <el-tab-pane v-if="detail.bvis2" name="bvi" label="Business Vulnerability"></el-tab-pane>
-                <el-tab-pane name="resilience" label="Disaster Resilience"></el-tab-pane>
                 <el-tab-pane name="storms" label="Storm History"></el-tab-pane>
-                <el-tab-pane name="cost" label="Potential Cost"></el-tab-pane>
+                <el-tab-pane name="disaster" :label="'FEMA Disaster Declarations ('+history.length+')'"></el-tab-pane>
+                <el-tab-pane v-if="detail.bvis2" name="bvi" label="Business Sector Vulnerability"></el-tab-pane>
+                <el-tab-pane name="resilience" label="Disaster Resilience"></el-tab-pane>
+                <el-tab-pane name="cost" label="Potential Disaster Cost"></el-tab-pane>
+                <el-tab-pane name="info" label="County Detail"></el-tab-pane>                
             </el-tabs>
         </div>
     </div>
@@ -581,7 +581,7 @@ export default class CountyDetail extends Vue {
     statemap;
     detail = null;
 
-    tab = "info";
+    tab = "storms";
 
     history = [];
 
