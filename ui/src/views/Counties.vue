@@ -1,7 +1,7 @@
 <template>
 <div style="position: relative;">
     <TopMenu/>
-    <CountyDetail v-if="fips" :fips="fips"/>
+    <CountyDetail v-if="fips" :fips="fips" @changeFips="changeFips"/>
     <CountyMap v-if="mountmap" v-show="showmap" @select="changeFips"/>
 </div>
 </template>
@@ -39,6 +39,7 @@ export default class CountiesView extends Vue {
     */
 
     changeFips(v) {
+        console.log("moving to new fip");
         this.$router.push('/county/'+v);
     }
     

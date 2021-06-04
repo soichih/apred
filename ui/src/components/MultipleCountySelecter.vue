@@ -1,6 +1,6 @@
 <template>
 <div>
-    <el-select v-if="countyList" class="county-selecter" v-model="myfips" 
+    <el-select v-if="$root.countyList" class="county-selecter" v-model="myfips" 
         multiple
         filterable 
         clearable 
@@ -24,7 +24,7 @@ export default {
     },
     data() {
         return {
-            countyList: null,
+            //countyList: null,
             options: [],
             myfips: [],
             loading: false,
@@ -37,6 +37,7 @@ export default {
         },
     },
 
+    /*
     mounted() {
         fetch(this.$root.dataUrl+"/countylist.json").then(res=>{ 
             return res.json()
@@ -44,6 +45,7 @@ export default {
             this.countyList = data;
         });
     },
+    */
 
     methods: {
         searchCounty(q) {
@@ -54,7 +56,7 @@ export default {
 
             this.loading = true;
             const lq = q.toLowerCase();
-            this.options = this.countyList.filter(o=>{
+            this.options = this.$root.countyList.filter(o=>{
                 if(o.label.toLowerCase().includes(lq)) return true;
                 if(o.value.toString().includes(lq)) return true;
                 return false;
@@ -66,12 +68,12 @@ export default {
         preselect(fips) {
 
             //delay if countyList is not loaded yet
-            if(!this.countyList) return setTimeout(()=>{
+            if(!this.$root.countyList) return setTimeout(()=>{
                 this.preselect(fips);
             }, 1000)
 
             this.myfips = fips;
-            this.options = this.countyList.filter(o=>this.myfips.includes(o.value));
+            this.options = this.$root.countyList.filter(o=>this.myfips.includes(o.value));
         },
 
         change() {

@@ -1,5 +1,5 @@
 <template>
-<el-select 
+<el-select v-if="$root.countyList"
     class="county-selecter"
     v-model="myfips" 
     filterable 
@@ -11,6 +11,7 @@
     @change="change" style="width: 100%;" size="large">
     <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
         <span style="float: left">{{ item.label }}</span>
+            &nbsp;
         <span style="float: right; color: #8492a6; font-size: 13px">{{ item.value }}</span>
     </el-option>
 </el-select>
@@ -24,7 +25,6 @@ export default {
     },
     data() {
         return {
-            countyList: null,
             options: [],
             myfips: null,
             loading: false,
@@ -38,12 +38,15 @@ export default {
     },
 
     mounted() {
+        /*
         fetch(this.$root.dataUrl+"/countylist.json").then(res=>{ 
             return res.json()
         }).then(data=>{
             this.countyList = data;
             this.myfips = this.fips;
         });
+        */
+        this.myfips = this.fips;
     },
 
     methods: {
@@ -55,7 +58,7 @@ export default {
 
             this.loading = true;
             const lq = q.toLowerCase();
-            this.options = this.countyList.filter(o=>{
+            this.options = this.$root.countyList.filter(o=>{
                 if(o.label.toLowerCase().includes(lq)) return true;
                 if(o.value.toString().includes(lq)) return true;
                 return false;

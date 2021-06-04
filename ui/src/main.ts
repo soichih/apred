@@ -206,6 +206,8 @@ new Vue({
                     zIndex: 1,
                 }, 
             },
+
+            countyList: null,
         }
     },
 
@@ -263,6 +265,12 @@ new Vue({
 
             this.commonReady = true;
             this.$forceUpdate();
+        });
+
+        fetch(this.$root.dataUrl+"/countylist.json").then(res=>{ 
+            return res.json()
+        }).then(data=>{
+            this.countyList = data;
         });
 
     },

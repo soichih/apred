@@ -300,7 +300,7 @@ export default class Disaster extends Vue {
             //apply to geojson 
             this.geojson.features.forEach(feature=>{
                 const fips = feature.properties["fips"];
-                feature.properties["resilience"] = values[fips]||0;
+                feature.properties["resilience"] = values[fips]||-1;
             });
 
             this.map.getSource('dr'+cid).setData(this.geojson);
@@ -427,6 +427,8 @@ export default class Disaster extends Vue {
                     'interpolate',
                     ['linear'],
                     [ "get", "resilience" ],
+                    -1,
+                    'rgba(0,0,0,0)',
                     0,
                     'red',
                     0.5,
@@ -619,7 +621,6 @@ export default class Disaster extends Vue {
                     layers: ['counties']
                 });
                 if(features.length > 0) {
-                    //this.countySelected(features[0].properties.state_fips+features[0].properties.county_fips);
                     this.countySelected(features[0].properties.county_fips);
                 }
             });
@@ -846,8 +847,13 @@ export default class Disaster extends Vue {
     */
 
     countySelected(fips) {
-        //this.$router.push('/county/'+fips);
-        this.$emit("select", fips);
+        //make sure fips exists in our list
+        const county = this.$root.countyList.find(c=>c.value == fips);
+        if(!county) {
+            alert("This county (fips code:"+fips+") does not exist in our database. This might be caused by recent changes made to the county.");
+        } else {
+            this.$emit("select", fips);
+        }
     }
     openContextMenuCounty() {
         window.open("#/county/"+this.contextMenuFips, "apred-"+this.contextMenuFips);

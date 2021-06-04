@@ -3,7 +3,7 @@
     <div class="header">
         <div class="page">
             <div class="toolset">
-                <CountySelecter @select="fips = $event" placeholder="Search other County" style="width: 180px;"/>
+                <CountySelecter @select="$router.replace('/county/'+$event)" placeholder="Search other County" style="width: 180px;"/>
                 or <el-button @click="compare" style="margin-left: 10px;" >Compare Counties</el-button>
             </div>
             <h3 style="font-weight: normal;">
@@ -759,8 +759,8 @@ export default class CountyDetail extends Vue {
     cuttersData = {}; //group by incode then {states: {avg, sdev}, us: {avg, sdev}, county} 
 
     @Watch('fips')
-    onDetailChange() {
-        this.$router.replace("/county/"+this.fips);
+    onFipsChange() {
+        //this.$router.replace("/county/"+this.fips);
         this.load();
     }
 
