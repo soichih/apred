@@ -29,7 +29,7 @@
                     This map shows locations and amounts of EDA (U.S. Economic Development Administration) fundings awarded in the specified time range. EDA assists communities experiencing economic distress or harm resulting from federally-declared natural disasters.
                 </p>
                 <p v-if="mode == 'resilience'">
-                    This map shows disaster resilience scores for each county in the specified year aggregated into 4 major categories (Social, Economic, Infrastructure, and Community Capital).  Disaster resilience scores are calculated using data from U.S. Census using formulas defined by [Cuter et al. 2020].
+                    This map shows disaster resilience scores for each county in the specified year aggregated into 4 major categories (Social, Economic, Infrastructure, and Community Capital).  Disaster resilience scores are calculated using data from U.S. Census using formulas defined by [Cutter et al. 2020].
                 </p>
             </div>
 
