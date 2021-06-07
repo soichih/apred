@@ -159,8 +159,8 @@
                 </div>
                 <br>
                 <div style="background-image: linear-gradient(to right, red, yellow, green); width: 100%; height: 5px;">&nbsp;</div>
-                <span style="float: left;">Low</span>
-                <span style="float: right">High</span>
+                <span style="float: left;">Low (0.0)</span>
+                <span style="float: right">High (1.0)</span>
                 <br>
             </div>
         </div>
