@@ -475,22 +475,19 @@
             </div>
 
             <p style="margin-left: 10px;">
-                <el-checkbox v-model="showInsigCost">Show industries with insignificant changes</el-checkbox>
+                <el-checkbox v-model="showInsigCost">Show industries with statistically insignificant changes</el-checkbox>
             </p>
             <br clear="both">
 
             <el-row>
-                <el-col :span="6" v-for="rec in detail.costDisasters.filter(rec=>showInsigCost||!rec.result.includes('INSIG'))" :key="rec.code">
+                <el-col :span="6" v-for="rec in detail.costDisasters.filter(rec=>showInsigCost||significant(rec.z))" :key="rec.code">
                     <div style="padding-left: 10px; height: 250px;">
                         <div style="padding-bottom: 10px;">
-                            <!--
-                            <p style="margin-bottom: 5px;"><small style="font-size: 80%;">{{rec.code}}</small></p>
-                            -->
-                            <h4 :title="rec.code" style="height: 30px; font-size: 11pt;">{{rec.desc}}</h4>
+                            <h4 :title="rec.code" style="height: 40px; font-size: 10pt;">{{rec.desc}}</h4>
                             <span class="primary" :style="{color: rec.z>0?'#409EFF':'#F56C6C'}">
                                 {{rec.chg_pct|formatNumber("+0.00")}}%
                             </span>
-                            <el-tag v-if="!rec.result.includes('INSIG')" :type="rec.z>0?'':'danger'" size="mini">{{rec.result!=""?"Significant":""}}</el-tag>
+                            <el-tag type="info" v-if="significant(rec.z)" size="mini" :title="'z-score:'+rec.z">Significant! (p&lt;0.3)</el-tag>
                         </div>
                         <p>
                             <small style="opacity: 0.9;">
@@ -502,7 +499,7 @@
                                 with a potential 
                                 <span v-if="rec.z<0">loss</span> 
                                 <span v-if="rec.z>=0">gain</span> 
-                                in productivity of <b>${{Math.abs(rec.chg_pct)*detail.gdpPerSector[rec.code]*1000|formatNumber()}}</b> dollars due to a declared disaster.
+                                in productivity of <b>${{Math.abs(rec.chg_pct)*detail.gdpPerSector[rec.code]*10|formatNumber()}}</b> dollars due to a declared disaster.
                             </small>
                         </p>
                     </div>
@@ -1308,6 +1305,12 @@ export default class CountyDetail extends Vue {
 
     compare() {
         window.open("#/compare/what/"+this.fips, "compare-what-"+this.fips);
+    }
+
+    significant(z) {
+        //return (z < -1.64485 || z > 1.64485); //p<0.1
+        //return (z < -1.28155 || z > 1.28155); //p<0.2
+        return (z < -1.03643 || z > 1.03643); //p<0.3
     }
 }
 

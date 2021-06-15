@@ -299,8 +299,8 @@ export default class Disaster extends Vue {
 
             //apply to geojson 
             this.geojson.features.forEach(feature=>{
-                const fips = feature.properties["fips"];
-                feature.properties["resilience"] = values[fips]||-1;
+                const fips = feature.properties.fips;
+                feature.properties.resilience = values[fips]||-1;
             });
 
             this.map.getSource('dr'+cid).setData(this.geojson);
@@ -468,13 +468,6 @@ export default class Disaster extends Vue {
         });
 
         this.map.on('load', ()=>{
-
-            //TODO - allow user to specify this year to show for dr
-
-            //I can try..
-            //this.map.getSource('counties').setData(new_geojson); 
-            //or maybe better to somehow update the prop values on the fly? can I do that?
-
             //TODO - I should separate DR information from counties_geo.. so we can load data for each year ranges
             //counties_geo should just contain counties_geo
             fetch(this.$root.dataUrl+"/counties_geo.albers.geojson").then(res=>{ 

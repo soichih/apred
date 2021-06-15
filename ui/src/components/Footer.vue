@@ -2,11 +2,11 @@
 <footer :class="{fixed: fixed}">
     <div :class="{page: !fixed}">
         <div v-if="!fixed">
-            <p style="background-color: rgba(255,255,255,0.1); padding: 10px; border-radius: 5px;">
+            <p>
                 This platform brings data science to decision-makers dealing with the economics of 
                 disaster mitigation, analysis, and recovery activities. 
             </p>
-            <p>
+            <p style="background-color: rgba(0,0,0,0.1); padding: 10px; border-radius: 5px;">
                 <i>This publication was prepared by the CTIL and IBRC at Indiana University using federal funds awarded to the Trustees of Indiana University and as a sub-component under award number ED17HDQ3120040 from the U.S. Economic Development Administration, U.S. Department of Commerce. The statements, findings, conclusions, and recommendations are those of the author(s) and do not necessarily reflect the views of the Economic Development Administration or the U.S. Department of Commerce.</i>
             </p>
         </div>
