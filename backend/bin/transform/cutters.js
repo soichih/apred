@@ -118,7 +118,8 @@ async.series([
     for(let fips in data.cutter.counties) {
         for(let id in data.cutter.counties[fips]) {
             let values = Object.values(data.cutter.counties[fips][id]);
-            values = values.filter(v=>v !== undefined);
+            //values = values.filter(v=>v !== undefined);
+            values = values.filter(v=>!!v); //ignore 0, or undefined
             let min = Math.min(...values);
             let max = Math.max(...values);
             if(mins[id] === undefined) mins[id] = min;
@@ -194,9 +195,9 @@ function load_dr(cb) {
     console.debug("loading dr");
     let count_missing = 0;
     
-    let dr = require(config.pubdir+'/raw/dr.json');
+    let dr = require(config.pubdir+'/raw/dr_normalized.json');
     dr.forEach(rec=>{
-        /*
+        /* dr.json
         {
           statefips: '30',
           countyfips: '059',
@@ -206,8 +207,18 @@ function load_dr(cb) {
           measure_value: 4.8375, //from dr.json
           measure_value_normalized: null //from dr_normalize.json
         }
+        dr_normalized.json
+        {
+          statefips: '48',
+          countyfips: '345',
+          measure: '11',
+          measure_category: '1',
+          year: '2016',
+          measure_value_normalized: 0.4297764607877904
+        }
         */
-        let v = rec.measure_value;
+        //let v = rec.measure_value;
+        let v = rec.measure_value_normalized;
 
         let fips = rec.statefips+"."+rec.countyfips;
         if(!data.cutter.counties[fips]) {
@@ -232,7 +243,7 @@ function load_dr(cb) {
         source.states[rec.statefips].vs.push(parseFloat(v));
     });
 
-    //compute average/sdev
+    //compute mean/sdev
     for(let measure in sources) {
         for(let year in sources[measure]) {
             let source = sources[measure][year];

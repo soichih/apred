@@ -71,6 +71,7 @@ mssql.connect(config.stats_america.db_red_dr).then(async pool=>{
     fs.writeFileSync(config.pubdir+"/raw/estimated_cost_avg.json", JSON.stringify(cost_avg.recordset));
     */
 
+    //TODO deprecated by dr_data_norm?
     console.log("loading dr_data / Resilience values for individual indices per county.");
     const dr_data = await pool.request().query(`
         SELECT * FROM dr_data
@@ -81,14 +82,13 @@ mssql.connect(config.stats_america.db_red_dr).then(async pool=>{
         rec.measure = rec.measure.trim();
         rec.measure_category = rec.measure_category.trim();
         rec.year = rec.year.trim();
-
         //if(rec.statefips == "18" && rec.countyfips == "105" && rec.measure == "16") console.dir(rec);
     });
     fs.writeFileSync(config.pubdir+"/raw/dr.json", JSON.stringify(dr_data.recordset));
 
     console.log("loading dr_data_norm / Resilience values for individual indices per county.");
     const dr_data_norm = await pool.request().query(`
-        SELECT statefips, countyfips, measure, measure_category, year FROM dr_data_norm
+        SELECT * FROM dr_data_norm WHERE year < 2019
     `);
     console.log("done loading from sql");
     dr_data_norm.recordset.forEach(rec=>{
@@ -97,6 +97,16 @@ mssql.connect(config.stats_america.db_red_dr).then(async pool=>{
         rec.measure = rec.measure.trim();
         rec.measure_category = rec.measure_category.trim();
         rec.year = rec.year.trim();
+        /*
+        {
+          statefips: '27',
+          countyfips: '009',
+          measure: '57',
+          measure_category: '5',
+          year: '2015',
+          measure_value_normalized: 0.44557485640489813
+        }
+        */
     });
     console.log("now saving to disk");
     fs.writeFileSync(config.pubdir+"/raw/dr_normalized.json", JSON.stringify(dr_data_norm.recordset));
