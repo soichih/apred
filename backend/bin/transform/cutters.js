@@ -5,8 +5,11 @@ const fs = require('fs');
 const config = require('../../config');
 const async = require('async');
 
+//disaster resiliecne for washington county, VI (51191) is stored under
+//edafips: 51953. We need to load data for 51953 and load it for county 51191
+const beamap = require(config.pubdir+'/beamap.json');
+ 
 console.log("cutters----------------------------------");
-
 //https://derickbailey.com/2014/09/21/calculating-standard-deviation-with-array-map-and-array-reduce-in-javascript/
 function standardDeviation(avg, values){
   var squareDiffs = values.map(function(value){
@@ -59,13 +62,14 @@ async.series([
     //load fips info to each cutter counties
     for(let fips in data.cutter.counties) {
         let fips_rec = data.fips.find(rec=>(rec.statefips+"."+rec.countyfips == fips));
-        if(!fips_rec) throw "no such fip:"+fips;
-        Object.assign(data.cutter.counties[fips], {
-            fips,
-            state: fips_rec.state,
-            stabb: fips_rec.stabb,
-            county: fips_rec.county,
-        });
+        if(fips_rec) {
+            Object.assign(data.cutter.counties[fips], {
+                fips,
+                state: fips_rec.state,
+                stabb: fips_rec.stabb,
+                county: fips_rec.county,
+            });
+        }
     }
     fs.writeFileSync(config.pubdir+"/cutter2.json", JSON.stringify(data.cutter));
 
@@ -170,6 +174,17 @@ function load_fips(cb) {
         let fips = rec.statefips+'.'+rec.countyfips;
         if(!data.cutter.counties[fips]) data.cutter.counties[fips] = {}; 
     });
+    
+    //link bea-mapped counties to a object under bea fips so that we load dr data under bea fips,
+    //but the original fips will have data populated
+    for(const newfips in beamap) {
+        const o = {};
+        data.cutter.counties[newfips] = o;
+        beamap[newfips].forEach(fips=>{
+            data.cutter.counties[fips] = o; //override to point to object under newfips
+        });
+    }
+       
     cb();
 }
 
@@ -221,6 +236,10 @@ function load_dr(cb) {
         let v = rec.measure_value_normalized;
 
         let fips = rec.statefips+"."+rec.countyfips;
+
+        //if it's edamap-ed fips, convert to census map
+        //todo
+
         if(!data.cutter.counties[fips]) {
             console.log("failed to find:"+fips);
             count_missing++;
@@ -242,6 +261,7 @@ function load_dr(cb) {
         if(!source.states[rec.statefips]) source.states[rec.statefips] = { vs: [] };
         source.states[rec.statefips].vs.push(parseFloat(v));
     });
+    console.log("total missing", count_missing);
 
     //compute mean/sdev
     for(let measure in sources) {

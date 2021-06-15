@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #APRED raw data extract (all quick)
-./extract/fips.js
+#./extract/fips.js
 ./extract/statsamerica_eda2018.js
 ./extract/statsamerica_fema_disasters.js
 ./extract/statsamerica_noaa_storms.js
@@ -17,6 +17,7 @@
 ./transform/cutters.js
 ./transform/count_noaa_storms.js
 ./transform/geojson.js
+
 ./load/counties.js
 
 #service monitoring (send sms alert if key service is down)

@@ -28,14 +28,19 @@ for(let fain in eda2018) {
         rec.lon = geocode.lon;
     }
 
-    //lookup county fips
+    //lookup county fips from county name
     rec.counties.forEach(c=>{
         c.county = c.county.trim();
         let fi = fips.find(f=>{
-            let county = c.county;
+            let county = c.county.toLowerCase();
+            let fcounty = f.county.toLowerCase().replace(".", "");
             county = county.replace(".", "");
-            county = county.replace("Ft ", "Fort ");
-            if(f.stabb == c.stateadd && f.county == county) return true;
+            county = county.replace("ft ", "fort ");
+            county = county.replace("district of columbia", "washington");
+            if(f.stabb == c.stateadd && fcounty == county) return true;
+
+            //"De Witt" is listed as "DeWitt" in geojson..
+            if(f.stabb == c.stateadd && fcounty.replace(" ", "") == county) return true;
             return false;
         });
         if(fi) {

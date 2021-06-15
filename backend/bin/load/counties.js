@@ -59,6 +59,19 @@ console.log("loading estimated_state_cost.json");
 const stateCostArray = require(config.pubdir+"/raw/estimated_cost.json");
 const statesCost = {}; //key by edd_id
 stateCostArray.forEach(r=>{
+    /*
+    {
+      statefips: '40',
+      linecd: '0070',
+      z: 0.01536921044438044,
+      result: 'INSIG',
+      chg_pct: 0.008892572293593748,
+      disaster_avg: 0.18483012018401582,
+      disaster_stdev: 0.7424760140928791,
+      no_avg: 0.17593754789042207,
+      no_stdev: 0.8221914981576122
+    }
+    */
     if(!statesCost[r.statefips]) statesCost[r.statefips] = [];
     statesCost[r.statefips].push({
         code:r.linecd,

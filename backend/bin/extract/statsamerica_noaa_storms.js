@@ -5,7 +5,6 @@ const async = require('async');
 const config = require('../../config');
 const mssql = require('mssql');
 
-//const fips = require('../data/fips.json');
 console.log("statsamerica_noaa_storms--------------------------------");
 const today = new Date();
 //I can only connect from IU VPN connected IPs - not dev1

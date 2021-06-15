@@ -38,10 +38,10 @@ function load(pool) {
                 next();
             });
         },
-        /*
+
+        //this table maps census fips code to bea fips code (most statsamerica entities are mapped to it)
         next=>{
             pool.request().query(`SELECT * FROM bea_fips_match_ii`).then(res=>{
-                console.dir(res);
                 //{
                 //  match_id: 1,
                 //  statefips: '02',
@@ -49,11 +49,63 @@ function load(pool) {
                 //  statefips_new: '02',
                 //  countyfips_new: '232'
                 //},
-                //TODO - what to do with the mapping? apply the county code update?
+                /*
+                {
+                  match_id: 67,
+                  statefips: '02',
+                  countyfips: '270',
+                  statefips_new: '02',
+                  countyfips_new: '158'
+                }
+                */
+                const beamap = {};
+                res.recordset.forEach(rec=>{
+                    const fips = rec.statefips+"."+rec.countyfips;
+                    const newfips = rec.statefips_new+"."+rec.countyfips_new;
+                    if(!beamap[newfips]) {
+                        beamap[newfips] = [];
+                    }
+                    beamap[newfips].push(fips);
+                })
+                /*
+                {
+                  '12086': [ '12025' ],
+                  '15901': [ '15005', '15009' ],
+                  '46102': [ '46113' ],
+                  '51019': [ '51019', '51515', '51909' ],
+                  '51901': [ '51003', '51540' ],
+                  '51903': [ '51005', '51560', '51580' ],
+                  '51907': [ '51015', '51790', '51820' ],
+                  '51911': [ '51031', '51680' ],
+                  '51913': [ '51035', '51640' ],
+                  '51918': [ '51053', '51570', '51730' ],
+                  '51919': [ '51059', '51600', '51610' ],
+                  '51921': [ '51069', '51840' ],
+                  '51923': [ '51081', '51595' ],
+                  '51929': [ '51089', '51690' ],
+                  '51931': [ '51095', '51830' ],
+                  '51933': [ '51121', '51750' ],
+                  '51939': [ '51143', '51590' ],
+                  '51941': [ '51149', '51670' ],
+                  '51942': [ '51153', '51683', '51685' ],
+                  '51944': [ '51161', '51775' ],
+                  '51945': [ '51163', '51530', '51678' ],
+                  '51947': [ '51165', '51660' ],
+                  '51949': [ '51175', '51620' ],
+                  '51951': [ '51177', '51630' ],
+                  '51953': [ '51191', '51520' ],
+                  '51955': [ '51195', '51720' ],
+                  '51958': [ '51199', '51735' ],
+                  '02232': [ '02105', '02230' ],
+                  '02901': [ '02130', '02198', '02201' ],
+                  '02280': [ '02195', '02275' ],
+                  '02158': [ '02270' ]
+                }
+                */
+                fs.writeFileSync(config.pubdir+"/beamap.json", JSON.stringify(beamap));
                 next();
             });
         },
-        */
 
         next=>{
             console.log("loading bea.gdp-per-sector");
