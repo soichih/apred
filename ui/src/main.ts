@@ -240,7 +240,7 @@ new Vue({
                 //check to see if user is using eda domain
                 const emailDomain = this.user.profile.email.split("@")[1];
                 this.isEDA = edaDomains.includes(emailDomain);
-                if(this.isEDA) console.log("user is EDA personal");
+                //if(this.isEDA) console.log("user is EDA personal");
             }
         }
 
@@ -267,7 +267,7 @@ new Vue({
             this.$forceUpdate();
         });
 
-        fetch(this.$root.dataUrl+"/countylist.json").then(res=>{ 
+        fetch(this.dataUrl+"/countylist.json").then(res=>{ 
             return res.json()
         }).then(data=>{
             this.countyList = data;
