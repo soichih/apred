@@ -26,7 +26,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Vue } from 'vue-property-decorator';
 
 @Component
 export default class TopMenu extends Vue {
@@ -38,21 +38,21 @@ export default class TopMenu extends Vue {
         if(document.location.hostname == "localhost") this.app = "dev";
     }
 
+    apihost = "https://apred1.ibrc.iupui.edu";
     signup() {
         //alert('Sign up is only applicable for EDA staff. Please con^tact APRED team for more information.');
-        document.location.href = "https://api.ctil.iu.edu/auth/#!/signup?app="+this.app;
+        document.location.href = this.apihost+"/auth/#!/signup?app="+this.app;
     }
 
     login() {
-        document.location.href = "https://api.ctil.iu.edu/auth/#!/login?app="+this.app;
+        document.location.href = this.apihost+"/auth/#!/login?app="+this.app;
     }
 
     settings() {
-        document.location.href = "https://api.ctil.iu.edu/auth/#!/settings/account?app="+this.app;
+        document.location.href = this.apihost+"/auth/#!/settings/account?app="+this.app;
     }
 
     signout() {
-        //document.location.href = "https://api.ctil.iu.edu/auth/#!/signout?app="+this.app;
         (this.$root as any).signout();
     }
 }

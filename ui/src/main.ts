@@ -139,8 +139,9 @@ new Vue({
     data() {
 
         //use gpu1 for localhost
-        let dataUrl = "https://api.ctil.iu.edu/pub";
-        if(location.hostname == "localhost") {
+        //let dataUrl = "https://api.ctil.iu.edu/pub";
+        let dataUrl = "https://apred1.ibrc.iupui.edu/pub";
+        if(location.hostname == "localhost-dis") {
             dataUrl = "https://gpu1-pestillilab.psych.indiana.edu/apred";
         }
 
@@ -219,7 +220,7 @@ new Vue({
             window.location.search = ""; //remove "jwt=" from the url (will cause refresh.. but)
         }
 
-        // warning - jwt_decode just decode any jwt token. it doesn't validate it
+        // WARNING - jwt_decode just decode any jwt token. it doesn't **validate** it
         // so we can't really trust that user is who they say they are on the client side.
         // we just assume that user is trustworthy on the client side and pass jwt to 
         // server so that we can do a real jwt validation there
