@@ -69,8 +69,9 @@ mssql.connect(config.stats_america.db_red_dr).then(async pool=>{
 
     console.log("loading dr_data_norm / Resilience values for individual indices per county.");
     const dr_data_norm = await pool.request().query(`
-        SELECT * FROM dr_data_norm WHERE year < 2019
+        SELECT * FROM dr_data_norm 
     `);
+    //WHERE year < 2019
     console.log("done loading from sql");
     dr_data_norm.recordset.forEach(rec=>{
         rec.statefips = rec.statefips.trim();
