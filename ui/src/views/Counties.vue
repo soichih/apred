@@ -30,16 +30,7 @@ export default class CountiesView extends Vue {
         this.togglemap();
     }
 
-    /*
-    @Watch('fips')
-    onFipsChange(v) {
-        console.log("onFipsChange called");
-        this.fips = this.$route.params.fips;
-    } 
-    */
-
     changeFips(v) {
-        console.log("moving to new fip");
         this.$router.push('/county/'+v);
     }
     
